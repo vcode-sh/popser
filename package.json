@@ -1,0 +1,90 @@
+{
+  "name": "popser",
+  "version": "0.1.0",
+  "type": "module",
+  "description": "Toast notifications for React. Built on Base UI. Sonner-compatible API.",
+  "main": "./dist/index.cjs",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": {
+        "types": "./dist/index.d.ts",
+        "default": "./dist/index.js"
+      },
+      "require": {
+        "types": "./dist/index.d.cts",
+        "default": "./dist/index.cjs"
+      }
+    },
+    "./styles": "./dist/styles/popser.css",
+    "./tokens": "./dist/styles/tokens.css"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "build": "tsup",
+    "dev": "tsup --watch",
+    "type-check": "tsc --noEmit",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:ui": "vitest --ui",
+    "test:coverage": "vitest run --coverage",
+    "lint": "npx ultracite check",
+    "lint:fix": "npx ultracite fix",
+    "prepublishOnly": "npm run type-check && npm run test && npm run build"
+  },
+  "keywords": [
+    "toast",
+    "notifications",
+    "react",
+    "base-ui",
+    "sonner",
+    "headless",
+    "accessible",
+    "a11y",
+    "typescript"
+  ],
+  "author": "Vibe Code <hello@vcode.sh> (https://vcode.sh)",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/vcode-sh/popser.git"
+  },
+  "bugs": {
+    "url": "https://github.com/vcode-sh/popser/issues"
+  },
+  "homepage": "https://github.com/vcode-sh/popser#readme",
+  "peerDependencies": {
+    "react": "^18.0.0 || ^19.0.0",
+    "react-dom": "^18.0.0 || ^19.0.0",
+    "@base-ui/react": "^1.2.0"
+  },
+  "engines": {
+    "node": ">=22.0.0"
+  },
+  "devDependencies": {
+    "@biomejs/biome": "2.4.4",
+    "@base-ui/react": "^1.2.0",
+    "@types/node": "^25.3.0",
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "@vitest/coverage-v8": "4.0.18",
+    "@vitest/ui": "^4.0.18",
+    "happy-dom": "20.7.0",
+    "lint-staged": "16.2.7",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "ultracite": "7.2.3",
+    "vitest": "4.0.18"
+  },
+  "lint-staged": {
+    "*.{ts,tsx,js,jsx,json,css}": [
+      "npx ultracite fix"
+    ]
+  }
+}

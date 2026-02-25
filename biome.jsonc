@@ -1,0 +1,62 @@
+{
+  "$schema": "./node_modules/@biomejs/biome/configuration_schema.json",
+  "extends": ["ultracite/core", "ultracite/react"],
+  "files": {
+    "ignoreUnknown": false
+  },
+  "linter": {
+    "rules": {
+      "style": {
+        "useNumericSeparators": "off",
+        "noNonNullAssertion": "off",
+        "useNamingConvention": "off",
+        "useFilenamingConvention": "off",
+        "noMagicNumbers": "off"
+      },
+      "suspicious": {
+        "noExplicitAny": "off"
+      },
+      "a11y": {
+        "useButtonType": "off"
+      }
+    }
+  },
+  "overrides": [
+    {
+      "includes": [
+        "**/*.test.ts",
+        "**/*.test.tsx",
+        "**/*.spec.ts",
+        "**/*.spec.tsx"
+      ],
+      "linter": {
+        "rules": {
+          "correctness": {
+            "noUnusedVariables": "off",
+            "noUnusedFunctionParameters": "off"
+          },
+          "complexity": {
+            "noForEach": "off",
+            "noExcessiveCognitiveComplexity": "off",
+            "useMaxParams": "off"
+          },
+          "suspicious": {
+            "noEmptyBlockStatements": "off",
+            "useAwait": "off",
+            "noExplicitAny": "off",
+            "useErrorMessage": "off"
+          },
+          "performance": {
+            "noDelete": "off",
+            "useTopLevelRegex": "off"
+          },
+          "style": {
+            "useThrowOnlyError": "off",
+            "noNonNullAssertion": "off",
+            "noNestedTernary": "off"
+          }
+        }
+      }
+    }
+  ]
+}
