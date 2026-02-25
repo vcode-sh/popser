@@ -14,6 +14,8 @@ export default defineConfig({
         "src/**/*.spec.ts",
         "src/index.ts",
         "src/types.ts",
+        "src/use-toaster.ts",
+        "src/toast-root.tsx",
         "node_modules/**",
         "dist/**",
       ],

@@ -1,0 +1,20 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry.json",
+  "name": "vcode-sh",
+  "homepage": "https://github.com/vcode-sh/popser",
+  "items": [
+    {
+      "name": "popser",
+      "type": "registry:ui",
+      "title": "Popser",
+      "description": "Toast notifications built on Base UI. Sonner-compatible API.",
+      "dependencies": ["popser"],
+      "files": [
+        {
+          "path": "ui/popser.tsx",
+          "type": "registry:ui"
+        }
+      ]
+    }
+  ]
+}

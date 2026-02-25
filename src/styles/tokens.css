@@ -1,0 +1,52 @@
+/* tokens.css -- light theme defaults, users override with their own CSS vars */
+:root {
+  --popser-bg: oklch(1 0 0);
+  --popser-fg: oklch(0.145 0 0);
+  --popser-border: oklch(0.922 0 0);
+  --popser-radius: 8px;
+  --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.1);
+  --popser-gap: 8px;
+  --popser-offset: 16px;
+
+  /* Rich colors (opt-in via richColors prop on Toaster) */
+  --popser-success-bg: oklch(0.962 0.044 153);
+  --popser-success-border: oklch(0.905 0.093 153);
+  --popser-success-fg: oklch(0.448 0.119 151);
+  --popser-error-bg: oklch(0.971 0.013 17);
+  --popser-error-border: oklch(0.946 0.027 18);
+  --popser-error-fg: oklch(0.577 0.215 27);
+  --popser-info-bg: oklch(0.97 0.014 254);
+  --popser-info-border: oklch(0.943 0.029 260);
+  --popser-info-fg: oklch(0.546 0.145 242);
+  --popser-warning-bg: oklch(0.98 0.021 85);
+  --popser-warning-border: oklch(0.905 0.071 85);
+  --popser-warning-fg: oklch(0.606 0.134 58);
+  --popser-loading-bg: oklch(0.968 0 0);
+  --popser-loading-border: oklch(0.922 0 0);
+  --popser-loading-fg: oklch(0.556 0 0);
+}
+
+/* Dark mode */
+[data-theme="dark"],
+.dark {
+  --popser-bg: oklch(0.205 0 0);
+  --popser-fg: oklch(0.96 0 0);
+  --popser-border: oklch(0.3 0 0);
+  --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.4);
+
+  --popser-success-bg: oklch(0.235 0.04 155);
+  --popser-success-border: oklch(0.335 0.06 155);
+  --popser-success-fg: oklch(0.696 0.12 155);
+  --popser-error-bg: oklch(0.235 0.04 20);
+  --popser-error-border: oklch(0.335 0.06 20);
+  --popser-error-fg: oklch(0.696 0.12 20);
+  --popser-info-bg: oklch(0.235 0.04 250);
+  --popser-info-border: oklch(0.335 0.06 250);
+  --popser-info-fg: oklch(0.696 0.12 250);
+  --popser-warning-bg: oklch(0.235 0.04 70);
+  --popser-warning-border: oklch(0.335 0.06 70);
+  --popser-warning-fg: oklch(0.696 0.12 70);
+  --popser-loading-bg: oklch(0.25 0 0);
+  --popser-loading-border: oklch(0.33 0 0);
+  --popser-loading-fg: oklch(0.65 0 0);
+}

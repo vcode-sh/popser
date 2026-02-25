@@ -1,0 +1,17 @@
+{
+  "$schema": "https://ui.shadcn.com/schema/registry-item.json",
+  "name": "popser",
+  "type": "registry:ui",
+  "title": "Popser",
+  "description": "Toast notifications built on Base UI. Sonner-compatible API.",
+  "dependencies": ["popser"],
+  "devDependencies": [],
+  "registryDependencies": [],
+  "files": [
+    {
+      "path": "ui/popser.tsx",
+      "content": "\"use client\";\n\nimport { useTheme } from \"next-themes\";\nimport { Toaster as PopserToaster } from \"popser\";\nimport type { ToasterProps } from \"popser\";\n\nfunction Toaster(props: Partial<ToasterProps>) {\n  const { theme = \"system\" } = useTheme();\n\n  return (\n    <PopserToaster\n      theme={theme as ToasterProps[\"theme\"]}\n      richColors\n      style={\n        {\n          \"--popser-bg\": \"var(--popover)\",\n          \"--popser-fg\": \"var(--popover-foreground)\",\n          \"--popser-border\": \"var(--border)\",\n          \"--popser-radius\": \"var(--radius)\",\n        } as React.CSSProperties\n      }\n      {...props}\n    />\n  );\n}\n\nexport { Toaster };\n",
+      "type": "registry:ui"
+    }
+  ]
+}
