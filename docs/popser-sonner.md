@@ -9,7 +9,7 @@
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 0.1.2 | 2.0.7 |
+| Version | 0.1.6 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | ~12.6 KB (unminified) | ~2-3 KB (minified+gzip) |
@@ -19,7 +19,7 @@
 | npm downloads | New | ~10.9M/week |
 | Stars | New | 12K+ |
 | Open issues | 0 | 65 |
-| Last push | Active | Dec 2025 (7+ months stale) |
+| Last push | Active | Sporadic (v2.x, community PRs) |
 | shadcn/ui | Registry-ready | Official integration |
 | License | MIT | MIT |
 
@@ -41,7 +41,9 @@
 | `toast.close(id)` | `toast.close(id)` | `toast.dismiss(id)` |
 | `toast.close()` (all) | `toast.close()` | `toast.dismiss()` |
 | `toast.update(id, opts)` | `toast.update(id, opts)` | Not available |
-| `toast.custom(jsx)` | Not yet (planned) | `toast.custom(jsx)` |
+| `toast.dismiss(id)` | `toast.dismiss(id)` (alias for `close`) | `toast.dismiss(id)` |
+| `toast.getToasts()` | `toast.getToasts()` → `string[]` | Not available |
+| `toast.custom(jsx)` | Not yet (planned v0.2) | `toast.custom(jsx)` |
 | Returns | `string` (toast ID) | `string \| number` |
 
 ### Migration from Sonner
@@ -69,15 +71,17 @@
 | Option | **Popser** | **Sonner** | Notes |
 |---|---|---|---|
 | `description` | `ReactNode` | `ReactNode` | Same |
-| `timeout` / `duration` | `timeout: number` | `duration: number` | Renamed for clarity |
+| `timeout` / `duration` | `timeout: number` (`duration` alias) | `duration: number` | Both accepted; `timeout` takes precedence |
 | `id` | `string` | `string \| number` | Popser is string-only (Base UI) |
 | `icon` | `ReactNode \| false` | `ReactNode` | `false` explicitly hides icon |
 | `action` | `{ label, onClick }` | `{ label, onClick }` | Same shape |
 | `cancel` | `{ label, onClick }` | `{ label, onClick }` | Same shape |
 | `type` | `PopserType \| string` | Internal only | Popser exposes custom types |
 | `priority` | `"low" \| "high"` | Not available | Screen reader urgency (ARIA) |
-| `onClose` | `() => void` | `onDismiss` | Renamed |
-| `onRemove` | `() => void` | `onAutoClose` | Called after exit animation |
+| `onClose` | `() => void` | `onDismiss` | General close callback |
+| `onAutoClose` | `() => void` | `onAutoClose` | Same name — fired on timeout expiry |
+| `onDismiss` | `() => void` | N/A | Fired on manual user dismiss (`toast.close(id)`) |
+| `onRemove` | `() => void` | N/A | Called after exit animation completes |
 | `className` | `string` | Via `classNames` | Per-toast class |
 | `style` | `CSSProperties` | `style` | Same |
 | `data` | `Record<string, unknown>` | Not available | Custom data bag |
@@ -222,13 +226,13 @@
 | `toast.custom(jsx)` | Planned v0.2 | Full JSX render via Base UI `render` prop |
 | `toast.message()` | Not needed | Same as `toast()` |
 | `toast.getHistory()` | Not planned | Sonner never cleans up, so it can return all past toasts |
-| `toast.getToasts()` | Not planned | Use `useToaster()` hook for active toasts |
+| `toast.getToasts()` | **Implemented** | Returns active toast IDs as `string[]` |
 | `useSonner()` hook | `useToaster()` | Same concept, different name |
 | `invert` prop | Not planned | Use `theme` instead |
 | `dir` (RTL) | Base UI handles | No prop needed |
 | `hotkey` customization | Base UI default (F6) | F6 is the ARIA standard |
 | `toasterId` (multiple Toasters) | Not planned | Single manager pattern |
-| `containerAriaLabel` | Hardcoded | Future: make configurable |
+| `containerAriaLabel` | **Implemented** as `ariaLabel` prop | Direct prop on `<Toaster>` |
 | `dismissible: false` | Via `swipeDirection={[]}` | Different approach |
 | `mobileOffset` | Via CSS variable | `--popser-offset` |
 | `testId` per toast | Not needed | `data-popser-root` is always present |
@@ -415,12 +419,29 @@ Popser: **11 slots**. Sonner: **6 slots** (and `default` is broken).
 
 | # | Issue | Status |
 |---|---|---|
+| #697 | `pauseOnHover: false` flag | **Planned v0.2** |
+| #510 | Enhanced offset `{ x, y }` object | **Planned v0.2** |
+| #464 | Per-state config in `toast.promise()` (actions, icons per state) | **Planned v0.2** |
+| #681 | Abortable promise with AbortSignal | **Planned v0.2** |
+| #671 | `enterFrom` direction prop | Via CSS `data-starting-style` |
 | #740 | Vibration for duplicate toasts | Not planned |
 | #674 | Persistent toasts via localStorage | Not planned |
-| #681 | Abortable promise with AbortSignal | Planned |
 | #655 | Popover API support | Not planned |
 | #716 | Vanilla (non-React) support | Not planned (React-only) |
-| #671 | `enterFrom` direction prop | Via CSS `data-starting-style` |
+
+### Additional Sonner Issues We Address (by Architecture)
+
+| # | Issue | Why Popser is Unaffected |
+|---|---|---|
+| #306 | ARIA live regions conditionally rendered — screen readers miss announcements | Base UI always-present ARIA live regions |
+| #357 | z-index behind Radix dialog, pointer events blocked | `Toast.Portal` with proper stacking context |
+| #591 | Tailwind v4 `classNames` overrides require `!important` | OKLCH tokens + headless primitives, no cascade conflicts |
+| #596 | Toasts not showing after v2.0 upgrade (style injection change) | CSS is separate opt-in file, not injected |
+| #322 | Double toast in React Strict Mode `useEffect` | Manager singleton queues independently of React lifecycle |
+| #479 | Multiple toasts all closing when last timer fires | Base UI manages individual toast timers |
+| #476 | Loading state blocks close button | Close button always functional, loading is visual only |
+| #450 | Server Actions error handling awkward | `toast.promise()` + `onAutoClose`/`onDismiss` callbacks |
+| #396 | Mobile offsets hardcoded to 16px | `mobileBreakpoint` prop + `--popser-offset` CSS variable |
 
 ---
 

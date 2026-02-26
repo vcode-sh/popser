@@ -20,7 +20,7 @@
 | `update()` | `toast.update(id, opts)` | `manager.update(id, opts)` |
 | Promise toasts | `toast.promise()` | `manager.promise()` |
 | Priority system | `priority: "high"` | `priority: "high"` |
-| Anchored toasts | Planned v0.2 | `Toast.Positioner` + `Toast.Arrow` |
+| Anchored toasts | Planned v0.2 | `Toast.Positioner` + `Toast.Arrow` (stable since v1.0.0) |
 
 ---
 
@@ -55,7 +55,7 @@ Popser adds: imperative API, built-in icons, CSS tokens, classNames, close butto
 
 | Feature | How Popser Uses It |
 |---|---|
-| `Toast.createToastManager()` | Singleton in `manager.ts`, shared between imperative API and Provider |
+| `Toast.createToastManager<T>()` | Singleton in `manager.ts`, shared between imperative API and Provider. Generic since Base UI v1.2.0. |
 | `Toast.useToastManager()` | Re-exported as `useToaster()` + used in `<ToasterContent>` |
 | Reactive store | Drives toast list rendering, no manual subscription |
 | Memoized selectors | Prevents unnecessary re-renders |
@@ -306,22 +306,25 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 ## Base UI Issues We Address
 
-### Open Issues
+### Base UI Issues We Address
 
-| # | Issue | Popser Solution |
-|---|---|---|
-| #2809 | `Toast.Description` doesn't render with `render` prop | We use standard `children`, not `render` prop for Description |
-| #3335 | `actionProps` is config-object, not ReactNode | Wrapped in `{ label, onClick }` object, rendered as `<Toast.Action>` children |
-| #3437 | Type augmentation needed for custom types | `type?: PopserType \| (string & {})` allows any string while providing autocomplete |
-| #3952 | Module augmentation for type extension | Same solution -- union type with string escape hatch |
-| #3979 | Close all toasts | `toast.close()` without args iterates `activeToasts` Set |
+| # | Issue | Status | Popser Solution |
+|---|---|---|---|
+| #2809 | `Toast.Description` doesn't render with `render` prop | Open | We use standard `children`, not `render` prop for Description |
+| #3335 | `actionProps` is config-object, not ReactNode | Open | Wrapped in `{ label, onClick }` object, rendered as `<Toast.Action>` children |
+| #3437 | Type augmentation needed for custom types | Open | `type?: PopserType \| (string & {})` allows any string while providing autocomplete |
+| #3952 | Module augmentation for type extension | Open | Same solution -- union type with string escape hatch |
+| #3979 | Close all toasts | Open | `toast.close()` without args iterates `activeToasts` Set |
+| #2287 | Toast error with react-router v7 SSR | **Fixed** in Base UI | No action needed — resolved upstream |
+| #2291 | `toast.promise` ignores `success.timeout` / `error.timeout` | **Fixed** in Base UI | No action needed — resolved upstream (PR #2294) |
+| #3026 | Anchor toast to an element | **Shipped** as `Toast.Positioner` | Planned for Popser v0.2 |
 
 ### Merged PRs We Benefit From
 
 | # | PR | Benefit |
 |---|---|---|
 | #3464 | Reactive store refactor | Foundation for our manager singleton |
-| #3882 | Generic `useToastManager<T>` | Type-safe custom data access |
+| #3882 | Generic `useToastManager<T>` and `createToastManager<T>` | Type-safe custom data access (v1.2.0) |
 | #3359 | Height recalculation on layout change | Content updates work correctly |
 | #4040 | Prevent dismissed promise toast from reopening | Promise transitions are clean |
 | #3469 | Fix `<Toast.Close>` aria-hidden warning | Close button accessibility |
@@ -369,12 +372,12 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 | Feature | Base UI | Popser Status |
 |---|---|---|
-| `Toast.Positioner` | Anchor to DOM element | Planned v0.2 |
-| `Toast.Arrow` | Arrow pointing at anchor | Planned v0.2 |
-| `render` prop | Custom element rendering | Planned (for `toast.custom()`) |
-| `collisionAvoidance` | Flip/shift strategies | Planned v0.2 (via Positioner) |
+| `Toast.Positioner` | Anchor to DOM element (stable since v1.0.0) | Planned v0.2 |
+| `Toast.Arrow` | Arrow pointing at anchor (stable since v1.0.0) | Planned v0.2 |
+| `render` prop | Custom element rendering | Planned v0.2 (for `toast.custom()`) |
+| `collisionAvoidance` | Flip/shift strategies (via Floating UI) | Planned v0.2 (via Positioner) |
 | `positionMethod` | `"absolute"` \| `"fixed"` | Planned v0.2 |
-| `disableAnchorTracking` | Stop following anchor | Planned v0.2 |
+| `disableAnchorTracking` | Stop following anchor (renamed from `trackAnchor` in beta.5) | Planned v0.2 |
 | `data-limited` | Alternate exit animation | CSS available, not styled yet |
 | `data-swipe-direction` on exit | Direction-specific exit | CSS available, not styled yet |
 
