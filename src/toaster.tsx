@@ -44,6 +44,7 @@ class ToastErrorBoundary extends React.Component<
 }
 
 function ToasterContent({
+  ariaLabel,
   position = DEFAULT_POSITION,
   swipeDirection = DEFAULT_SWIPE_DIRECTION,
   closeButton = DEFAULT_CLOSE_BUTTON,
@@ -114,6 +115,7 @@ function ToasterContent({
   return (
     <Toast.Portal>
       <Toast.Viewport
+        aria-label={ariaLabel}
         className={classNames?.viewport}
         data-expanded={isExpanded || undefined}
         data-mobile={isMobile || undefined}

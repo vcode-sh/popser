@@ -177,6 +177,28 @@ describe("toast", () => {
       );
     });
 
+    it("stores dismissible in data", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { dismissible: false });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ dismissible: false }),
+        })
+      );
+    });
+
+    it("stores dismissible: true in data", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { dismissible: true });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({ dismissible: true }),
+        })
+      );
+    });
+
     it("wraps onClose to remove from activeToasts and call original", () => {
       const onClose = vi.fn();
       const manager = getManager();
@@ -427,6 +449,19 @@ describe("toast", () => {
         id,
         expect.objectContaining({
           data: expect.objectContaining({ style }),
+        })
+      );
+    });
+
+    it("puts dismissible in data on update", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+      const id = toast("Title");
+      toast.update(id, { dismissible: false });
+      expect(updateSpy).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({
+          data: expect.objectContaining({ dismissible: false }),
         })
       );
     });
