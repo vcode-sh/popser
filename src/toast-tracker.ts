@@ -36,7 +36,7 @@ export function clearActiveToasts(): void {
  */
 export function findDuplicate(
   title: unknown,
-  deduplicate?: boolean,
+  deduplicate?: boolean
 ): string | undefined {
   if (deduplicate === true && typeof title === "string") {
     const existingId = activeToastTitles.get(title);
@@ -53,7 +53,7 @@ export function findDuplicate(
 export function trackToast(
   id: string,
   title: unknown,
-  deduplicate?: boolean,
+  deduplicate?: boolean
 ): void {
   activeToasts.add(id);
   if (deduplicate === true && typeof title === "string") {

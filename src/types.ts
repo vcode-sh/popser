@@ -68,6 +68,15 @@ export interface PopserClassNames {
   viewport?: string;
 }
 
+export interface PopserToastData {
+  action?: PopserAction;
+  cancel?: PopserAction;
+  className?: string;
+  icon?: ReactNode | false;
+  style?: React.CSSProperties;
+  [key: string]: unknown;
+}
+
 export interface ToasterProps {
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";

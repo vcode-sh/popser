@@ -15,6 +15,7 @@ import type {
 } from "./types.js";
 
 // Re-export test helpers so existing imports from "./toast.js" keep working
+// biome-ignore lint/performance/noBarrelFile: re-exports are intentional for backward compat
 export {
   clearActiveToasts,
   getActiveToastCount,
@@ -35,7 +36,7 @@ function createToast(title: ReactNode, options: PopserOptions = {}): string {
   // Use a ref-like object so the onClose callback always sees the real ID
   const resolvedId = { current: "" };
   const managerOptions = toManagerOptions(title, options, () =>
-    untrackToast(resolvedId.current),
+    untrackToast(resolvedId.current)
   );
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
@@ -60,55 +61,16 @@ function toast(title: ReactNode, options?: PopserOptions): string {
   return createToast(title, options);
 }
 
-/**
- * Show a success toast.
- */
-toast.success = (
-  title: ReactNode,
-  options?: Omit<PopserOptions, "type">,
-): string => {
-  return createToast(title, { ...options, type: "success" });
-};
+function typedToast(type: string) {
+  return (title: ReactNode, options?: Omit<PopserOptions, "type">): string =>
+    createToast(title, { ...options, type });
+}
 
-/**
- * Show an error toast.
- */
-toast.error = (
-  title: ReactNode,
-  options?: Omit<PopserOptions, "type">,
-): string => {
-  return createToast(title, { ...options, type: "error" });
-};
-
-/**
- * Show an informational toast.
- */
-toast.info = (
-  title: ReactNode,
-  options?: Omit<PopserOptions, "type">,
-): string => {
-  return createToast(title, { ...options, type: "info" });
-};
-
-/**
- * Show a warning toast.
- */
-toast.warning = (
-  title: ReactNode,
-  options?: Omit<PopserOptions, "type">,
-): string => {
-  return createToast(title, { ...options, type: "warning" });
-};
-
-/**
- * Show a loading toast. Loading toasts do not auto-dismiss.
- */
-toast.loading = (
-  title: ReactNode,
-  options?: Omit<PopserOptions, "type">,
-): string => {
-  return createToast(title, { ...options, type: "loading" });
-};
+toast.success = typedToast("success");
+toast.error = typedToast("error");
+toast.info = typedToast("info");
+toast.warning = typedToast("warning");
+toast.loading = typedToast("loading");
 
 /**
  * Tie a toast to a promise. Shows loading/success/error states
@@ -124,7 +86,7 @@ toast.loading = (
  */
 toast.promise = <T>(
   promise: Promise<T>,
-  options: PopserPromiseOptions<T>,
+  options: PopserPromiseOptions<T>
 ): Promise<T> => {
   const { success, error } = options;
 

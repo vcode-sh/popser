@@ -1,0 +1,169 @@
+/* ─── Toast root ───────────────────────────────────────────────────── */
+
+[data-popser-root] {
+  position: absolute;
+  z-index: calc(100 - var(--toast-index, 0));
+  box-sizing: border-box;
+  width: var(--popser-width, 356px);
+  padding: 16px;
+  font-family: system-ui, -apple-system, sans-serif;
+  font-size: 13px;
+  line-height: 1.4;
+  color: var(--popser-fg);
+  pointer-events: auto;
+  background: var(--popser-bg);
+  border: 1px solid var(--popser-border);
+  border-radius: var(--popser-radius, 8px);
+  box-shadow: var(--popser-shadow);
+}
+
+/* Transitions only apply in collapsed mode (stacking animations).
+ * In expanded mode, toasts switch to relative positioning instantly
+ * to avoid jarring height/transform transitions during layout switch. */
+[data-popser-viewport]:not([data-expanded]) [data-popser-root] {
+  transition:
+    transform 400ms,
+    opacity 400ms,
+    max-height 400ms;
+}
+
+/* Bottom positions: anchor toasts to the bottom of the viewport */
+[data-popser-viewport][data-position^="bottom"] [data-popser-root] {
+  right: 0;
+  bottom: 0;
+  transform-origin: center bottom;
+}
+
+/* Top positions: anchor toasts to the top of the viewport */
+[data-popser-viewport][data-position^="top"] [data-popser-root] {
+  top: 0;
+  left: 0;
+  transform-origin: center top;
+}
+
+/* ─── Collapsed stacking (default) ─────────────────────────────────── */
+/*
+ * Base UI sets these CSS custom properties on each Toast.Root automatically:
+ *   --toast-index           : 0 for newest (front), 1, 2, ... for older
+ *   --toast-offset-y        : cumulative pixel offset (sum of preceding heights)
+ *   --toast-height          : this toast's measured height in pixels
+ *   --toast-frontmost-height: set on the Viewport, height of the front toast
+ *
+ * In collapsed mode, toasts stack on top of each other with a peek effect.
+ * The front toast (index 0) is full size. Toasts behind it are scaled down
+ * and shifted slightly to create a layered card stack appearance.
+ *
+ * --popser-gap controls peek distance between stacked toasts (default 14px).
+ */
+
+/* Collapsed: bottom positions (toasts stack upward) */
+[data-popser-viewport][data-position^="bottom"]:not([data-expanded])
+  [data-popser-root] {
+  height: auto;
+  max-height: var(--toast-frontmost-height, none);
+  overflow: hidden;
+  /*
+   * Opacity combines two concerns:
+   * 1. Progressive fade: (1 - index * 0.1) → 1.0, 0.9, 0.8 ...
+   * 2. Visibility cutoff: clamp(0, visibleCount - index, 1) → 1 when visible, 0 when hidden
+   * Result: toasts beyond --popser-visible-count are fully transparent.
+   */
+  opacity: calc(
+    clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
+    (1 - var(--toast-index, 0) * 0.1)
+  );
+  transform: translateY(
+      calc(-1 * var(--toast-index, 0) * var(--popser-gap, 14px))
+    )
+    scale(calc(1 - var(--toast-index, 0) * 0.05));
+}
+
+/* Collapsed: top positions (toasts stack downward) */
+[data-popser-viewport][data-position^="top"]:not([data-expanded])
+  [data-popser-root] {
+  height: auto;
+  max-height: var(--toast-frontmost-height, none);
+  overflow: hidden;
+  opacity: calc(
+    clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
+    (1 - var(--toast-index, 0) * 0.1)
+  );
+  transform: translateY(calc(var(--toast-index, 0) * var(--popser-gap, 14px)))
+    scale(calc(1 - var(--toast-index, 0) * 0.05));
+}
+
+/* Collapsed: hide content of non-front toasts (only card shell visible) */
+[data-popser-viewport]:not([data-expanded])
+  [data-popser-root]:not(:first-child)
+  [data-popser-content]
+  > * {
+  opacity: 0;
+  transition: opacity 400ms;
+}
+
+/* ─── Expanded state ───────────────────────────────────────────────── */
+/*
+ * Expansion is controlled entirely by JS via [data-expanded] on the viewport.
+ * The Toaster component sets this attribute when:
+ * 1. expand={true} prop is set
+ * 2. User hovers or focuses the viewport (onMouseEnter/onMouseLeave)
+ *
+ * Using JS state instead of CSS :has() prevents feedback loops where
+ * layout changes cause mouseLeave → collapse → mouseEnter → expand cycles.
+ *
+ * When expanded, the viewport switches from a stacking container to a
+ * scrollable flex column. Toasts become relative flow items so that
+ * overflow-y: auto produces a scrollbar when they exceed viewport height.
+ */
+
+/* Expanded viewport: shared */
+[data-popser-viewport][data-expanded] {
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: none;
+}
+
+/* Expanded viewport: bottom positions (expand upward with scroll) */
+[data-popser-viewport][data-position^="bottom"][data-expanded] {
+  top: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--popser-gap, 14px);
+}
+
+/* Expanded viewport: top positions (expand downward with scroll) */
+[data-popser-viewport][data-position^="top"][data-expanded] {
+  top: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--popser-gap, 14px);
+}
+
+/* Hide scrollbar for Webkit browsers */
+[data-popser-viewport][data-expanded]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Expanded toasts: switch from absolute to flow items */
+[data-popser-viewport][data-expanded] [data-popser-root] {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  flex-shrink: 0;
+  max-height: none;
+  overflow: visible;
+  pointer-events: auto;
+  opacity: 1;
+  transform: none;
+}
+
+/* Expanded: restore content visibility for all toasts */
+[data-popser-viewport][data-expanded]
+  [data-popser-root]
+  [data-popser-content]
+  > * {
+  opacity: 1;
+}

@@ -1,0 +1,64 @@
+/* ─── Viewport ─────────────────────────────────────────────────────── */
+
+[data-popser-viewport] {
+  position: fixed;
+  z-index: 9999;
+  box-sizing: border-box;
+  width: var(--popser-width, 356px);
+  pointer-events: none;
+  /* Collapsed: toasts are absolutely positioned inside this anchor point */
+  /* Offset is applied via inset values in position variants below */
+}
+
+/* Position variants -- offset from browser edge via --popser-offset */
+[data-popser-viewport][data-position="top-left"] {
+  top: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
+}
+
+[data-popser-viewport][data-position="top-center"] {
+  top: var(--popser-offset, 16px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+[data-popser-viewport][data-position="top-right"] {
+  top: var(--popser-offset, 16px);
+  right: var(--popser-offset, 16px);
+}
+
+[data-popser-viewport][data-position="bottom-left"] {
+  bottom: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
+}
+
+[data-popser-viewport][data-position="bottom-center"] {
+  bottom: var(--popser-offset, 16px);
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+[data-popser-viewport][data-position="bottom-right"] {
+  right: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+}
+
+/* ─── Mobile responsive (driven by data-mobile attribute) ─────────── */
+
+[data-popser-viewport][data-mobile] {
+  top: auto;
+  right: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
+  transform: none;
+}
+
+[data-popser-viewport][data-mobile] [data-popser-root] {
+  width: calc(100vw - 2 * var(--popser-offset, 16px));
+}
+
+/* On mobile, always show close button */
+[data-popser-viewport][data-mobile]
+  [data-popser-close][data-close-button="hover"] {
+  opacity: 0.5;
+}

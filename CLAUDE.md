@@ -10,7 +10,7 @@ Single entry point:
 
 Core modules:
 
-- **`src/toast.ts`** -- Imperative API: `toast()`, `.success()`, `.error()`, `.info()`, `.warning()`, `.loading()`, `.promise()`, `.close()`, `.update()`
+- **`src/toast.ts`** -- Imperative API: `toast()`, `.success()`, `.error()`, `.info()`, `.warning()`, `.loading()`, `.promise()`, `.close()`, `.update()`. Content-based deduplication via `activeToastTitles` Map.
 - **`src/manager.ts`** -- Singleton wrapper over Base UI `Toast.createToastManager()`
 - **`src/types.ts`** -- All TypeScript interfaces (PopserOptions, PopserType, PopserConfig, ToasterProps)
 - **`src/constants.ts`** -- Default values (timeout, limit, position, swipeDirection)
@@ -18,7 +18,7 @@ Core modules:
 Components:
 
 - **`src/toaster.tsx`** -- `<Toaster>` wrapping Base UI Provider + Portal + Viewport
-- **`src/toast-root.tsx`** -- Individual toast renderer (Root + Content + slots)
+- **`src/toast-root.tsx`** -- Individual toast renderer (Root + Content + slots). Renders `data-popser-id` for e2e testing.
 - **`src/toast-icon.tsx`** -- 5 inline SVGs + CSS spinner (~40 LOC, zero external deps)
 - **`src/toast-action.tsx`** -- Action + Cancel button wrapper
 - **`src/toast-close.tsx`** -- Close button with hover/always/never modes
@@ -72,12 +72,17 @@ npm run lint:fix       # ultracite fix
 - **Full override:** Icons, styles, classNames overridable at every level.
 - **No `!important`:** Headless Base UI primitives. Your styles always win.
 - **Sonner-compatible API:** Drop-in replacement. `toast.success()`, `toast.error()`, etc.
+- **Content dedup:** `deduplicate: true` prevents duplicate toasts with same title.
+- **E2E friendly:** `data-popser-id` on every toast root for Playwright/Cypress targeting.
+- **ReactNode in promise:** `success`/`error` accept JSX, not just strings. Return `undefined` to skip.
 - **Accessible:** ARIA live regions, priority system, F6 keyboard navigation.
 
 ## Review Guidelines
 
 - Toast manager is a singleton. Ensure no memory leaks on close/cleanup.
+- Deduplication uses `activeToastTitles` Map — only string titles are compared. Clean up entries in `onClose` and `toast.close()`.
 - Icons use `currentColor` for fill/stroke. Colors come from CSS variables.
 - All Base UI Toast primitives must be used correctly (Provider > Portal > Viewport > Root > Content).
+- `data-popser-id` must always be present on Toast.Root for test targeting.
 - CSS custom properties prefixed with `--popser-*` to avoid collisions.
 - Coverage thresholds enforced in CI. New code needs tests.

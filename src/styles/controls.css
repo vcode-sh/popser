@@ -1,0 +1,85 @@
+/* ─── Close button ─────────────────────────────────────────────────── */
+
+[data-popser-close] {
+  display: flex;
+  flex-shrink: 0;
+  align-items: center;
+  justify-content: center;
+  width: 20px;
+  height: 20px;
+  padding: 0;
+  margin: -2px -4px -2px 0;
+  color: inherit;
+  cursor: pointer;
+  background: none;
+  border: none;
+  border-radius: 4px;
+  opacity: 0.5;
+  transition:
+    opacity 0.15s,
+    background 0.15s;
+}
+
+[data-popser-close]:hover {
+  background: oklch(0 0 0 / 0.05);
+  opacity: 1;
+}
+
+/* Hover mode: hidden by default, shown on toast hover */
+[data-popser-close][data-close-button="hover"] {
+  opacity: 0;
+  transition: opacity 0.15s;
+}
+
+[data-popser-root]:hover [data-popser-close][data-close-button="hover"],
+[data-popser-root]:focus-within [data-popser-close][data-close-button="hover"] {
+  opacity: 0.5;
+}
+
+[data-popser-root]:hover [data-popser-close][data-close-button="hover"]:hover {
+  opacity: 1;
+}
+
+/* ─── Action buttons ───────────────────────────────────────────────── */
+
+[data-popser-actions] {
+  display: flex;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+[data-popser-action],
+[data-popser-cancel] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 4px 12px;
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1.4;
+  cursor: pointer;
+  border: none;
+  border-radius: 4px;
+  transition:
+    background 0.15s,
+    color 0.15s;
+}
+
+[data-popser-action] {
+  color: var(--popser-bg);
+  background: var(--popser-fg);
+}
+
+[data-popser-action]:hover {
+  opacity: 0.9;
+}
+
+[data-popser-cancel] {
+  color: inherit;
+  background: transparent;
+  border: 1px solid var(--popser-border);
+}
+
+[data-popser-cancel]:hover {
+  background: oklch(0 0 0 / 0.05);
+}

@@ -1,0 +1,65 @@
+/* ─── Enter / exit transitions (Base UI data attributes) ───────────── */
+
+[data-popser-viewport] [data-popser-root][data-starting-style] {
+  opacity: 0;
+}
+
+[data-popser-viewport] [data-popser-root][data-ending-style] {
+  opacity: 0;
+}
+
+/* Bottom: slide up from below on enter */
+[data-popser-viewport][data-position^="bottom"]
+  [data-popser-root][data-starting-style] {
+  transform: translateY(100%) scale(0.95);
+}
+
+/* Bottom: slide down on exit */
+[data-popser-viewport][data-position^="bottom"]
+  [data-popser-root][data-ending-style] {
+  transform: translateY(calc(-1 * var(--toast-height, 0px))) scale(0.95);
+}
+
+/* Top: slide down from above on enter */
+[data-popser-viewport][data-position^="top"]
+  [data-popser-root][data-starting-style] {
+  transform: translateY(-100%) scale(0.95);
+}
+
+/* Top: slide up on exit */
+[data-popser-viewport][data-position^="top"]
+  [data-popser-root][data-ending-style] {
+  transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95);
+}
+
+/* ─── Rich colors (opt-in via data-rich-colors) ────────────────────── */
+
+[data-rich-colors] [data-popser-root][data-type="success"] {
+  --popser-bg: var(--popser-success-bg);
+  --popser-border: var(--popser-success-border);
+  --popser-fg: var(--popser-success-fg);
+}
+
+[data-rich-colors] [data-popser-root][data-type="error"] {
+  --popser-bg: var(--popser-error-bg);
+  --popser-border: var(--popser-error-border);
+  --popser-fg: var(--popser-error-fg);
+}
+
+[data-rich-colors] [data-popser-root][data-type="info"] {
+  --popser-bg: var(--popser-info-bg);
+  --popser-border: var(--popser-info-border);
+  --popser-fg: var(--popser-info-fg);
+}
+
+[data-rich-colors] [data-popser-root][data-type="warning"] {
+  --popser-bg: var(--popser-warning-bg);
+  --popser-border: var(--popser-warning-border);
+  --popser-fg: var(--popser-warning-fg);
+}
+
+[data-rich-colors] [data-popser-root][data-type="loading"] {
+  --popser-bg: var(--popser-loading-bg);
+  --popser-border: var(--popser-loading-border);
+  --popser-fg: var(--popser-loading-fg);
+}

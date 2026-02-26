@@ -63,6 +63,28 @@ toast.promise(saveUser(data), {
 });
 ```
 
+#### Promise with JSX and conditional skip
+
+Success and error handlers accept `ReactNode` — not just strings:
+
+```ts
+toast.promise(saveUser(data), {
+  loading: "Saving...",
+  success: (user) => <span>Saved <strong>{user.name}</strong></span>,
+  error: (err) => `Failed: ${err.message}`,
+});
+```
+
+Return `undefined` from a callback to dismiss the toast silently:
+
+```ts
+toast.promise(fetchData(), {
+  loading: "Loading...",
+  success: (data) => data.silent ? undefined : "Done!",
+  error: (err) => err.name === "AbortError" ? undefined : `Error: ${err.message}`,
+});
+```
+
 #### Close and update
 
 ```ts
@@ -78,11 +100,23 @@ toast.close(id);
 toast.close();
 ```
 
+#### Deduplication
+
+Prevent duplicate toasts with the same title:
+
+```ts
+toast.error("Connection lost", { deduplicate: true });
+toast.error("Connection lost", { deduplicate: true }); // no-op, returns existing ID
+```
+
+Once the first toast is dismissed, the same title can create a new one.
+
 #### `PopserOptions`
 
 ```ts
 {
   id?: string;                  // Custom ID (deduplication, updates)
+  deduplicate?: boolean;          // Prevent duplicate toasts with same title
   description?: ReactNode;      // Secondary text below the title
   timeout?: number;             // Auto-dismiss in ms. 0 = persistent
   priority?: "low" | "high";   // ARIA live region priority
@@ -249,6 +283,7 @@ Every element exposes `data-popser-*` attributes for targeting:
 ```css
 [data-popser-viewport] { /* viewport */ }
 [data-popser-root] { /* individual toast */ }
+[data-popser-root][data-popser-id="my-id"] { /* target by toast ID */ }
 [data-popser-content] { /* content wrapper */ }
 [data-popser-actions] { /* action bar */ }
 [data-popser-close] { /* close button */ }
@@ -279,6 +314,7 @@ Built on [Base UI](https://base-ui.com) Toast primitives instead of rolling cust
 - **No `!important` overrides.** Base UI renders headless primitives. Your styles always win.
 - **No memory leaks.** Singleton toast manager with proper cleanup. Toasts are tracked and removed.
 - **No hardcoded breakpoints.** Mobile breakpoint is a prop. Responsive behavior is CSS-driven.
+- **E2E test friendly.** Every toast renders `data-popser-id` in the DOM. Select by ID in Playwright or Cypress.
 - **Accessible by default.** ARIA live regions with configurable priority. F6 keyboard navigation to the toast viewport.
 - **Sonner-compatible API.** Same `toast.success()` / `toast.error()` / `toast.promise()` interface. Drop-in replacement.
 - **Tiny footprint.** Zero icon dependencies. Five inline SVGs and a CSS spinner.

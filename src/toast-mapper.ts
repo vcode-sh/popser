@@ -10,7 +10,7 @@ import type { PopserOptions, PopserUpdateOptions } from "./types.js";
 export function toManagerOptions(
   title: ReactNode,
   options: PopserOptions,
-  onCloseInternal: () => void,
+  onCloseInternal: () => void
 ) {
   const {
     id,

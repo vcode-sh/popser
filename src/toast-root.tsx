@@ -4,16 +4,11 @@ import React from "react";
 import { ToastActions } from "./toast-action.js";
 import { ToastCloseButton } from "./toast-close.js";
 import { ToastIcon } from "./toast-icon.js";
-import type { PopserAction, PopserClassNames, PopserIcons } from "./types.js";
-
-interface PopserToastData {
-  action?: PopserAction;
-  cancel?: PopserAction;
-  className?: string;
-  icon?: React.ReactNode | false;
-  style?: React.CSSProperties;
-  [key: string]: unknown;
-}
+import type {
+  PopserClassNames,
+  PopserIcons,
+  PopserToastData,
+} from "./types.js";
 
 export interface ToastRootProps {
   classNames?: PopserClassNames;
