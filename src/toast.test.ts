@@ -1,10 +1,15 @@
 import { getManager, resetManager } from "./manager.js";
-import { activeToasts, toast } from "./toast.js";
+import {
+  clearActiveToasts,
+  getActiveToastCount,
+  isActiveToast,
+  toast,
+} from "./toast.js";
 
 describe("toast", () => {
   beforeEach(() => {
     resetManager();
-    activeToasts.clear();
+    clearActiveToasts();
   });
 
   describe("basic toast creation", () => {
@@ -181,7 +186,7 @@ describe("toast", () => {
       expect(callArgs.onClose).toBeDefined();
 
       // Verify the ID is tracked
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       // Trigger the wrapped onClose
       callArgs.onClose?.();
@@ -190,7 +195,7 @@ describe("toast", () => {
       expect(onClose).toHaveBeenCalledOnce();
 
       // ID should be removed from activeToasts
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("onClose wrapper works even without original onClose", () => {
@@ -199,11 +204,11 @@ describe("toast", () => {
       const id = toast("Title");
 
       const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       // Should not throw when no original onClose
       expect(() => callArgs.onClose?.()).not.toThrow();
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("merges custom data with popser-specific data fields", () => {
@@ -229,36 +234,36 @@ describe("toast", () => {
   describe("active toast tracking", () => {
     it("adds ID to activeToasts after toast()", () => {
       const id = toast("Hello");
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
     });
 
     it("tracks multiple toast IDs", () => {
       const id1 = toast("First");
       const id2 = toast("Second");
-      expect(activeToasts.has(id1)).toBe(true);
-      expect(activeToasts.has(id2)).toBe(true);
-      expect(activeToasts.size).toBe(2);
+      expect(isActiveToast(id1)).toBe(true);
+      expect(isActiveToast(id2)).toBe(true);
+      expect(getActiveToastCount()).toBe(2);
     });
 
     it("tracks toasts from type shortcuts", () => {
       const id = toast.success("Done");
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
     });
 
     it("removes ID from activeToasts after toast.close(id)", () => {
       const id = toast("Hello");
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
       toast.close(id);
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("clears all active toasts after toast.close()", () => {
       toast("First");
       toast("Second");
       toast("Third");
-      expect(activeToasts.size).toBe(3);
+      expect(getActiveToastCount()).toBe(3);
       toast.close();
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
   });
 
@@ -288,15 +293,15 @@ describe("toast", () => {
       toast("First");
       toast("Second");
       toast.close();
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("only removes the specified ID when closing one toast", () => {
       const id1 = toast("First");
       const id2 = toast("Second");
       toast.close(id1);
-      expect(activeToasts.has(id1)).toBe(false);
-      expect(activeToasts.has(id2)).toBe(true);
+      expect(isActiveToast(id1)).toBe(false);
+      expect(isActiveToast(id2)).toBe(true);
     });
   });
 

@@ -9,7 +9,7 @@
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 0.1.0 | 2.0.7 |
+| Version | 0.1.2 | 2.0.7 |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | ~12.6 KB (unminified) | ~2-3 KB (minified+gzip) |
@@ -138,9 +138,9 @@
 
 ### 4. Configurable Mobile Breakpoint
 
-**Sonner #376 (open 2+ years, 7 upvotes):** Mobile breakpoint is hardcoded to 600px. No way to change it.
+**Sonner #376 (open 2+ years, 7 upvotes):** Mobile breakpoint is hardcoded to 600px in CSS `@media (max-width: 600px)`. No way to change it.
 
-**Popser:** `mobileBreakpoint` prop. Sets a CSS variable. No JavaScript media query.
+**Popser:** `mobileBreakpoint` prop. Uses `window.matchMedia` to detect mobile and sets `data-mobile` attribute on viewport. CSS targets `[data-popser-viewport][data-mobile]` instead of a fixed media query. Fully configurable at runtime.
 
 ### 5. Height Recalculation
 
@@ -154,11 +154,11 @@
 
 **Popser:** Uses `Toast.Portal` which renders after mount. No SSR mismatch. No `setTimeout` workarounds needed.
 
-### 7. No `!important` Required
+### 7. No `!important` Required for User Styles
 
 **Sonner #632, #633 (5 upvotes each):** Critical styling is gated behind `data-styled="true"` selector. Custom styles require `!important` to override.
 
-**Popser:** Headless Base UI primitives. CSS is opt-in (`import "popser/styles"`). Your styles always win. OKLCH tokens via CSS variables -- override with a single `:root` block.
+**Popser:** Headless Base UI primitives. CSS is opt-in (`import "popser/styles"`). Your styles always win. OKLCH tokens via CSS variables -- override with a single `:root` block. The only `!important` usage is internal: enter/exit animations (`data-starting-style`/`data-ending-style`) use `!important` to override the collapsed stacking transforms. User-facing styles never need it.
 
 ### 8. Tailwind v4 Compatible
 
@@ -205,7 +205,13 @@
 
 **Sonner #678, #683, #684 (multiple issues):** Toast content restricted to text width. `w-auto` doesn't work. Custom toasts don't get proper width.
 
-**Popser:** Fixed `width: 356px` in default CSS. Easy to override via CSS variable or `classNames.root`. No `--width` constraint fighting.
+**Popser:** Width controlled by `--popser-width` CSS variable (default `356px`). Override globally with `:root { --popser-width: 400px; }` or per-toast with `classNames.root`. No `--width` constraint fighting.
+
+### 15. Sonner-quality Stacking with CSS Variables
+
+**Sonner:** Collapsed stacking via JS height measurement (`getBoundingClientRect`) + manual offset calculation. Layout thrashing on every toast add/remove.
+
+**Popser:** Collapsed stacking via Base UI CSS variables (`--toast-index`, `--toast-frontmost-height`). Toasts are `position: absolute`, layered with `z-index: calc(100 - var(--toast-index))`, scaled down with `scale(1 - index * 0.05)`, and faded with progressive opacity. Content behind the front toast is hidden with `overflow: hidden` + `opacity: 0`. The `--popser-visible-count` CSS variable (from `limit` prop) cuts off toasts beyond the visible count. Expand on hover switches the viewport to `display: flex` with `overflow-y: auto` for scrollable toast lists -- fully CSS-driven layout shift, no JS measurement.
 
 ---
 
@@ -271,23 +277,33 @@ Global ToastState (singleton Observer class)
 Toast.createToastManager() (Base UI singleton)
   └── Reactive store with memoized selectors
   └── Proper cleanup on close
-  └── Generic types
+  └── Generic types: ToastObject<PopserToastData>
 
-<Toast.Provider toastManager={manager}>
+<Toast.Provider toastManager={manager} limit={N} timeout={ms}>
+  └── <ToasterContent>
+  │     └── useState(isHovering) + debounced mouse handlers (100ms)
+  │     └── useState(isMobile) + matchMedia listener
+  │     └── isExpanded = expand || isHovering
   └── <Toast.Portal> (proper React portal)
-    └── <Toast.Viewport> (ARIA landmark)
-      └── <Toast.Root> per toast
-        └── CSS variables for stacking (--toast-index, --toast-offset-y)
-        └── data-starting-style / data-ending-style for animations
-        └── Native swipe handling (accessible)
+    └── <Toast.Viewport data-expanded data-mobile data-position data-theme>
+    │     └── CSS vars: --popser-offset, --popser-gap, --popser-visible-count
+    └── <Toast.Root> per toast (onMouseEnter/Leave forwarded)
+          └── CSS vars: --toast-index, --toast-height, --toast-frontmost-height
+          └── Collapsed: position:absolute, stacking via transforms + z-index
+          └── Expanded: position:relative, flex flow, scrollable overflow
+          └── data-starting-style / data-ending-style for enter/exit
+          └── Native swipe handling (accessible, Base UI)
 ```
 
 **Advantages:**
-- Reactive store replaces mutable array
-- CSS variables for stacking (no JS layout)
-- `data-starting-style` / `data-ending-style` for enter/exit (CSS-only)
+- Reactive store replaces mutable array -- no memory leaks
+- CSS variables for collapsed stacking (no JS height measurement)
+- JS-driven expansion with debounce (prevents mouseEnter/Leave flicker loops)
+- JS-driven mobile detection via `matchMedia` (configurable breakpoint prop)
+- `data-starting-style` / `data-ending-style` for enter/exit (CSS transitions)
 - Base UI handles swipe, ARIA, keyboard, height recalculation
 - Portal renders after mount (no hydration mismatch)
+- `--popser-visible-count` CSS variable for opacity cutoff beyond visible limit
 
 ---
 
@@ -310,11 +326,16 @@ Toast.createToastManager() (Base UI singleton)
 - OKLCH color space (Tailwind v4 native)
 - CSS custom properties documented and prefixed (`--popser-*`)
 - Token file importable separately (`import "popser/tokens"`)
-- No `!important` -- your styles always win
-- `mobileBreakpoint` prop sets CSS variable
+- User styles never need `!important` (internal `!important` only on enter/exit to override stacking)
+- `mobileBreakpoint` prop drives JS `matchMedia` + `data-mobile` attribute
 - `unstyled` mode for zero default styles
 - `classNames` prop with 11 target slots
 - Dark mode via `[data-theme="dark"]` or `.dark` class
+- Collapsed stacking: `position: absolute` with `--toast-index` z-ordering, scale, opacity cutoff
+- Expanded state: `display: flex` + `overflow-y: auto` (scrollable)
+- `--popser-width` variable for toast width (default 356px)
+- `--popser-visible-count` variable for collapsed visibility cutoff
+- Transition timing: 400ms (matching Sonner) for collapsed transforms
 
 ---
 
@@ -411,14 +432,15 @@ Popser: **11 slots**. Sonner: **6 slots** (and `default` is broken).
 4. **`update()` API** -- partial updates, not full replacement
 5. **3-mode close button** -- always / hover / never
 6. **Configurable mobile breakpoint** -- prop, not hardcoded
-7. **CSS-driven animations** -- `data-starting-style` / `data-ending-style`
-8. **CSS-driven stacking** -- `--toast-index`, `--toast-offset-y`, no JS layout
-9. **ARIA-first accessibility** -- F6 nav, priority system, assertive announcements
-10. **Stable test selectors** -- `data-popser-*` on every element
-11. **11 classNames slots** -- vs Sonner's 6 (one broken)
-12. **No hydration errors** -- proper portal rendering
-13. **shadcn registry** -- `npx shadcn add @vcode-sh/popser`
-14. **Clean architecture** -- Base UI primitives, thin wrapper, no state hacks
+7. **CSS-driven animations** -- `data-starting-style` / `data-ending-style`, direction-aware enter/exit
+8. **CSS-driven stacking** -- `--toast-index`, `--toast-frontmost-height`, `--popser-visible-count`, no JS layout
+9. **JS-driven expansion** -- debounced hover with 100ms timeout, prevents flicker loops
+10. **ARIA-first accessibility** -- F6 nav, priority system, assertive announcements
+11. **Stable test selectors** -- `data-popser-*` on every element
+12. **11 classNames slots** -- vs Sonner's 6 (one broken)
+13. **No hydration errors** -- proper portal rendering
+14. **shadcn registry** -- `npx shadcn add @vcode-sh/popser`
+15. **Clean architecture** -- Base UI primitives, thin wrapper, no state hacks
 
 ## Popser Cons
 

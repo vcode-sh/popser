@@ -1,64 +1,124 @@
+import { act } from "react";
+import { createRoot } from "react-dom/client";
+import { resetManager } from "./manager.js";
+import { clearActiveToasts, toast } from "./toast.js";
 import { ToastCloseButton } from "./toast-close.js";
+import { Toaster } from "./toaster.js";
+
+let container: HTMLDivElement;
+let root: ReturnType<typeof createRoot>;
+
+beforeEach(() => {
+  resetManager();
+  clearActiveToasts();
+  container = document.createElement("div");
+  document.body.appendChild(container);
+  root = createRoot(container);
+});
+
+afterEach(() => {
+  act(() => {
+    root.unmount();
+  });
+  document.body.removeChild(container);
+});
 
 describe("ToastCloseButton", () => {
-  it("returns null when mode is never", () => {
+  it("renders close button with default hover mode", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn?.getAttribute("data-close-button")).toBe("hover");
+  });
+
+  it("renders close button with always mode", () => {
+    act(() => {
+      root.render(<Toaster closeButton="always" />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    expect(closeBtn).toBeTruthy();
+    expect(closeBtn?.getAttribute("data-close-button")).toBe("always");
+  });
+
+  it("does not render close button when mode is never", () => {
+    act(() => {
+      root.render(<Toaster closeButton="never" />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    expect(closeBtn).toBeNull();
+  });
+
+  it("has correct aria-label on close button", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    expect(closeBtn?.getAttribute("aria-label")).toBe("Close notification");
+  });
+
+  it("renders default CloseIcon SVG when no custom icon provided", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    const svg = closeBtn?.querySelector("svg");
+    expect(svg).toBeTruthy();
+    expect(svg?.getAttribute("aria-hidden")).toBe("true");
+    expect(svg?.getAttribute("width")).toBe("14");
+    expect(svg?.getAttribute("height")).toBe("14");
+    // Verify it has the two X-shape paths
+    const paths = svg?.querySelectorAll("path");
+    expect(paths?.length).toBe(2);
+  });
+
+  it("uses custom close icon when provided via icons prop", () => {
+    act(() => {
+      root.render(
+        <Toaster icons={{ close: <span data-custom-close>X</span> }} />
+      );
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    const customIcon = closeBtn?.querySelector("[data-custom-close]");
+    expect(customIcon).toBeTruthy();
+    expect(customIcon?.textContent).toBe("X");
+    // Default SVG should not be present
+    const svg = closeBtn?.querySelector("svg");
+    expect(svg).toBeNull();
+  });
+
+  it("applies closeButton className from classNames prop", () => {
+    act(() => {
+      root.render(<Toaster classNames={{ closeButton: "custom-close" }} />);
+    });
+    act(() => {
+      toast("Hello");
+    });
+    const closeBtn = document.querySelector("[data-popser-close]");
+    expect(closeBtn?.classList.contains("custom-close")).toBe(true);
+  });
+
+  it("returns null directly when called as function with mode never", () => {
     const result = ToastCloseButton({ mode: "never" });
     expect(result).toBeNull();
-  });
-
-  it("renders when mode is always", () => {
-    const result = ToastCloseButton({ mode: "always" });
-    expect(result).not.toBeNull();
-    expect(result?.props["data-close-button"]).toBe("always");
-    expect(result?.props["data-popser-close"]).toBe(true);
-  });
-
-  it("renders when mode is hover (default)", () => {
-    const result = ToastCloseButton({});
-    expect(result).not.toBeNull();
-    expect(result?.props["data-close-button"]).toBe("hover");
-    expect(result?.props["data-popser-close"]).toBe(true);
-  });
-
-  it("has correct aria-label", () => {
-    const result = ToastCloseButton({ mode: "always" });
-    expect(result?.props["aria-label"]).toBe("Close notification");
-  });
-
-  it("renders default CloseIcon when no custom icon provided", () => {
-    const result = ToastCloseButton({ mode: "always" });
-    // children should be the default CloseIcon (an SVG element)
-    const children = result?.props.children;
-    // The default icon is rendered via <CloseIcon /> which returns an svg
-    expect(children).toBeTruthy();
-    // CloseIcon is a React element with type being the CloseIcon function
-    expect(children.type).toBeDefined();
-  });
-
-  it("uses custom icon when provided", () => {
-    const customIcon = "X";
-    const result = ToastCloseButton({ mode: "always", icon: customIcon });
-    expect(result?.props.children).toBe("X");
-  });
-
-  it("applies className when provided", () => {
-    const result = ToastCloseButton({
-      mode: "always",
-      className: "custom-close",
-    });
-    expect(result?.props.className).toBe("custom-close");
-  });
-
-  it("defaults mode to hover when not specified", () => {
-    const result = ToastCloseButton({});
-    expect(result?.props["data-close-button"]).toBe("hover");
-  });
-
-  it("renders custom ReactNode icon", () => {
-    const result = ToastCloseButton({
-      mode: "always",
-      icon: "Close me",
-    });
-    expect(result?.props.children).toBe("Close me");
   });
 });

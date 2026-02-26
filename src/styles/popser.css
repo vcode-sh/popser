@@ -71,7 +71,7 @@
   transition:
     transform 400ms,
     opacity 400ms,
-    height 400ms;
+    max-height 400ms;
 }
 
 /* Bottom positions: anchor toasts to the bottom of the viewport */
@@ -105,8 +105,9 @@
 
 /* Collapsed: bottom positions (toasts stack upward) */
 [data-popser-viewport][data-position^="bottom"]:not([data-expanded])
-  [data-popser-root]:not([data-expanded]) {
-  height: var(--toast-frontmost-height, auto);
+  [data-popser-root] {
+  height: auto;
+  max-height: var(--toast-frontmost-height, none);
   overflow: hidden;
   /*
    * Opacity combines two concerns:
@@ -126,8 +127,9 @@
 
 /* Collapsed: top positions (toasts stack downward) */
 [data-popser-viewport][data-position^="top"]:not([data-expanded])
-  [data-popser-root]:not([data-expanded]) {
-  height: var(--toast-frontmost-height, auto);
+  [data-popser-root] {
+  height: auto;
+  max-height: var(--toast-frontmost-height, none);
   overflow: hidden;
   opacity: calc(
     clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
@@ -139,7 +141,7 @@
 
 /* Collapsed: hide content of non-front toasts (only card shell visible) */
 [data-popser-viewport]:not([data-expanded])
-  [data-popser-root]:not([data-expanded]):not(:first-child)
+  [data-popser-root]:not(:first-child)
   [data-popser-content]
   > * {
   opacity: 0;
@@ -195,13 +197,10 @@
 /* Expanded toasts: switch from absolute to flow items */
 [data-popser-viewport][data-expanded] [data-popser-root] {
   position: relative;
-  top: auto;
-  right: auto;
-  bottom: auto;
-  left: auto;
+  inset: auto;
   z-index: auto;
   flex-shrink: 0;
-  height: auto;
+  max-height: none;
   overflow: visible;
   pointer-events: auto;
   opacity: 1;
@@ -218,36 +217,36 @@
 
 /* ─── Enter / exit transitions (Base UI data attributes) ───────────── */
 
-[data-popser-root][data-starting-style] {
-  opacity: 0 !important;
+[data-popser-viewport] [data-popser-root][data-starting-style] {
+  opacity: 0;
 }
 
-[data-popser-root][data-ending-style] {
-  opacity: 0 !important;
+[data-popser-viewport] [data-popser-root][data-ending-style] {
+  opacity: 0;
 }
 
 /* Bottom: slide up from below on enter */
 [data-popser-viewport][data-position^="bottom"]
   [data-popser-root][data-starting-style] {
-  transform: translateY(100%) scale(0.95) !important;
+  transform: translateY(100%) scale(0.95);
 }
 
 /* Bottom: slide down on exit */
 [data-popser-viewport][data-position^="bottom"]
   [data-popser-root][data-ending-style] {
-  transform: translateY(calc(-1 * var(--toast-height, 0px))) scale(0.95) !important;
+  transform: translateY(calc(-1 * var(--toast-height, 0px))) scale(0.95);
 }
 
 /* Top: slide down from above on enter */
 [data-popser-viewport][data-position^="top"]
   [data-popser-root][data-starting-style] {
-  transform: translateY(-100%) scale(0.95) !important;
+  transform: translateY(-100%) scale(0.95);
 }
 
 /* Top: slide up on exit */
 [data-popser-viewport][data-position^="top"]
   [data-popser-root][data-ending-style] {
-  transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95) !important;
+  transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95);
 }
 
 /* ─── Rich colors (opt-in via data-rich-colors) ────────────────────── */
@@ -329,23 +328,6 @@
   display: block;
 }
 
-/* Icon colors for rich colors mode - icon uses type fg color */
-[data-rich-colors] [data-popser-icon][data-type="success"] {
-  color: var(--popser-success-fg);
-}
-
-[data-rich-colors] [data-popser-icon][data-type="error"] {
-  color: var(--popser-error-fg);
-}
-
-[data-rich-colors] [data-popser-icon][data-type="info"] {
-  color: var(--popser-info-fg);
-}
-
-[data-rich-colors] [data-popser-icon][data-type="warning"] {
-  color: var(--popser-warning-fg);
-}
-
 /* ─── Loading spinner (12 bars, Sonner-style) ──────────────────────── */
 
 [data-popser-spinner] {
@@ -366,6 +348,7 @@
   border-radius: 1px;
   opacity: 0.1;
   animation: popser-spinner 1.2s linear infinite;
+  will-change: opacity;
 }
 
 [data-popser-spinner-bar]:nth-child(1) {

@@ -1,10 +1,10 @@
 import { getManager, resetManager } from "./manager.js";
-import { activeToasts, toast } from "./toast.js";
+import { clearActiveToasts, getActiveToastCount, toast } from "./toast.js";
 
 describe("performance baseline", () => {
   beforeEach(() => {
     resetManager();
-    activeToasts.clear();
+    clearActiveToasts();
   });
 
   it("creates 100 toasts in sequence under 100ms", () => {
@@ -16,7 +16,7 @@ describe("performance baseline", () => {
 
     const elapsed = performance.now() - start;
     expect(elapsed).toBeLessThan(100);
-    expect(activeToasts.size).toBe(100);
+    expect(getActiveToastCount()).toBe(100);
   });
 
   it("creates 100 toasts and closes all under 200ms", () => {
@@ -26,13 +26,13 @@ describe("performance baseline", () => {
       toast(`Toast ${i}`);
     }
 
-    expect(activeToasts.size).toBe(100);
+    expect(getActiveToastCount()).toBe(100);
 
     toast.close();
 
     const elapsed = performance.now() - start;
     expect(elapsed).toBeLessThan(200);
-    expect(activeToasts.size).toBe(0);
+    expect(getActiveToastCount()).toBe(0);
   });
 
   it("updates a toast 100 times under 100ms", () => {
@@ -55,13 +55,13 @@ describe("performance baseline", () => {
       ids.push(toast(`Toast ${i}`));
     }
 
-    expect(activeToasts.size).toBe(1000);
+    expect(getActiveToastCount()).toBe(1000);
 
     for (const id of ids) {
       toast.close(id);
     }
 
-    expect(activeToasts.size).toBe(0);
+    expect(getActiveToastCount()).toBe(0);
   });
 
   it("resolves 50 concurrent promise toasts correctly", async () => {

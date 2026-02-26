@@ -1,13 +1,16 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { resetManager } from "./manager.js";
+import { clearActiveToasts, toast } from "./toast.js";
 import { Toaster } from "./toaster.js";
 
 let container: HTMLDivElement;
 let root: ReturnType<typeof createRoot>;
 
 beforeEach(() => {
+  vi.useFakeTimers();
   resetManager();
+  clearActiveToasts();
   container = document.createElement("div");
   document.body.appendChild(container);
   root = createRoot(container);
@@ -18,6 +21,7 @@ afterEach(() => {
     root.unmount();
   });
   document.body.removeChild(container);
+  vi.useRealTimers();
 });
 
 describe("Toaster", () => {
@@ -150,5 +154,162 @@ describe("Toaster", () => {
       "[data-popser-viewport]"
     ) as HTMLElement;
     expect(viewport.style.zIndex).toBe("9999");
+  });
+
+  it("renders toast DOM elements when toasts are created via the manager", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hello World");
+    });
+    const toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot).toBeTruthy();
+    const title = document.querySelector("[data-popser-title]");
+    expect(title?.textContent).toBe("Hello World");
+  });
+
+  it("renders multiple toasts", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("First");
+      toast("Second");
+    });
+    const toastRoots = document.querySelectorAll("[data-popser-root]");
+    expect(toastRoots.length).toBe(2);
+  });
+
+  it("sets data-expanded on mouseEnter over a toast root", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hover me");
+    });
+    const toastRoot = document.querySelector(
+      "[data-popser-root]"
+    ) as HTMLElement;
+    expect(toastRoot).toBeTruthy();
+
+    // Use mouseover (bubbles) to trigger React's onMouseEnter in happy-dom
+    act(() => {
+      toastRoot.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+
+    const viewport = document.querySelector(
+      "[data-popser-viewport]"
+    ) as HTMLElement;
+    expect(viewport.getAttribute("data-expanded")).toBe("true");
+  });
+
+  it("clears data-expanded on mouseLeave after debounce", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hover me");
+    });
+    const toastRoot = document.querySelector(
+      "[data-popser-root]"
+    ) as HTMLElement;
+
+    // Enter via mouseover (bubbles)
+    act(() => {
+      toastRoot.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+
+    const viewport = document.querySelector(
+      "[data-popser-viewport]"
+    ) as HTMLElement;
+    expect(viewport.getAttribute("data-expanded")).toBe("true");
+
+    // Leave via mouseout (bubbles) triggers onMouseLeave with 100ms debounce
+    act(() => {
+      viewport.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+    });
+
+    // Still expanded before debounce fires
+    expect(viewport.getAttribute("data-expanded")).toBe("true");
+
+    // Advance timers past the 100ms debounce
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    expect(viewport.getAttribute("data-expanded")).toBeNull();
+  });
+
+  it("cancels mouseLeave debounce on mouseEnter (prevents flicker)", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hover me");
+    });
+    const toastRoot = document.querySelector(
+      "[data-popser-root]"
+    ) as HTMLElement;
+    const viewport = document.querySelector(
+      "[data-popser-viewport]"
+    ) as HTMLElement;
+
+    // Enter
+    act(() => {
+      toastRoot.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+    expect(viewport.getAttribute("data-expanded")).toBe("true");
+
+    // Leave (starts 100ms debounce)
+    act(() => {
+      viewport.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+    });
+
+    // Re-enter before debounce fires (clears timeout)
+    act(() => {
+      vi.advanceTimersByTime(50);
+    });
+    act(() => {
+      toastRoot.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+
+    // Advance past when the original debounce would have fired
+    act(() => {
+      vi.advanceTimersByTime(100);
+    });
+
+    // Should still be expanded because mouseEnter cancelled the leave debounce
+    expect(viewport.getAttribute("data-expanded")).toBe("true");
+  });
+
+  it("cleans up hover timeout on unmount", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Cleanup test");
+    });
+    const toastRoot = document.querySelector(
+      "[data-popser-root]"
+    ) as HTMLElement;
+    const viewport = document.querySelector(
+      "[data-popser-viewport]"
+    ) as HTMLElement;
+
+    // Enter then leave (creates a pending timeout)
+    act(() => {
+      toastRoot.dispatchEvent(new MouseEvent("mouseover", { bubbles: true }));
+    });
+    act(() => {
+      viewport.dispatchEvent(new MouseEvent("mouseout", { bubbles: true }));
+    });
+
+    // Unmount before timeout fires -- should not throw
+    expect(() => {
+      act(() => {
+        root.unmount();
+      });
+    }).not.toThrow();
   });
 });

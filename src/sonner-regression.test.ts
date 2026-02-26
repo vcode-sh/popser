@@ -1,5 +1,10 @@
 import { clearManager, getManager, resetManager } from "./manager.js";
-import { activeToasts, toast } from "./toast.js";
+import {
+  clearActiveToasts,
+  getActiveToastCount,
+  isActiveToast,
+  toast,
+} from "./toast.js";
 
 /**
  * Regression tests proving popser fixes known Sonner bugs.
@@ -11,7 +16,7 @@ import { activeToasts, toast } from "./toast.js";
 describe("Sonner regression tests", () => {
   beforeEach(() => {
     resetManager();
-    activeToasts.clear();
+    clearActiveToasts();
   });
 
   // ---------------------------------------------------------------------------
@@ -22,24 +27,24 @@ describe("Sonner regression tests", () => {
   describe("Memory leak fix (Sonner #729)", () => {
     it("removes toast ID from activeToasts after toast.close(id)", () => {
       const id = toast("Leaky toast");
-      expect(activeToasts.has(id)).toBe(true);
-      expect(activeToasts.size).toBe(1);
+      expect(isActiveToast(id)).toBe(true);
+      expect(getActiveToastCount()).toBe(1);
 
       toast.close(id);
 
-      expect(activeToasts.has(id)).toBe(false);
-      expect(activeToasts.size).toBe(0);
+      expect(isActiveToast(id)).toBe(false);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("clears all IDs from activeToasts after toast.close() with no args", () => {
       toast("Toast 1");
       toast("Toast 2");
       toast("Toast 3");
-      expect(activeToasts.size).toBe(3);
+      expect(getActiveToastCount()).toBe(3);
 
       toast.close();
 
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("activeToasts does not grow unbounded after repeated create/close cycles", () => {
@@ -48,7 +53,7 @@ describe("Sonner regression tests", () => {
         toast.close(id);
       }
 
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("activeToasts size stays correct when mixing individual and bulk closes", () => {
@@ -58,26 +63,26 @@ describe("Sonner regression tests", () => {
 
       // Close one individually
       toast.close(id1);
-      expect(activeToasts.size).toBe(2);
-      expect(activeToasts.has(id1)).toBe(false);
+      expect(getActiveToastCount()).toBe(2);
+      expect(isActiveToast(id1)).toBe(false);
 
       // Close another individually
       toast.close(id2);
-      expect(activeToasts.size).toBe(1);
+      expect(getActiveToastCount()).toBe(1);
 
       // Close remaining via close-all
       toast.close();
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("closing an already-closed toast ID does not throw or corrupt state", () => {
       const id = toast("Ephemeral");
       toast.close(id);
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
 
       // Closing again should be a no-op
       expect(() => toast.close(id)).not.toThrow();
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
   });
 
@@ -116,7 +121,7 @@ describe("Sonner regression tests", () => {
       // Second call should do nothing -- no active toasts left
       toast.close();
       expect(closeSpy).toHaveBeenCalledTimes(2);
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("close-all works with mixed toast types", () => {
@@ -137,7 +142,7 @@ describe("Sonner regression tests", () => {
       expect(closeSpy).toHaveBeenCalledWith(id3);
       expect(closeSpy).toHaveBeenCalledWith(id4);
       expect(closeSpy).toHaveBeenCalledWith(id5);
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
   });
 
@@ -244,20 +249,20 @@ describe("Sonner regression tests", () => {
       toast("First", { id: "unique-id" });
       toast("Second", { id: "unique-id" });
 
-      expect(activeToasts.size).toBe(1);
-      expect(activeToasts.has("unique-id")).toBe(true);
+      expect(getActiveToastCount()).toBe(1);
+      expect(isActiveToast("unique-id")).toBe(true);
     });
 
     it("closing a deduplicated ID fully removes it from tracking", () => {
       toast("First", { id: "dedup" });
       toast("Second", { id: "dedup" });
 
-      expect(activeToasts.size).toBe(1);
+      expect(getActiveToastCount()).toBe(1);
 
       toast.close("dedup");
 
-      expect(activeToasts.size).toBe(0);
-      expect(activeToasts.has("dedup")).toBe(false);
+      expect(getActiveToastCount()).toBe(0);
+      expect(isActiveToast("dedup")).toBe(false);
     });
 
     it("each toast with same ID gets fresh data (no action bleed)", () => {
@@ -733,11 +738,11 @@ describe("Sonner regression tests", () => {
 
     it("persistent toast can be manually closed", () => {
       const id = toast("Sticky", { timeout: 0 });
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       toast.close(id);
 
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("persistent toast can be updated to auto-dismiss", () => {
@@ -768,13 +773,13 @@ describe("Sonner regression tests", () => {
       const userOnClose = vi.fn();
 
       const id = toast("Auto-dismiss", { onClose: userOnClose });
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       // Simulate Base UI firing the onClose callback (e.g., swipe dismiss)
       const callArgs = addSpy.mock.calls[0]?.[0] as { onClose: () => void };
       callArgs.onClose();
 
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
       expect(userOnClose).toHaveBeenCalledOnce();
     });
 
@@ -783,13 +788,13 @@ describe("Sonner regression tests", () => {
       const addSpy = vi.spyOn(manager, "add");
 
       const id = toast("No callback toast");
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       // Simulate Base UI auto-dismissing the toast
       const callArgs = addSpy.mock.calls[0]?.[0] as { onClose: () => void };
       callArgs.onClose();
 
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("does not throw if onClose fires after manual toast.close()", () => {
@@ -800,12 +805,12 @@ describe("Sonner regression tests", () => {
 
       // Manually close first
       toast.close(id);
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
 
       // Then Base UI's onClose fires (race condition scenario)
       const callArgs = addSpy.mock.calls[0]?.[0] as { onClose: () => void };
       expect(() => callArgs.onClose()).not.toThrow();
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("onClose callback correctly resolves ID for auto-generated IDs", () => {
@@ -815,13 +820,13 @@ describe("Sonner regression tests", () => {
       // Create toast without explicit ID (auto-generated)
       const id = toast("Auto ID");
       expect(id.length).toBeGreaterThan(0);
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       // The wrapped onClose should have captured the resolved ID
       const callArgs = addSpy.mock.calls[0]?.[0] as { onClose: () => void };
       callArgs.onClose();
 
-      expect(activeToasts.has(id)).toBe(false);
+      expect(isActiveToast(id)).toBe(false);
     });
 
     it("onClose cleanup works correctly across multiple toasts", () => {
@@ -832,7 +837,7 @@ describe("Sonner regression tests", () => {
       const id2 = toast("Toast 2");
       const id3 = toast("Toast 3");
 
-      expect(activeToasts.size).toBe(3);
+      expect(getActiveToastCount()).toBe(3);
 
       // Simulate only the middle toast being dismissed by Base UI
       const secondCallArgs = addSpy.mock.calls[1]?.[0] as {
@@ -840,10 +845,10 @@ describe("Sonner regression tests", () => {
       };
       secondCallArgs.onClose();
 
-      expect(activeToasts.has(id1)).toBe(true);
-      expect(activeToasts.has(id2)).toBe(false);
-      expect(activeToasts.has(id3)).toBe(true);
-      expect(activeToasts.size).toBe(2);
+      expect(isActiveToast(id1)).toBe(true);
+      expect(isActiveToast(id2)).toBe(false);
+      expect(isActiveToast(id3)).toBe(true);
+      expect(getActiveToastCount()).toBe(2);
     });
   });
 
@@ -856,7 +861,7 @@ describe("Sonner regression tests", () => {
   describe("Pre-mount guard (Sonner #723)", () => {
     beforeEach(() => {
       clearManager();
-      activeToasts.clear();
+      clearActiveToasts();
     });
 
     it("calling toast() before any Toaster mount returns a valid ID", () => {
@@ -870,8 +875,8 @@ describe("Sonner regression tests", () => {
     it("toast() before mount adds the ID to activeToasts", () => {
       const id = toast("Queued toast");
 
-      expect(activeToasts.has(id)).toBe(true);
-      expect(activeToasts.size).toBe(1);
+      expect(isActiveToast(id)).toBe(true);
+      expect(getActiveToastCount()).toBe(1);
     });
 
     it("manager is lazily created on first toast() call", () => {
@@ -887,7 +892,7 @@ describe("Sonner regression tests", () => {
       expect(typeof manager.close).toBe("function");
 
       // The toast was tracked
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
     });
 
     it("multiple toast() calls before mount all get tracked", () => {
@@ -897,21 +902,21 @@ describe("Sonner regression tests", () => {
       const id4 = toast.warning("Fourth pre-mount");
       const id5 = toast.info("Fifth pre-mount");
 
-      expect(activeToasts.size).toBe(5);
-      expect(activeToasts.has(id1)).toBe(true);
-      expect(activeToasts.has(id2)).toBe(true);
-      expect(activeToasts.has(id3)).toBe(true);
-      expect(activeToasts.has(id4)).toBe(true);
-      expect(activeToasts.has(id5)).toBe(true);
+      expect(getActiveToastCount()).toBe(5);
+      expect(isActiveToast(id1)).toBe(true);
+      expect(isActiveToast(id2)).toBe(true);
+      expect(isActiveToast(id3)).toBe(true);
+      expect(isActiveToast(id4)).toBe(true);
+      expect(isActiveToast(id5)).toBe(true);
     });
 
     it("toasts created before mount can be closed", () => {
       const id = toast("Closable pre-mount");
-      expect(activeToasts.has(id)).toBe(true);
+      expect(isActiveToast(id)).toBe(true);
 
       toast.close(id);
-      expect(activeToasts.has(id)).toBe(false);
-      expect(activeToasts.size).toBe(0);
+      expect(isActiveToast(id)).toBe(false);
+      expect(getActiveToastCount()).toBe(0);
     });
 
     it("toasts created before mount can be updated", () => {
@@ -934,10 +939,10 @@ describe("Sonner regression tests", () => {
       toast("Pre-mount 1");
       toast("Pre-mount 2");
       toast("Pre-mount 3");
-      expect(activeToasts.size).toBe(3);
+      expect(getActiveToastCount()).toBe(3);
 
       toast.close();
-      expect(activeToasts.size).toBe(0);
+      expect(getActiveToastCount()).toBe(0);
     });
   });
 });

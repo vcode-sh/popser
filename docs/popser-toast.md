@@ -78,7 +78,7 @@ Popser adds: imperative API, built-in icons, CSS tokens, classNames, close butto
 | `--toast-offset-y` | Vertical offset when expanded (px) | Expanded layout |
 | `--toast-swipe-movement-x` | Horizontal swipe offset | Swipe animation |
 | `--toast-swipe-movement-y` | Vertical swipe offset | Swipe animation |
-| `--toast-frontmost-height` | Height of front toast | Viewport sizing |
+| `--toast-frontmost-height` | Height of front toast | Collapsed uniform height, viewport sizing |
 
 ### Data Attributes (from Base UI)
 
@@ -247,21 +247,47 @@ Popser adds a parallel `data-popser-*` system for stable CSS targeting:
 | `data-position` | Viewport | Yes |
 | `data-theme` | Viewport | Yes |
 | `data-rich-colors` | Viewport | When enabled |
-| `data-expanded` | Viewport | When enabled |
+| `data-expanded` | Viewport | When expanded (hover or prop) |
+| `data-mobile` | Viewport | When below mobileBreakpoint |
 | `data-close-button` | Close button | Yes (mode value) |
 
 ### 8. Mobile Responsive
 
 Base UI provides no mobile handling.
 
-Popser handles mobile via CSS:
-- Full-width toasts below `mobileBreakpoint`
-- Always-visible close buttons on touch devices
-- Bottom positioning regardless of `position` prop
-- Swipe direction adapts
-- Configurable breakpoint (not hardcoded)
+Popser detects mobile via JS `window.matchMedia` and sets a `data-mobile` attribute on the viewport:
+- `mobileBreakpoint` prop (default: 600px) drives `matchMedia` listener
+- `data-mobile` attribute enables mobile CSS: full-width toasts, bottom positioning, always-visible close buttons
+- Toast width: `calc(100vw - 2 * var(--popser-offset, 16px))`
+- This approach (JS + data attribute) allows the breakpoint to be configurable at runtime, unlike CSS `@media` which requires a compile-time value
 
-### 9. shadcn Registry
+### 9. Hover-to-Expand with Debounce
+
+Base UI provides `data-expanded` attribute but relies on CSS `:hover` or manual state.
+
+Popser implements JS-driven expansion in `<ToasterContent>`:
+- `isHovering` React state with `handleMouseEnter`/`handleMouseLeave` callbacks
+- 100ms debounce timeout on `mouseLeave` to prevent flicker when moving between toasts
+- Mouse handlers attached to individual `<Toast.Root>` elements (via `onMouseEnter`/`onMouseLeave` passthrough)
+- `mouseLeave` on the viewport as fallback when cursor exits the stack entirely
+- `isExpanded = expand || isHovering` drives `data-expanded` on viewport
+- This JS approach avoids CSS `:has()` feedback loops where layout changes cause mouseLeave→collapse→mouseEnter→expand cycles
+
+### 10. Collapsed Stacking CSS
+
+Base UI provides `--toast-index` and `--toast-frontmost-height` but no default stacking styles.
+
+Popser implements a full collapsed card stack:
+- Toasts are `position: absolute`, anchored to the bottom (or top) of the viewport
+- `z-index: calc(100 - var(--toast-index, 0))` for front-to-back layering
+- `height: var(--toast-frontmost-height, auto)` + `overflow: hidden` for uniform card height
+- `transform: translateY(-index * gap) scale(1 - index * 0.05)` for peek + shrink effect
+- `opacity: clamp(0, visibleCount - index, 1) * (1 - index * 0.1)` for fade + visibility cutoff
+- Content of non-front toasts hidden with `opacity: 0`
+- Expanded state: viewport switches to `display: flex` + `column-reverse` with `overflow-y: auto`, toasts become `position: relative` flow items
+- Transitions only on collapsed mode (400ms) to avoid jarring layout shift during expand/collapse
+
+### 11. shadcn Registry
 
 Base UI has no registry integration.
 
@@ -270,7 +296,7 @@ Popser ships as `npx shadcn add @vcode-sh/popser`:
 - CSS variable bridge to shadcn design tokens
 - Drop-in replacement for shadcn's sonner component
 
-### 10. Rich Colors
+### 12. Rich Colors
 
 Base UI sets `data-type` but ships no color system.
 
@@ -328,12 +354,14 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 | Popser Component | Base UI Components Used | What's Added |
 |---|---|---|
-| `<Toaster>` | Provider, Portal, Viewport | `limit`, `timeout`, manager injection, data attributes |
-| `<PopserToastRoot>` | Root, Content | classNames merging, data-popser attributes, swipe direction |
+| `<Toaster>` | Provider, Portal, Viewport | `limit`, `timeout`, manager injection, data attributes, CSS vars |
+| `<ToasterContent>` | Viewport (renders inside Provider) | `isHovering` + debounce, `isMobile` via matchMedia, mouse handlers |
+| `<PopserToastRoot>` | Root, Content | classNames merging, data-popser attributes, mouse handler passthrough, typed `ToastObject<PopserToastData>` |
 | `<ToastIcon>` | None | 4 SVGs, spinner, icon override chain |
 | `<ToastActions>` | Action, Close | `{ label, onClick }` API, cancel auto-dismisses |
 | `<ToastCloseButton>` | Close | 3 visibility modes, built-in icon, aria-label |
 | `useToaster()` | `useToastManager()` | Thin re-export |
+| `getManager()` / `resetManager()` / `clearManager()` | `createToastManager()` | Singleton lifecycle (lazy init, reset, clear for tests) |
 
 ---
 

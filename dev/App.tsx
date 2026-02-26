@@ -330,6 +330,12 @@ export function App() {
   const [richColors, setRichColors] = useState(false);
   const [expand, setExpand] = useState(false);
   const [theme, setTheme] = useState<"light" | "dark" | "system">("light");
+  const [closeButton, setCloseButton] = useState<"always" | "hover" | "never">(
+    "hover"
+  );
+  const [limit, setLimit] = useState(3);
+  const [offset, setOffset] = useState(16);
+  const [gap, setGap] = useState(8);
   const lastToastId = useRef<string | null>(null);
   const count = useToastCount();
 
@@ -623,6 +629,23 @@ export function App() {
 
             <div style={dividerStyle} />
 
+            {/* Close Button */}
+            <div style={controlGroupStyle}>
+              <span style={controlLabelStyle}>Close</span>
+              {(["hover", "always", "never"] as const).map((mode) => (
+                <button
+                  key={mode}
+                  onClick={() => setCloseButton(mode)}
+                  style={pillStyle(closeButton === mode)}
+                  type="button"
+                >
+                  {mode}
+                </button>
+              ))}
+            </div>
+
+            <div style={dividerStyle} />
+
             {/* Toggles */}
             <div style={controlGroupStyle}>
               <button
@@ -642,6 +665,52 @@ export function App() {
             </div>
           </div>
 
+          {/* Numeric controls */}
+          <div
+            style={{
+              ...controlRowStyle,
+              marginTop: 10,
+              paddingTop: 10,
+              borderTop: `1px solid ${colors.borderLight}`,
+            }}
+          >
+            <div style={controlGroupStyle}>
+              <span style={controlLabelStyle}>Limit</span>
+              <input
+                max={20}
+                min={1}
+                onChange={(e) => setLimit(Number(e.target.value))}
+                style={{ ...selectStyle, width: 60 }}
+                type="number"
+                value={limit}
+              />
+            </div>
+            <div style={controlGroupStyle}>
+              <span style={controlLabelStyle}>Offset</span>
+              <input
+                max={64}
+                min={0}
+                onChange={(e) => setOffset(Number(e.target.value))}
+                step={4}
+                style={{ ...selectStyle, width: 60 }}
+                type="number"
+                value={offset}
+              />
+            </div>
+            <div style={controlGroupStyle}>
+              <span style={controlLabelStyle}>Gap</span>
+              <input
+                max={32}
+                min={0}
+                onChange={(e) => setGap(Number(e.target.value))}
+                step={2}
+                style={{ ...selectStyle, width: 60 }}
+                type="number"
+                value={gap}
+              />
+            </div>
+          </div>
+
           {/* Live config preview */}
           <div
             style={{
@@ -657,7 +726,7 @@ export function App() {
               color: colors.textMuted,
             }}
           >
-            {`<Toaster position="${position}" theme="${theme}"${richColors ? " richColors" : ""}${expand ? " expand" : ""} />`}
+            {`<Toaster\n  position="${position}"\n  theme="${theme}"\n  closeButton="${closeButton}"\n  limit={${limit}}\n  offset={${offset}}\n  gap={${gap}}${richColors ? "\n  richColors" : ""}${expand ? "\n  expand" : ""}\n/>`}
           </div>
         </div>
       </div>
@@ -768,7 +837,11 @@ export function App() {
       </div>
 
       <Toaster
+        closeButton={closeButton}
         expand={expand}
+        gap={gap}
+        limit={limit}
+        offset={offset}
         position={position}
         richColors={richColors}
         theme={theme}

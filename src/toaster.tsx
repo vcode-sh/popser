@@ -1,5 +1,11 @@
 import { Toast } from "@base-ui/react";
-import { useCallback, useEffect, useRef, useState } from "react";
+import React, {
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import {
   DEFAULT_CLOSE_BUTTON,
   DEFAULT_GAP,
@@ -13,6 +19,29 @@ import {
 import { getManager } from "./manager.js";
 import { PopserToastRoot } from "./toast-root.js";
 import type { ToasterProps } from "./types.js";
+
+interface ErrorBoundaryState {
+  hasError: boolean;
+}
+
+// biome-ignore lint/style/useReactFunctionComponents: Error boundaries require class components in React
+class ToastErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorBoundaryState
+> {
+  state: ErrorBoundaryState = { hasError: false };
+
+  static getDerivedStateFromError(): ErrorBoundaryState {
+    return { hasError: true };
+  }
+
+  render() {
+    if (this.state.hasError) {
+      return null;
+    }
+    return this.props.children;
+  }
+}
 
 function ToasterContent({
   position = DEFAULT_POSITION,
@@ -36,6 +65,20 @@ function ToasterContent({
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isExpanded = expand || isHovering;
+
+  const viewportStyle = useMemo(
+    () =>
+      ({
+        ...(!unstyled && {
+          "--popser-offset":
+            typeof offset === "number" ? `${offset}px` : offset,
+          "--popser-gap": `${gap}px`,
+          "--popser-visible-count": `${visibleCount}`,
+        }),
+        ...style,
+      }) as React.CSSProperties,
+    [unstyled, offset, gap, visibleCount, style]
+  );
 
   const handleMouseEnter = useCallback(() => {
     if (hoverTimeoutRef.current) {
@@ -79,29 +122,20 @@ function ToasterContent({
         data-rich-colors={richColors || undefined}
         data-theme={theme}
         onMouseLeave={handleMouseLeave}
-        style={
-          {
-            ...(!unstyled && {
-              "--popser-offset":
-                typeof offset === "number" ? `${offset}px` : offset,
-              "--popser-gap": `${gap}px`,
-              "--popser-visible-count": `${visibleCount}`,
-            }),
-            ...style,
-          } as React.CSSProperties
-        }
+        style={viewportStyle}
       >
         {toasts.map((toast) => (
-          <PopserToastRoot
-            classNames={classNames}
-            closeButton={closeButton}
-            icons={icons}
-            key={toast.id}
-            onMouseEnter={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
-            swipeDirection={swipeDirection}
-            toast={toast}
-          />
+          <ToastErrorBoundary key={toast.id}>
+            <PopserToastRoot
+              classNames={classNames}
+              closeButton={closeButton}
+              icons={icons}
+              onMouseEnter={handleMouseEnter}
+              onMouseLeave={handleMouseLeave}
+              swipeDirection={swipeDirection}
+              toast={toast}
+            />
+          </ToastErrorBoundary>
         ))}
       </Toast.Viewport>
     </Toast.Portal>

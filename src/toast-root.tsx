@@ -1,5 +1,6 @@
 import type { ToastObject } from "@base-ui/react";
 import { Toast } from "@base-ui/react";
+import React from "react";
 import { ToastActions } from "./toast-action.js";
 import { ToastCloseButton } from "./toast-close.js";
 import { ToastIcon } from "./toast-icon.js";
@@ -26,7 +27,7 @@ export interface ToastRootProps {
   toast: ToastObject<PopserToastData>;
 }
 
-export function PopserToastRoot({
+export const PopserToastRoot = React.memo(function PopserToastRoot({
   toast: toastData,
   swipeDirection,
   closeButton = "hover",
@@ -88,4 +89,4 @@ export function PopserToastRoot({
       </Toast.Content>
     </Toast.Root>
   );
-}
+});

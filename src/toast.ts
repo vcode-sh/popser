@@ -11,6 +11,21 @@ import type {
  */
 const activeToasts = new Set<string>();
 
+/** @internal — exposed for testing only */
+export function getActiveToastCount(): number {
+  return activeToasts.size;
+}
+
+/** @internal — exposed for testing only */
+export function isActiveToast(id: string): boolean {
+  return activeToasts.has(id);
+}
+
+/** @internal — exposed for testing only */
+export function clearActiveToasts(): void {
+  activeToasts.clear();
+}
+
 /**
  * Converts PopserOptions into the shape expected by Base UI's
  * `ToastManager.add()`. Popser-specific fields (icon, action, cancel,
@@ -176,6 +191,7 @@ toast.promise = <T>(
       : { title: error, type: "error" as const };
 
   return getManager().promise(promise, {
+    ...(options.id !== undefined && { id: options.id }),
     loading: { title: options.loading, type: "loading" as const },
     success: successHandler,
     error: errorHandler,
@@ -192,7 +208,7 @@ toast.promise = <T>(
  * ```
  */
 toast.close = (id?: string): void => {
-  if (id) {
+  if (id !== undefined) {
     getManager().close(id);
     activeToasts.delete(id);
   } else {
@@ -225,11 +241,9 @@ toast.update = (id: string, options: PopserUpdateOptions): void => {
     className,
     style,
     data,
-    ...rest
   } = options;
 
   getManager().update(id, {
-    ...rest,
     ...(title !== undefined && { title }),
     ...(type !== undefined && { type }),
     ...(description !== undefined && { description }),
@@ -248,4 +262,4 @@ toast.update = (id: string, options: PopserUpdateOptions): void => {
   });
 };
 
-export { activeToasts, toast };
+export { toast };

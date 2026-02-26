@@ -1,4 +1,4 @@
-import type { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import type { PopserIcons } from "./types.js";
 
 const icons: Record<string, ReactNode> = {
@@ -89,7 +89,11 @@ export interface ToastIconProps {
   type?: string;
 }
 
-export function ToastIcon({ type, icon, globalIcons }: ToastIconProps) {
+export const ToastIcon = React.memo(function ToastIcon({
+  type,
+  icon,
+  globalIcons,
+}: ToastIconProps) {
   if (icon === false) {
     return null;
   }
@@ -116,4 +120,4 @@ export function ToastIcon({ type, icon, globalIcons }: ToastIconProps) {
     );
   }
   return null;
-}
+});
