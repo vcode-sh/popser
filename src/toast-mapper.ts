@@ -1,4 +1,8 @@
 import type { ReactNode } from "react";
+import {
+  isManuallyClosedToast,
+  removeManualCloseFlag,
+} from "./toast-tracker.js";
 import type { PopserOptions, PopserUpdateOptions } from "./types.js";
 
 /**
@@ -10,32 +14,45 @@ import type { PopserOptions, PopserUpdateOptions } from "./types.js";
 export function toManagerOptions(
   title: ReactNode,
   options: PopserOptions,
-  onCloseInternal: () => void
+  onCloseInternal: () => void,
+  resolvedId: { current: string }
 ) {
   const {
     id,
     type,
     description,
     timeout,
+    duration,
     priority,
     icon,
     action,
     cancel,
     onClose,
+    onAutoClose,
+    onDismiss,
     onRemove,
     className,
     style,
     data,
   } = options;
 
+  const effectiveTimeout = timeout ?? duration;
+
   return {
     id,
     title,
     type,
     description,
-    timeout,
+    timeout: effectiveTimeout,
     priority,
     onClose: () => {
+      const wasManuallyClosed = isManuallyClosedToast(resolvedId.current);
+      if (wasManuallyClosed) {
+        removeManualCloseFlag(resolvedId.current);
+        onDismiss?.();
+      } else {
+        onAutoClose?.();
+      }
       onCloseInternal();
       onClose?.();
     },
@@ -61,6 +78,7 @@ export function toManagerUpdateOptions(options: PopserUpdateOptions) {
     type,
     description,
     timeout,
+    duration,
     priority,
     icon,
     action,
@@ -72,11 +90,13 @@ export function toManagerUpdateOptions(options: PopserUpdateOptions) {
     data,
   } = options;
 
+  const effectiveTimeout = timeout ?? duration;
+
   return {
     ...(title !== undefined && { title }),
     ...(type !== undefined && { type }),
     ...(description !== undefined && { description }),
-    ...(timeout !== undefined && { timeout }),
+    ...(effectiveTimeout !== undefined && { timeout: effectiveTimeout }),
     ...(priority !== undefined && { priority }),
     ...(onClose !== undefined && { onClose }),
     ...(onRemove !== undefined && { onRemove }),

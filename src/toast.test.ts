@@ -2,6 +2,7 @@ import { createElement } from "react";
 import { getManager, resetManager } from "./manager.js";
 import {
   clearActiveToasts,
+  clearManualCloseFlags,
   getActiveToastCount,
   getActiveToastTitles,
   isActiveToast,
@@ -12,6 +13,7 @@ describe("toast", () => {
   beforeEach(() => {
     resetManager();
     clearActiveToasts();
+    clearManualCloseFlags();
   });
 
   describe("basic toast creation", () => {
@@ -783,6 +785,168 @@ describe("toast", () => {
       toast("Only once", { deduplicate: true });
 
       expect(addSpy).toHaveBeenCalledTimes(1);
+    });
+  });
+
+  describe("toast.dismiss alias", () => {
+    it("is the same function reference as toast.close", () => {
+      expect(toast.dismiss).toBe(toast.close);
+    });
+  });
+
+  describe("duration option", () => {
+    it("sets the timeout when timeout is not provided", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { duration: 3000 });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 3000 })
+      );
+    });
+
+    it("timeout takes precedence over duration when both are set", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { timeout: 5000, duration: 3000 });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ timeout: 5000 })
+      );
+    });
+  });
+
+  describe("onAutoClose and onDismiss callbacks", () => {
+    it("onAutoClose fires when toast is auto-dismissed (not manually closed)", () => {
+      const onAutoClose = vi.fn();
+      const onClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { onAutoClose, onClose });
+
+      // Extract the wrapped onClose from the call
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      expect(callArgs.onClose).toBeDefined();
+
+      // Simulate Base UI firing onClose (auto-dismiss, no manual close flag)
+      callArgs.onClose?.();
+
+      expect(onAutoClose).toHaveBeenCalledOnce();
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it("onDismiss fires when toast.close(id) is called", () => {
+      const onDismiss = vi.fn();
+      const onClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const closeSpy = vi.spyOn(manager, "close");
+      const id = toast("Title", { onDismiss, onClose });
+
+      // Extract the wrapped onClose from the call
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+
+      // Close manually — this sets the manual close flag
+      toast.close(id);
+
+      // Simulate Base UI firing onClose after toast.close()
+      callArgs.onClose?.();
+
+      expect(onDismiss).toHaveBeenCalledOnce();
+      expect(onClose).toHaveBeenCalledOnce();
+    });
+
+    it("onClose fires in both auto-close and manual-close cases", () => {
+      const onClose1 = vi.fn();
+      const onClose2 = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+
+      // Toast 1: will be auto-closed
+      toast("Auto", { onClose: onClose1 });
+      const callArgs1 = addSpy.mock.calls[0]?.[0] as {
+        onClose?: () => void;
+      };
+
+      // Toast 2: will be manually closed
+      const id2 = toast("Manual", { onClose: onClose2 });
+      const callArgs2 = addSpy.mock.calls[1]?.[0] as {
+        onClose?: () => void;
+      };
+
+      // Auto-close Toast 1
+      callArgs1.onClose?.();
+      expect(onClose1).toHaveBeenCalledOnce();
+
+      // Manually close Toast 2
+      toast.close(id2);
+      callArgs2.onClose?.();
+      expect(onClose2).toHaveBeenCalledOnce();
+    });
+
+    it("onAutoClose does not fire when toast is manually closed", () => {
+      const onAutoClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const id = toast("Title", { onAutoClose });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+
+      toast.close(id);
+      callArgs.onClose?.();
+
+      expect(onAutoClose).not.toHaveBeenCalled();
+    });
+
+    it("onDismiss does not fire when toast is auto-closed", () => {
+      const onDismiss = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { onDismiss });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+
+      // Simulate auto-close (no manual close flag set)
+      callArgs.onClose?.();
+
+      expect(onDismiss).not.toHaveBeenCalled();
+    });
+  });
+
+  describe("toast.getToasts", () => {
+    it("returns empty array when no toasts are active", () => {
+      expect(toast.getToasts()).toEqual([]);
+    });
+
+    it("returns correct IDs after creating toasts", () => {
+      const id1 = toast("First");
+      const id2 = toast("Second");
+      const id3 = toast("Third");
+
+      const ids = toast.getToasts();
+      expect(ids).toContain(id1);
+      expect(ids).toContain(id2);
+      expect(ids).toContain(id3);
+      expect(ids).toHaveLength(3);
+    });
+
+    it("IDs are removed after closing", () => {
+      const id1 = toast("First");
+      const id2 = toast("Second");
+
+      toast.close(id1);
+
+      const ids = toast.getToasts();
+      expect(ids).not.toContain(id1);
+      expect(ids).toContain(id2);
+      expect(ids).toHaveLength(1);
+    });
+
+    it("returns empty array after closing all toasts", () => {
+      toast("First");
+      toast("Second");
+
+      toast.close();
+
+      expect(toast.getToasts()).toEqual([]);
     });
   });
 });

@@ -1,6 +1,7 @@
 import { clearManager, getManager, resetManager } from "./manager.js";
 import {
   clearActiveToasts,
+  clearManualCloseFlags,
   getActiveToastCount,
   getActiveToastTitles,
   isActiveToast,
@@ -18,6 +19,7 @@ describe("Sonner regression tests", () => {
   beforeEach(() => {
     resetManager();
     clearActiveToasts();
+    clearManualCloseFlags();
   });
 
   // ---------------------------------------------------------------------------
