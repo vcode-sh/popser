@@ -14,6 +14,8 @@ export interface PopserOptions {
   data?: Record<string, unknown>;
   deduplicate?: boolean;
   description?: ReactNode;
+  /** When false, prevents this toast from being swiped to dismiss. Also hides the close button. */
+  dismissible?: boolean;
   /** Alias for `timeout`. If both are set, `timeout` takes precedence. Provided for Sonner compatibility. */
   duration?: number;
   icon?: ReactNode | false;
@@ -78,12 +80,15 @@ export interface PopserToastData {
   action?: PopserAction;
   cancel?: PopserAction;
   className?: string;
+  dismissible?: boolean;
   icon?: ReactNode | false;
   style?: React.CSSProperties;
   [key: string]: unknown;
 }
 
 export interface ToasterProps {
+  /** Accessible label for the toast viewport region. Defaults to Base UI's built-in label. */
+  ariaLabel?: string;
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";
   expand?: boolean;

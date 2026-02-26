@@ -33,6 +33,7 @@ export function toManagerOptions(
     onRemove,
     className,
     style,
+    dismissible,
     data,
   } = options;
 
@@ -64,6 +65,7 @@ export function toManagerOptions(
       cancel,
       className,
       style,
+      dismissible,
     },
   };
 }
@@ -87,6 +89,7 @@ export function toManagerUpdateOptions(options: PopserUpdateOptions) {
     onRemove,
     className,
     style,
+    dismissible,
     data,
   } = options;
 
@@ -107,6 +110,7 @@ export function toManagerUpdateOptions(options: PopserUpdateOptions) {
       ...(cancel !== undefined && { cancel }),
       ...(className !== undefined && { className }),
       ...(style !== undefined && { style }),
+      ...(dismissible !== undefined && { dismissible }),
     },
   };
 }

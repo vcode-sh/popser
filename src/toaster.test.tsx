@@ -351,6 +351,57 @@ describe("Toaster", () => {
     expect(toastRoot.getAttribute("data-popser-root")).not.toBeNull();
   });
 
+  it("renders viewport with aria-label when ariaLabel is provided", () => {
+    act(() => {
+      root.render(<Toaster ariaLabel="Notifications" />);
+    });
+    const viewport = document.querySelector("[data-popser-viewport]");
+    expect(viewport?.getAttribute("aria-label")).toBe("Notifications");
+  });
+
+  it("does not set aria-label when ariaLabel is not provided", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    const viewport = document.querySelector("[data-popser-viewport]");
+    expect(viewport?.getAttribute("aria-label")).toBeNull();
+  });
+
+  it("hides close button when toast has dismissible: false", () => {
+    act(() => {
+      root.render(<Toaster closeButton="always" />);
+    });
+    act(() => {
+      toast("Non-dismissible", { dismissible: false });
+    });
+    const closeButton = document.querySelector("[data-popser-close]");
+    // With dismissible: false, the close button mode should be "never"
+    // which means the close button should not render
+    expect(closeButton).toBeNull();
+  });
+
+  it("shows close button when toast has dismissible: true", () => {
+    act(() => {
+      root.render(<Toaster closeButton="always" />);
+    });
+    act(() => {
+      toast("Dismissible", { dismissible: true });
+    });
+    const closeButton = document.querySelector("[data-popser-close]");
+    expect(closeButton).toBeTruthy();
+  });
+
+  it("shows close button by default when dismissible is not set", () => {
+    act(() => {
+      root.render(<Toaster closeButton="always" />);
+    });
+    act(() => {
+      toast("Default");
+    });
+    const closeButton = document.querySelector("[data-popser-close]");
+    expect(closeButton).toBeTruthy();
+  });
+
   it("cleans up hover timeout on unmount", () => {
     act(() => {
       root.render(<Toaster />);

@@ -34,6 +34,11 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
   const data = (toastData.data ?? {}) as PopserToastData;
   const type = toastData.type;
 
+  const effectiveSwipeDirection =
+    data.dismissible === false ? [] : swipeDirection;
+  const effectiveCloseButton =
+    data.dismissible === false ? "never" : closeButton;
+
   return (
     <Toast.Root
       className={
@@ -46,7 +51,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
       onMouseEnter={onMouseEnter}
       onMouseLeave={onMouseLeave}
       style={data.style}
-      swipeDirection={swipeDirection}
+      swipeDirection={effectiveSwipeDirection}
       toast={toastData}
     >
       <Toast.Content className={classNames?.content} data-popser-content>
@@ -70,7 +75,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
           <ToastCloseButton
             className={classNames?.closeButton}
             icon={icons?.close}
-            mode={closeButton}
+            mode={effectiveCloseButton}
           />
         </div>
         <ToastActions
