@@ -283,6 +283,74 @@ describe("Toaster", () => {
     expect(viewport.getAttribute("data-expanded")).toBe("true");
   });
 
+  it("renders data-popser-id on toast root element", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Hello World");
+    });
+    const toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot).toBeTruthy();
+    expect(toastRoot?.hasAttribute("data-popser-id")).toBe(true);
+    expect(toastRoot?.getAttribute("data-popser-id")).toBeTruthy();
+  });
+
+  it("renders data-popser-id matching the toast ID returned by toast()", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    let id: string;
+    act(() => {
+      id = toast("Identified toast");
+    });
+    const toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot?.getAttribute("data-popser-id")).toBe(id!);
+  });
+
+  it("renders data-popser-id with custom ID", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("Custom ID toast", { id: "my-custom-id" });
+    });
+    const toastRoot = document.querySelector('[data-popser-id="my-custom-id"]');
+    expect(toastRoot).toBeTruthy();
+  });
+
+  it("renders unique data-popser-id for each toast", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast("First");
+      toast("Second");
+    });
+    const toastRoots = document.querySelectorAll("[data-popser-root]");
+    expect(toastRoots.length).toBe(2);
+    const id1 = toastRoots[0]?.getAttribute("data-popser-id");
+    const id2 = toastRoots[1]?.getAttribute("data-popser-id");
+    expect(id1).toBeTruthy();
+    expect(id2).toBeTruthy();
+    expect(id1).not.toBe(id2);
+  });
+
+  it("allows selecting toast by data-popser-id for e2e testing", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+    act(() => {
+      toast.success("Done", { id: "e2e-toast" });
+    });
+    const toastRoot = document.querySelector(
+      '[data-popser-id="e2e-toast"]'
+    ) as HTMLElement;
+    expect(toastRoot).toBeTruthy();
+    expect(toastRoot.getAttribute("data-type")).toBe("success");
+    expect(toastRoot.getAttribute("data-popser-root")).not.toBeNull();
+  });
+
   it("cleans up hover timeout on unmount", () => {
     act(() => {
       root.render(<Toaster />);

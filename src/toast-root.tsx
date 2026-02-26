@@ -45,6 +45,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
         [classNames?.root, data.className].filter(Boolean).join(" ") ||
         undefined
       }
+      data-popser-id={toastData.id}
       data-popser-root
       data-type={type}
       onMouseEnter={onMouseEnter}

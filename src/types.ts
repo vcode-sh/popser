@@ -12,6 +12,7 @@ export interface PopserOptions {
   cancel?: PopserAction;
   className?: string;
   data?: Record<string, unknown>;
+  deduplicate?: boolean;
   description?: ReactNode;
   icon?: ReactNode | false;
   id?: string;
@@ -24,10 +25,10 @@ export interface PopserOptions {
 }
 
 export interface PopserPromiseOptions<T = unknown> {
-  error: string | ((error: unknown) => string);
+  error: ReactNode | ((error: unknown) => ReactNode | undefined);
   id?: string;
-  loading: string;
-  success: string | ((result: T) => string);
+  loading: ReactNode;
+  success: ReactNode | ((result: T) => ReactNode | undefined);
 }
 
 export interface PopserUpdateOptions extends Partial<PopserOptions> {

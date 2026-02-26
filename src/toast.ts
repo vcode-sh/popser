@@ -1,92 +1,46 @@
 import type { ReactNode } from "react";
 import { getManager } from "./manager.js";
+import { toManagerOptions, toManagerUpdateOptions } from "./toast-mapper.js";
+import {
+  clearActiveToasts,
+  findDuplicate,
+  getActiveToastIds,
+  trackToast,
+  untrackToast,
+} from "./toast-tracker.js";
 import type {
   PopserOptions,
   PopserPromiseOptions,
   PopserUpdateOptions,
 } from "./types.js";
 
-/**
- * Tracks active toast IDs so `toast.close()` (no args) can close all.
- */
-const activeToasts = new Set<string>();
-
-/** @internal — exposed for testing only */
-export function getActiveToastCount(): number {
-  return activeToasts.size;
-}
-
-/** @internal — exposed for testing only */
-export function isActiveToast(id: string): boolean {
-  return activeToasts.has(id);
-}
-
-/** @internal — exposed for testing only */
-export function clearActiveToasts(): void {
-  activeToasts.clear();
-}
-
-/**
- * Converts PopserOptions into the shape expected by Base UI's
- * `ToastManager.add()`. Popser-specific fields (icon, action, cancel,
- * className, style) are stored inside `data` so that our renderer
- * components can read them back.
- */
-function toManagerOptions(
-  title: ReactNode,
-  options: PopserOptions,
-  resolvedId: { current: string }
-) {
-  const {
-    id,
-    type,
-    description,
-    timeout,
-    priority,
-    icon,
-    action,
-    cancel,
-    onClose,
-    onRemove,
-    className,
-    style,
-    data,
-  } = options;
-
-  return {
-    id,
-    title,
-    type,
-    description,
-    timeout,
-    priority,
-    onClose: () => {
-      activeToasts.delete(resolvedId.current);
-      onClose?.();
-    },
-    onRemove,
-    data: {
-      ...data,
-      icon,
-      action,
-      cancel,
-      className,
-      style,
-    },
-  };
-}
+// Re-export test helpers so existing imports from "./toast.js" keep working
+export {
+  clearActiveToasts,
+  getActiveToastCount,
+  getActiveToastTitles,
+  isActiveToast,
+} from "./toast-tracker.js";
 
 /**
  * Internal helper that calls `getManager().add()` and keeps
- * `activeToasts` in sync.
+ * active toast tracking in sync.
  */
 function createToast(title: ReactNode, options: PopserOptions = {}): string {
+  const existingId = findDuplicate(title, options.deduplicate);
+  if (existingId !== undefined) {
+    return existingId;
+  }
+
   // Use a ref-like object so the onClose callback always sees the real ID
   const resolvedId = { current: "" };
-  const managerOptions = toManagerOptions(title, options, resolvedId);
+  const managerOptions = toManagerOptions(title, options, () =>
+    untrackToast(resolvedId.current),
+  );
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
-  activeToasts.add(id);
+  trackToast(id, title, options.deduplicate);
+
   return id;
 }
 
@@ -111,7 +65,7 @@ function toast(title: ReactNode, options?: PopserOptions): string {
  */
 toast.success = (
   title: ReactNode,
-  options?: Omit<PopserOptions, "type">
+  options?: Omit<PopserOptions, "type">,
 ): string => {
   return createToast(title, { ...options, type: "success" });
 };
@@ -121,7 +75,7 @@ toast.success = (
  */
 toast.error = (
   title: ReactNode,
-  options?: Omit<PopserOptions, "type">
+  options?: Omit<PopserOptions, "type">,
 ): string => {
   return createToast(title, { ...options, type: "error" });
 };
@@ -131,7 +85,7 @@ toast.error = (
  */
 toast.info = (
   title: ReactNode,
-  options?: Omit<PopserOptions, "type">
+  options?: Omit<PopserOptions, "type">,
 ): string => {
   return createToast(title, { ...options, type: "info" });
 };
@@ -141,7 +95,7 @@ toast.info = (
  */
 toast.warning = (
   title: ReactNode,
-  options?: Omit<PopserOptions, "type">
+  options?: Omit<PopserOptions, "type">,
 ): string => {
   return createToast(title, { ...options, type: "warning" });
 };
@@ -151,7 +105,7 @@ toast.warning = (
  */
 toast.loading = (
   title: ReactNode,
-  options?: Omit<PopserOptions, "type">
+  options?: Omit<PopserOptions, "type">,
 ): string => {
   return createToast(title, { ...options, type: "loading" });
 };
@@ -170,24 +124,30 @@ toast.loading = (
  */
 toast.promise = <T>(
   promise: Promise<T>,
-  options: PopserPromiseOptions<T>
+  options: PopserPromiseOptions<T>,
 ): Promise<T> => {
   const { success, error } = options;
 
   const successHandler =
     typeof success === "function"
-      ? (result: T) => ({
-          title: success(result),
-          type: "success" as const,
-        })
+      ? (result: T) => {
+          const title = success(result);
+          if (title === undefined) {
+            return { title: "", type: "default" as const, timeout: 1 };
+          }
+          return { title, type: "success" as const };
+        }
       : { title: success, type: "success" as const };
 
   const errorHandler =
     typeof error === "function"
-      ? (err: unknown) => ({
-          title: error(err),
-          type: "error" as const,
-        })
+      ? (err: unknown) => {
+          const title = error(err);
+          if (title === undefined) {
+            return { title: "", type: "default" as const, timeout: 1 };
+          }
+          return { title, type: "error" as const };
+        }
       : { title: error, type: "error" as const };
 
   return getManager().promise(promise, {
@@ -210,12 +170,12 @@ toast.promise = <T>(
 toast.close = (id?: string): void => {
   if (id !== undefined) {
     getManager().close(id);
-    activeToasts.delete(id);
+    untrackToast(id);
   } else {
-    for (const toastId of activeToasts) {
+    for (const toastId of getActiveToastIds()) {
       getManager().close(toastId);
     }
-    activeToasts.clear();
+    clearActiveToasts();
   }
 };
 
@@ -227,39 +187,7 @@ toast.close = (id?: string): void => {
  * ```
  */
 toast.update = (id: string, options: PopserUpdateOptions): void => {
-  const {
-    title,
-    type,
-    description,
-    timeout,
-    priority,
-    icon,
-    action,
-    cancel,
-    onClose,
-    onRemove,
-    className,
-    style,
-    data,
-  } = options;
-
-  getManager().update(id, {
-    ...(title !== undefined && { title }),
-    ...(type !== undefined && { type }),
-    ...(description !== undefined && { description }),
-    ...(timeout !== undefined && { timeout }),
-    ...(priority !== undefined && { priority }),
-    ...(onClose !== undefined && { onClose }),
-    ...(onRemove !== undefined && { onRemove }),
-    data: {
-      ...data,
-      ...(icon !== undefined && { icon }),
-      ...(action !== undefined && { action }),
-      ...(cancel !== undefined && { cancel }),
-      ...(className !== undefined && { className }),
-      ...(style !== undefined && { style }),
-    },
-  });
+  getManager().update(id, toManagerUpdateOptions(options));
 };
 
 export { toast };
