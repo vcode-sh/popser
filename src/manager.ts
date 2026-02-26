@@ -13,3 +13,12 @@ export function resetManager() {
   manager = Toast.createToastManager();
   return manager;
 }
+
+/**
+ * Resets the manager to `null` so the next `getManager()` call lazily
+ * creates a fresh instance. Used in tests to simulate the state before
+ * any `<Toaster>` has mounted.
+ */
+export function clearManager() {
+  manager = null;
+}

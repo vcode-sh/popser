@@ -1,4 +1,5 @@
 import { Toast } from "@base-ui/react";
+import { useEffect, useState } from "react";
 import {
   DEFAULT_CLOSE_BUTTON,
   DEFAULT_GAP,
@@ -29,12 +30,22 @@ function ToasterContent({
   unstyled = false,
 }: Omit<ToasterProps, "limit" | "timeout">) {
   const { toasts } = Toast.useToastManager();
+  const [isMobile, setIsMobile] = useState(false);
+
+  useEffect(() => {
+    const mql = window.matchMedia(`(max-width: ${mobileBreakpoint}px)`);
+    setIsMobile(mql.matches);
+    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [mobileBreakpoint]);
 
   return (
     <Toast.Portal>
       <Toast.Viewport
         className={classNames?.viewport}
         data-expanded={expand || undefined}
+        data-mobile={isMobile || undefined}
         data-popser-viewport
         data-position={position}
         data-rich-colors={richColors || undefined}
@@ -45,7 +56,6 @@ function ToasterContent({
               "--popser-offset":
                 typeof offset === "number" ? `${offset}px` : offset,
               "--popser-gap": `${gap}px`,
-              "--popser-mobile-breakpoint": `${mobileBreakpoint}px`,
             }),
             ...style,
           } as React.CSSProperties

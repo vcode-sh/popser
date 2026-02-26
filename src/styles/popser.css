@@ -14,6 +14,11 @@
   pointer-events: none;
 }
 
+/* Bottom positions: reverse column so newest toast is at the bottom */
+[data-popser-viewport][data-position^="bottom"] {
+  flex-direction: column-reverse;
+}
+
 /* Position variants */
 [data-popser-viewport][data-position="top-left"] {
   top: 0;
@@ -62,9 +67,119 @@
   border: 1px solid var(--popser-border);
   border-radius: var(--popser-radius, 8px);
   box-shadow: var(--popser-shadow);
+  transform-origin: center bottom;
   transition:
     transform 0.3s ease-out,
-    opacity 0.3s ease-out;
+    opacity 0.3s ease-out,
+    margin 0.3s ease-out;
+}
+
+/* Top positions: scale from top edge */
+[data-popser-viewport][data-position^="top"] [data-popser-root] {
+  transform-origin: center top;
+}
+
+/* ─── Collapsed stacking (default) ─────────────────────────────────── */
+/*
+ * Base UI sets these CSS custom properties on each Toast.Root automatically:
+ *   --toast-index    : 0-based number (0 = newest/front, 1 = behind, ...)
+ *   --toast-offset-y : cumulative pixel offset (e.g. "60px")
+ *   --toast-height   : height of this toast (e.g. "60px")
+ *
+ * In collapsed mode, toasts stack on top of each other with a peek effect.
+ * The front toast (index 0) is full size. Toasts behind it are scaled down,
+ * faded, and peeking slightly to create a layered card stack appearance.
+ *
+ * --popser-stack-peek controls how many pixels each toast peeks behind the
+ * front one. Defaults to 8px.
+ */
+
+/* Collapsed viewport: remove gap so toasts overlap */
+[data-popser-viewport]:not([data-expanded]):not(:hover) {
+  --popser-stack-peek: 8px;
+  gap: 0;
+}
+
+/* Collapsed: fade toasts based on their stack index */
+[data-popser-viewport]:not([data-expanded]):not(:hover) [data-popser-root] {
+  opacity: calc(1 - var(--toast-index) * 0.15);
+}
+
+/*
+ * Collapsed stacking for top-* positions (column layout):
+ * Newest toast (index 0) is at top (first-child). Older toasts pull up
+ * behind it via negative top margin, peeking out slightly below.
+ */
+[data-popser-viewport][data-position^="top"]:not([data-expanded]):not(:hover)
+  [data-popser-root] {
+  margin-top: calc(-1 * var(--toast-height, 0px) + var(--popser-stack-peek));
+  transform: scale(calc(1 - var(--toast-index) * 0.05))
+    translateY(calc(var(--toast-index) * var(--popser-stack-peek)));
+}
+
+/* Front toast (index 0) needs no negative margin */
+[data-popser-viewport][data-position^="top"]:not([data-expanded]):not(:hover)
+  [data-popser-root]:first-child {
+  margin-top: 0;
+}
+
+/*
+ * Collapsed stacking for bottom-* positions (column-reverse layout):
+ * Newest toast (index 0) is at bottom (first-child). Older toasts pull down
+ * behind it via negative bottom margin, peeking out slightly above.
+ */
+[data-popser-viewport][data-position^="bottom"]:not([data-expanded]):not(:hover)
+  [data-popser-root] {
+  margin-bottom: calc(-1 * var(--toast-height, 0px) + var(--popser-stack-peek));
+  transform: scale(calc(1 - var(--toast-index) * 0.05))
+    translateY(calc(var(--toast-index) * var(--popser-stack-peek) * -1));
+}
+
+/* Front toast (index 0) needs no negative margin */
+[data-popser-viewport][data-position^="bottom"]:not([data-expanded]):not(:hover)
+  [data-popser-root]:first-child {
+  margin-bottom: 0;
+}
+
+/*
+ * Collapsed: hide toasts beyond index 2 (they are fully behind the stack).
+ * Base UI sets --toast-index as an inline style number, so we match against
+ * the style attribute substring. Both "index: N" and "index:N" are covered.
+ */
+[data-popser-viewport]:not([data-expanded]):not(:hover)
+  [data-popser-root]:where(
+    [style*="--toast-index: 3"],
+    [style*="--toast-index:3"],
+    [style*="--toast-index: 4"],
+    [style*="--toast-index:4"],
+    [style*="--toast-index: 5"],
+    [style*="--toast-index:5"],
+    [style*="--toast-index: 6"],
+    [style*="--toast-index:6"],
+    [style*="--toast-index: 7"],
+    [style*="--toast-index:7"],
+    [style*="--toast-index: 8"],
+    [style*="--toast-index:8"],
+    [style*="--toast-index: 9"],
+    [style*="--toast-index:9"]
+  ) {
+  pointer-events: none;
+  opacity: 0;
+}
+
+/* ─── Expanded state (prop or hover) ───────────────────────────────── */
+/*
+ * When the viewport has [data-expanded] (from expand prop) or is hovered,
+ * all toasts expand to full size with proper spacing between them.
+ * The gap is restored by the viewport not matching :not(:hover)/:not([data-expanded]).
+ */
+
+[data-popser-viewport][data-expanded] [data-popser-root],
+[data-popser-viewport]:hover [data-popser-root] {
+  margin-top: 0;
+  margin-bottom: 0;
+  opacity: 1;
+  transform: none;
 }
 
 /* ─── Enter / exit transitions (Base UI data attributes) ───────────── */
@@ -356,24 +471,23 @@
   background: oklch(0 0 0 / 0.05);
 }
 
-/* ─── Mobile responsive ────────────────────────────────────────────── */
+/* ─── Mobile responsive (driven by data-mobile attribute) ─────────── */
 
-@media (max-width: 600px) {
-  [data-popser-viewport] {
-    top: auto !important;
-    right: 0 !important;
-    bottom: 0 !important;
-    left: 0 !important;
-    padding: var(--popser-offset, 16px);
-    transform: none !important;
-  }
+[data-popser-viewport][data-mobile] {
+  top: auto;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  padding: var(--popser-offset, 16px);
+  transform: none;
+}
 
-  [data-popser-root] {
-    width: 100%;
-  }
+[data-popser-viewport][data-mobile] [data-popser-root] {
+  width: 100%;
+}
 
-  /* On mobile, always show close button */
+/* On mobile, always show close button */
+[data-popser-viewport][data-mobile]
   [data-popser-close][data-close-button="hover"] {
-    opacity: 0.5;
-  }
+  opacity: 0.5;
 }

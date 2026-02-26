@@ -1,4 +1,4 @@
-import { getManager, resetManager } from "./manager.js";
+import { clearManager, getManager, resetManager } from "./manager.js";
 import { activeToasts, toast } from "./toast.js";
 
 /**
@@ -844,6 +844,100 @@ describe("Sonner regression tests", () => {
       expect(activeToasts.has(id2)).toBe(false);
       expect(activeToasts.has(id3)).toBe(true);
       expect(activeToasts.size).toBe(2);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 11. Pre-mount guard (Sonner #723)
+  // Sonner silently drops toasts called before `<Toaster>` mounts.
+  // Popser's manager is a lazy singleton created on first `toast()` call,
+  // so toasts are never lost even if no Provider/Toaster is mounted yet.
+  // ---------------------------------------------------------------------------
+  describe("Pre-mount guard (Sonner #723)", () => {
+    beforeEach(() => {
+      clearManager();
+      activeToasts.clear();
+    });
+
+    it("calling toast() before any Toaster mount returns a valid ID", () => {
+      // Manager is null (no Toaster has mounted), simulating pre-mount state
+      const id = toast("Pre-mount toast");
+
+      expect(typeof id).toBe("string");
+      expect(id.length).toBeGreaterThan(0);
+    });
+
+    it("toast() before mount adds the ID to activeToasts", () => {
+      const id = toast("Queued toast");
+
+      expect(activeToasts.has(id)).toBe(true);
+      expect(activeToasts.size).toBe(1);
+    });
+
+    it("manager is lazily created on first toast() call", () => {
+      // Before any toast call, getManager will create one on demand.
+      // The key behavior: calling toast() triggers getManager() which
+      // creates the manager if it doesn't exist yet.
+      const id = toast("Lazy creation");
+
+      // After the first toast(), the manager exists and works
+      const manager = getManager();
+      expect(manager).toBeDefined();
+      expect(typeof manager.add).toBe("function");
+      expect(typeof manager.close).toBe("function");
+
+      // The toast was tracked
+      expect(activeToasts.has(id)).toBe(true);
+    });
+
+    it("multiple toast() calls before mount all get tracked", () => {
+      const id1 = toast("First pre-mount");
+      const id2 = toast.success("Second pre-mount");
+      const id3 = toast.error("Third pre-mount");
+      const id4 = toast.warning("Fourth pre-mount");
+      const id5 = toast.info("Fifth pre-mount");
+
+      expect(activeToasts.size).toBe(5);
+      expect(activeToasts.has(id1)).toBe(true);
+      expect(activeToasts.has(id2)).toBe(true);
+      expect(activeToasts.has(id3)).toBe(true);
+      expect(activeToasts.has(id4)).toBe(true);
+      expect(activeToasts.has(id5)).toBe(true);
+    });
+
+    it("toasts created before mount can be closed", () => {
+      const id = toast("Closable pre-mount");
+      expect(activeToasts.has(id)).toBe(true);
+
+      toast.close(id);
+      expect(activeToasts.has(id)).toBe(false);
+      expect(activeToasts.size).toBe(0);
+    });
+
+    it("toasts created before mount can be updated", () => {
+      const id = toast.loading("Loading before mount...");
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+
+      toast.update(id, { type: "success", title: "Done!" });
+
+      expect(updateSpy).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({
+          type: "success",
+          title: "Done!",
+        })
+      );
+    });
+
+    it("close-all works on toasts created before mount", () => {
+      toast("Pre-mount 1");
+      toast("Pre-mount 2");
+      toast("Pre-mount 3");
+      expect(activeToasts.size).toBe(3);
+
+      toast.close();
+      expect(activeToasts.size).toBe(0);
     });
   });
 });

@@ -1,3 +1,4 @@
+import type { ToastObject } from "@base-ui/react";
 import { Toast } from "@base-ui/react";
 import { ToastActions } from "./toast-action.js";
 import { ToastCloseButton } from "./toast-close.js";
@@ -10,6 +11,7 @@ interface PopserToastData {
   className?: string;
   icon?: React.ReactNode | false;
   style?: React.CSSProperties;
+  [key: string]: unknown;
 }
 
 export interface ToastRootProps {
@@ -19,7 +21,7 @@ export interface ToastRootProps {
   swipeDirection?:
     | ("up" | "down" | "left" | "right")
     | ("up" | "down" | "left" | "right")[];
-  toast: any;
+  toast: ToastObject<PopserToastData>;
 }
 
 export function PopserToastRoot({
