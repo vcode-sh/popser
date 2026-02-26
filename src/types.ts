@@ -14,9 +14,15 @@ export interface PopserOptions {
   data?: Record<string, unknown>;
   deduplicate?: boolean;
   description?: ReactNode;
+  /** Alias for `timeout`. If both are set, `timeout` takes precedence. Provided for Sonner compatibility. */
+  duration?: number;
   icon?: ReactNode | false;
   id?: string;
+  /** Callback fired when the toast is auto-dismissed after its timeout expires. */
+  onAutoClose?: () => void;
   onClose?: () => void;
+  /** Callback fired when the toast is dismissed by user action (e.g. `toast.close(id)`). */
+  onDismiss?: () => void;
   onRemove?: () => void;
   priority?: "low" | "high";
   style?: React.CSSProperties;

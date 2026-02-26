@@ -9,6 +9,32 @@ const activeToasts = new Set<string>();
  */
 const activeToastTitles = new Map<string, string>();
 
+/**
+ * Tracks toast IDs that were closed via `toast.close(id)` (user action)
+ * so the onClose callback can distinguish manual closes from auto-dismissals.
+ */
+const manuallyClosedToasts = new Set<string>();
+
+/** Check if a toast was manually closed. */
+export function isManuallyClosedToast(id: string): boolean {
+  return manuallyClosedToasts.has(id);
+}
+
+/** Remove the manual close flag for a toast after it has been consumed. */
+export function removeManualCloseFlag(id: string): void {
+  manuallyClosedToasts.delete(id);
+}
+
+/** Mark a toast as manually closed. */
+export function markManuallyClosedToast(id: string): void {
+  manuallyClosedToasts.add(id);
+}
+
+/** @internal — exposed for testing only */
+export function clearManualCloseFlags(): void {
+  manuallyClosedToasts.clear();
+}
+
 /** @internal — exposed for testing only */
 export function getActiveToastCount(): number {
   return activeToasts.size;

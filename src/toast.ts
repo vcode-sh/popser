@@ -5,6 +5,7 @@ import {
   clearActiveToasts,
   findDuplicate,
   getActiveToastIds,
+  markManuallyClosedToast,
   trackToast,
   untrackToast,
 } from "./toast-tracker.js";
@@ -18,6 +19,7 @@ import type {
 // biome-ignore lint/performance/noBarrelFile: re-exports are intentional for backward compat
 export {
   clearActiveToasts,
+  clearManualCloseFlags,
   getActiveToastCount,
   getActiveToastTitles,
   isActiveToast,
@@ -35,8 +37,11 @@ function createToast(title: ReactNode, options: PopserOptions = {}): string {
 
   // Use a ref-like object so the onClose callback always sees the real ID
   const resolvedId = { current: "" };
-  const managerOptions = toManagerOptions(title, options, () =>
-    untrackToast(resolvedId.current)
+  const managerOptions = toManagerOptions(
+    title,
+    options,
+    () => untrackToast(resolvedId.current),
+    resolvedId
   );
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
@@ -131,10 +136,12 @@ toast.promise = <T>(
  */
 toast.close = (id?: string): void => {
   if (id !== undefined) {
+    markManuallyClosedToast(id);
     getManager().close(id);
     untrackToast(id);
   } else {
     for (const toastId of getActiveToastIds()) {
+      markManuallyClosedToast(toastId);
       getManager().close(toastId);
     }
     clearActiveToasts();
@@ -150,6 +157,18 @@ toast.close = (id?: string): void => {
  */
 toast.update = (id: string, options: PopserUpdateOptions): void => {
   getManager().update(id, toManagerUpdateOptions(options));
+};
+
+/**
+ * Alias for `toast.close()`. Provided for Sonner API compatibility.
+ */
+toast.dismiss = toast.close;
+
+/**
+ * Get the IDs of all currently active toasts.
+ */
+toast.getToasts = (): string[] => {
+  return Array.from(getActiveToastIds());
 };
 
 export { toast };
