@@ -6,42 +6,42 @@
   position: fixed;
   z-index: 9999;
   box-sizing: border-box;
-  padding: var(--popser-offset, 16px);
   pointer-events: none;
   /* No flex/grid - toasts are absolutely positioned */
+  /* Offset is applied via inset values in position variants below */
 }
 
-/* Position variants */
+/* Position variants -- offset from browser edge via --popser-offset */
 [data-popser-viewport][data-position="top-left"] {
-  top: 0;
-  left: 0;
+  top: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
 }
 
 [data-popser-viewport][data-position="top-center"] {
-  top: 0;
+  top: var(--popser-offset, 16px);
   left: 50%;
   transform: translateX(-50%);
 }
 
 [data-popser-viewport][data-position="top-right"] {
-  top: 0;
-  right: 0;
+  top: var(--popser-offset, 16px);
+  right: var(--popser-offset, 16px);
 }
 
 [data-popser-viewport][data-position="bottom-left"] {
-  bottom: 0;
-  left: 0;
+  bottom: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
 }
 
 [data-popser-viewport][data-position="bottom-center"] {
-  bottom: 0;
+  bottom: var(--popser-offset, 16px);
   left: 50%;
   transform: translateX(-50%);
 }
 
 [data-popser-viewport][data-position="bottom-right"] {
-  right: 0;
-  bottom: 0;
+  right: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
 }
 
 /* ─── Toast root ───────────────────────────────────────────────────── */
@@ -563,10 +563,9 @@
 
 [data-popser-viewport][data-mobile] {
   top: auto;
-  right: 0;
-  bottom: 0;
-  left: 0;
-  padding: var(--popser-offset, 16px);
+  right: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  left: var(--popser-offset, 16px);
   transform: none;
 }
 
