@@ -3,19 +3,23 @@ import {
   isManuallyClosedToast,
   removeManualCloseFlag,
 } from "./toast-tracker.js";
-import type { PopserOptions, PopserUpdateOptions } from "./types.js";
+import type {
+  PopserInternalData,
+  PopserOptions,
+  PopserUpdateOptions,
+} from "./types.js";
 
 /**
  * Converts PopserOptions into the shape expected by Base UI's
- * `ToastManager.add()`. Popser-specific fields (icon, action, cancel,
- * className, style) are stored inside `data` so that our renderer
- * components can read them back.
+ * `ToastManager.add()`. Popser-specific fields are stored inside
+ * `data.__popser` to prevent collision with user-provided data fields.
  */
 export function toManagerOptions(
   title: ReactNode,
   options: PopserOptions,
   onCloseInternal: () => void,
-  resolvedId: { current: string }
+  resolvedId: { current: string },
+  jsx?: (id: string) => ReactNode
 ) {
   const {
     id,
@@ -32,12 +36,28 @@ export function toManagerOptions(
     onDismiss,
     onRemove,
     className,
+    classNames,
     style,
     dismissible,
+    richColors,
+    unstyled,
     data,
   } = options;
 
   const effectiveTimeout = timeout ?? duration;
+
+  const __popser: PopserInternalData = {
+    icon,
+    action,
+    cancel,
+    className,
+    classNames,
+    style,
+    dismissible,
+    richColors,
+    unstyled,
+    ...(jsx !== undefined && { jsx }),
+  };
 
   return {
     id,
@@ -47,25 +67,21 @@ export function toManagerOptions(
     timeout: effectiveTimeout,
     priority,
     onClose: () => {
-      const wasManuallyClosed = isManuallyClosedToast(resolvedId.current);
+      const toastId = resolvedId.current;
+      const wasManuallyClosed = isManuallyClosedToast(toastId);
       if (wasManuallyClosed) {
-        removeManualCloseFlag(resolvedId.current);
-        onDismiss?.();
+        removeManualCloseFlag(toastId);
+        onDismiss?.(toastId);
       } else {
-        onAutoClose?.();
+        onAutoClose?.(toastId);
       }
       onCloseInternal();
-      onClose?.();
+      onClose?.(toastId);
     },
     onRemove,
     data: {
       ...data,
-      icon,
-      action,
-      cancel,
-      className,
-      style,
-      dismissible,
+      __popser,
     },
   };
 }
@@ -98,8 +114,11 @@ export function toManagerUpdateOptions(
     onDismiss,
     onRemove,
     className,
+    classNames,
     style,
     dismissible,
+    richColors,
+    unstyled,
     data,
   } = options;
 
@@ -117,14 +136,26 @@ export function toManagerUpdateOptions(
         const wasManuallyClosed = isManuallyClosedToast(id);
         if (wasManuallyClosed) {
           removeManualCloseFlag(id);
-          onDismiss?.();
+          onDismiss?.(id);
         } else {
-          onAutoClose?.();
+          onAutoClose?.(id);
         }
         onCloseInternal();
-        onClose?.();
+        onClose?.(id);
       }
     : undefined;
+
+  const __popser: Partial<PopserInternalData> = {
+    ...(icon !== undefined && { icon }),
+    ...(action !== undefined && { action }),
+    ...(cancel !== undefined && { cancel }),
+    ...(className !== undefined && { className }),
+    ...(classNames !== undefined && { classNames }),
+    ...(style !== undefined && { style }),
+    ...(dismissible !== undefined && { dismissible }),
+    ...(richColors !== undefined && { richColors }),
+    ...(unstyled !== undefined && { unstyled }),
+  };
 
   return {
     ...(title !== undefined && { title }),
@@ -136,12 +167,7 @@ export function toManagerUpdateOptions(
     ...(onRemove !== undefined && { onRemove }),
     data: {
       ...data,
-      ...(icon !== undefined && { icon }),
-      ...(action !== undefined && { action }),
-      ...(cancel !== undefined && { cancel }),
-      ...(className !== undefined && { className }),
-      ...(style !== undefined && { style }),
-      ...(dismissible !== undefined && { dismissible }),
+      ...(Object.keys(__popser).length > 0 && { __popser }),
     },
   };
 }

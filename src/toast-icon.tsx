@@ -84,6 +84,7 @@ function Spinner() {
 }
 
 export interface ToastIconProps {
+  className?: string;
   globalIcons?: PopserIcons;
   icon?: React.ReactNode | false;
   type?: string;
@@ -93,28 +94,35 @@ export const ToastIcon = React.memo(function ToastIcon({
   type,
   icon,
   globalIcons,
+  className,
 }: ToastIconProps) {
   if (icon === false) {
     return null;
   }
   if (icon) {
-    return <span data-popser-icon>{icon}</span>;
+    return (
+      <span className={className} data-popser-icon>
+        {icon}
+      </span>
+    );
   }
   if (type && globalIcons?.[type as keyof PopserIcons]) {
     return (
-      <span data-popser-icon>{globalIcons[type as keyof PopserIcons]}</span>
+      <span className={className} data-popser-icon>
+        {globalIcons[type as keyof PopserIcons]}
+      </span>
     );
   }
   if (type === "loading") {
     return (
-      <span data-popser-icon>
+      <span className={className} data-popser-icon>
         <Spinner />
       </span>
     );
   }
   if (type && icons[type]) {
     return (
-      <span data-popser-icon data-type={type}>
+      <span className={className} data-popser-icon data-type={type}>
         {icons[type]}
       </span>
     );

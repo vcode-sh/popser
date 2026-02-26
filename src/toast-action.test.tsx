@@ -144,4 +144,127 @@ describe("ToastActions", () => {
       : null;
     expect(cancelElement?.props.onClick).toBe(onClick);
   });
+
+  // ---------------------------------------------------------------------------
+  // v0.2.0: ReactNode action/cancel (Phase 2.6)
+  // ---------------------------------------------------------------------------
+
+  describe("ReactNode action/cancel (Phase 2.6)", () => {
+    it("renders ReactNode action as Toast.Action children", () => {
+      const actionNode = <button type="button">Custom Undo</button>;
+      const result = ToastActions({
+        action: actionNode,
+        cancel: undefined,
+        classNames: undefined,
+      });
+      expect(result).not.toBeNull();
+      const children = result?.props.children;
+      const actionElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-action"] === true
+          )
+        : null;
+      expect(actionElement).toBeTruthy();
+      // ReactNode should be rendered as children of Toast.Action
+      expect(actionElement?.props.children).toBe(actionNode);
+    });
+
+    it("renders ReactNode cancel as Toast.Close children", () => {
+      const cancelNode = <button type="button">Custom Cancel</button>;
+      const result = ToastActions({
+        action: undefined,
+        cancel: cancelNode,
+        classNames: undefined,
+      });
+      expect(result).not.toBeNull();
+      const children = result?.props.children;
+      const cancelElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-cancel"] === true
+          )
+        : null;
+      expect(cancelElement).toBeTruthy();
+      expect(cancelElement?.props.children).toBe(cancelNode);
+    });
+
+    it("object format still works with ReactNode alongside (backward compat)", () => {
+      const onClick = vi.fn();
+      const result = ToastActions({
+        action: { label: "Object Action", onClick },
+        cancel: { label: "Object Cancel", onClick },
+        classNames: undefined,
+      });
+      const children = result?.props.children;
+      const actionElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-action"] === true
+          )
+        : null;
+      const cancelElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-cancel"] === true
+          )
+        : null;
+      expect(actionElement?.props.children).toBe("Object Action");
+      expect(actionElement?.props.onClick).toBe(onClick);
+      expect(cancelElement?.props.children).toBe("Object Cancel");
+      expect(cancelElement?.props.onClick).toBe(onClick);
+    });
+
+    it("ReactNode action does not receive onClick (no label property)", () => {
+      const actionNode = <span>Custom</span>;
+      const result = ToastActions({
+        action: actionNode,
+        cancel: undefined,
+        classNames: undefined,
+      });
+      const children = result?.props.children;
+      const actionElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-action"] === true
+          )
+        : null;
+      // ReactNode branch should not have an onClick prop set
+      expect(actionElement?.props.onClick).toBeUndefined();
+    });
+
+    it("ReactNode cancel does not receive onClick (no label property)", () => {
+      const cancelNode = <span>Custom Cancel</span>;
+      const result = ToastActions({
+        action: undefined,
+        cancel: cancelNode,
+        classNames: undefined,
+      });
+      const children = result?.props.children;
+      const cancelElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-cancel"] === true
+          )
+        : null;
+      expect(cancelElement?.props.onClick).toBeUndefined();
+    });
+
+    it("applies classNames to ReactNode action", () => {
+      const actionNode = <span>Custom</span>;
+      const result = ToastActions({
+        action: actionNode,
+        cancel: undefined,
+        classNames: { actionButton: "custom-btn" },
+      });
+      const children = result?.props.children;
+      const actionElement = Array.isArray(children)
+        ? children.find(
+            (child: any) =>
+              child && child.props?.["data-popser-action"] === true
+          )
+        : null;
+      expect(actionElement?.props.className).toBe("custom-btn");
+    });
+  });
 });

@@ -32,33 +32,38 @@
   transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95);
 }
 
-/* ─── Rich colors (opt-in via data-rich-colors) ────────────────────── */
+/* ─── Rich colors (opt-in via data-rich-colors on viewport or per-toast) ─── */
 
-[data-rich-colors] [data-popser-root][data-type="success"] {
+[data-rich-colors] [data-popser-root][data-type="success"],
+[data-popser-root][data-rich-colors][data-type="success"] {
   --popser-bg: var(--popser-success-bg);
   --popser-border: var(--popser-success-border);
   --popser-fg: var(--popser-success-fg);
 }
 
-[data-rich-colors] [data-popser-root][data-type="error"] {
+[data-rich-colors] [data-popser-root][data-type="error"],
+[data-popser-root][data-rich-colors][data-type="error"] {
   --popser-bg: var(--popser-error-bg);
   --popser-border: var(--popser-error-border);
   --popser-fg: var(--popser-error-fg);
 }
 
-[data-rich-colors] [data-popser-root][data-type="info"] {
+[data-rich-colors] [data-popser-root][data-type="info"],
+[data-popser-root][data-rich-colors][data-type="info"] {
   --popser-bg: var(--popser-info-bg);
   --popser-border: var(--popser-info-border);
   --popser-fg: var(--popser-info-fg);
 }
 
-[data-rich-colors] [data-popser-root][data-type="warning"] {
+[data-rich-colors] [data-popser-root][data-type="warning"],
+[data-popser-root][data-rich-colors][data-type="warning"] {
   --popser-bg: var(--popser-warning-bg);
   --popser-border: var(--popser-warning-border);
   --popser-fg: var(--popser-warning-fg);
 }
 
-[data-rich-colors] [data-popser-root][data-type="loading"] {
+[data-rich-colors] [data-popser-root][data-type="loading"],
+[data-popser-root][data-rich-colors][data-type="loading"] {
   --popser-bg: var(--popser-loading-bg);
   --popser-border: var(--popser-loading-border);
   --popser-fg: var(--popser-loading-fg);

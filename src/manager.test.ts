@@ -71,4 +71,49 @@ describe("manager", () => {
       ).not.toThrow();
     });
   });
+
+  // ---------------------------------------------------------------------------
+  // v0.2.0: Generic manager type (T1)
+  // ---------------------------------------------------------------------------
+
+  describe("generic manager type (T1)", () => {
+    it("manager accepts data with __popser typed field", () => {
+      const manager = getManager();
+      const id = manager.add({
+        title: "Typed toast",
+        data: {
+          __popser: {
+            icon: "test-icon",
+            className: "typed-class",
+            dismissible: true,
+          },
+          customField: "value",
+        },
+      });
+      expect(typeof id).toBe("string");
+      expect(id.length).toBeGreaterThan(0);
+    });
+
+    it("manager update accepts typed data", () => {
+      const manager = getManager();
+      const id = manager.add({ title: "Original" });
+      expect(() =>
+        manager.update(id, {
+          title: "Updated",
+          data: {
+            __popser: { icon: "updated-icon" },
+          },
+        })
+      ).not.toThrow();
+    });
+
+    it("manager still works with plain data (no __popser)", () => {
+      const manager = getManager();
+      const id = manager.add({
+        title: "Plain data toast",
+        data: { foo: "bar" },
+      });
+      expect(typeof id).toBe("string");
+    });
+  });
 });

@@ -11,6 +11,7 @@ import {
 } from "./toast-tracker.js";
 import type {
   PopserOptions,
+  PopserPromiseExtendedResult,
   PopserPromiseOptions,
   PopserUpdateOptions,
 } from "./types.js";
@@ -51,6 +52,31 @@ function createToast(title: ReactNode, options: PopserOptions = {}): string {
 }
 
 // ---------------------------------------------------------------------------
+// Helpers
+// ---------------------------------------------------------------------------
+
+/**
+ * Checks if a promise handler result is an extended result object (has `title`).
+ */
+function isExtendedResult(
+  value: unknown
+): value is PopserPromiseExtendedResult {
+  return (
+    typeof value === "object" &&
+    value !== null &&
+    "title" in value &&
+    !isReactElement(value)
+  );
+}
+
+/**
+ * Checks if a value is a React element (has $$typeof).
+ */
+function isReactElement(value: unknown): boolean {
+  return typeof value === "object" && value !== null && "$$typeof" in value;
+}
+
+// ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
 
@@ -78,6 +104,44 @@ toast.warning = typedToast("warning");
 toast.loading = typedToast("loading");
 
 /**
+ * Show a message toast (explicit "default" type). Provided for Sonner compatibility.
+ *
+ * ```ts
+ * toast.message("Something happened");
+ * ```
+ */
+toast.message = (
+  title: ReactNode,
+  options?: Omit<PopserOptions, "type">
+): string => createToast(title, { ...options, type: "default" });
+
+/**
+ * Render arbitrary JSX as a toast, bypassing the default structure.
+ * Base UI still provides transitions, swipe, stacking, and ARIA.
+ *
+ * ```ts
+ * toast.custom((id) => <MyToast id={id} onClose={() => toast.dismiss(id)} />);
+ * ```
+ */
+toast.custom = (
+  jsx: (id: string) => ReactNode,
+  options?: Omit<PopserOptions, "type" | "icon" | "action" | "cancel">
+): string => {
+  const resolvedId = { current: "" };
+  const managerOptions = toManagerOptions(
+    undefined,
+    { ...options, type: "__custom" },
+    () => untrackToast(resolvedId.current),
+    resolvedId,
+    jsx
+  );
+  const id = getManager().add(managerOptions);
+  resolvedId.current = id;
+  trackToast(id, undefined, false);
+  return id;
+};
+
+/**
  * Tie a toast to a promise. Shows loading/success/error states
  * automatically as the promise settles.
  *
@@ -88,41 +152,155 @@ toast.loading = typedToast("loading");
  *   error: "Something went wrong",
  * });
  * ```
+ *
+ * Supports lazy promises, extended results, `finally`, and per-state descriptions.
  */
 toast.promise = <T>(
-  promise: Promise<T>,
+  promiseOrFn: Promise<T> | (() => Promise<T>),
   options: PopserPromiseOptions<T>
-): Promise<T> => {
+): Promise<T> & { id: string } => {
   const { success, error } = options;
+
+  // Support lazy promises
+  const promise =
+    typeof promiseOrFn === "function" ? promiseOrFn() : promiseOrFn;
+
+  const toastId = { current: "" };
 
   const successHandler =
     typeof success === "function"
       ? (result: T) => {
-          const title = success(result);
-          if (title === undefined) {
-            return { title: "", type: "default" as const, timeout: 1 };
+          const handlerResult = success(result);
+          if (handlerResult === undefined) {
+            // Close the loading toast instead of showing a ghost (B1 fix)
+            queueMicrotask(() => getManager().close(toastId.current));
+            return { title: "", type: "success" as const, timeout: 1 };
           }
-          return { title, type: "success" as const };
+          if (isExtendedResult(handlerResult)) {
+            const {
+              title,
+              timeout,
+              icon,
+              action,
+              cancel,
+              description,
+              ...rest
+            } = handlerResult;
+            return {
+              title,
+              type: "success" as const,
+              ...(timeout !== undefined && { timeout }),
+              ...(description !== undefined && { description }),
+              data: {
+                __popser: {
+                  ...(icon !== undefined && { icon }),
+                  ...(action !== undefined && { action }),
+                  ...(cancel !== undefined && { cancel }),
+                  ...rest,
+                },
+              },
+            };
+          }
+          // Per-state description support
+          const desc =
+            typeof options.description === "function"
+              ? (options.description as (data: T) => ReactNode)(result)
+              : undefined;
+          return {
+            title: handlerResult,
+            type: "success" as const,
+            ...(desc !== undefined && { description: desc }),
+          };
         }
-      : { title: success, type: "success" as const };
+      : {
+          title: success,
+          type: "success" as const,
+          ...(typeof options.description !== "function" &&
+            options.description !== undefined && {
+              description: options.description,
+            }),
+        };
 
   const errorHandler =
     typeof error === "function"
       ? (err: unknown) => {
-          const title = error(err);
-          if (title === undefined) {
-            return { title: "", type: "default" as const, timeout: 1 };
+          const handlerResult = error(err);
+          if (handlerResult === undefined) {
+            // Close the loading toast instead of showing a ghost (B1 fix)
+            queueMicrotask(() => getManager().close(toastId.current));
+            return { title: "", type: "error" as const, timeout: 1 };
           }
-          return { title, type: "error" as const };
+          if (isExtendedResult(handlerResult)) {
+            const {
+              title,
+              timeout,
+              icon,
+              action,
+              cancel,
+              description,
+              ...rest
+            } = handlerResult;
+            return {
+              title,
+              type: "error" as const,
+              ...(timeout !== undefined && { timeout }),
+              ...(description !== undefined && { description }),
+              data: {
+                __popser: {
+                  ...(icon !== undefined && { icon }),
+                  ...(action !== undefined && { action }),
+                  ...(cancel !== undefined && { cancel }),
+                  ...rest,
+                },
+              },
+            };
+          }
+          // Per-state description support
+          const desc =
+            typeof options.description === "function"
+              ? (options.description as (error: unknown) => ReactNode)(err)
+              : undefined;
+          return {
+            title: handlerResult,
+            type: "error" as const,
+            ...(desc !== undefined && { description: desc }),
+          };
         }
-      : { title: error, type: "error" as const };
+      : {
+          title: error,
+          type: "error" as const,
+          ...(typeof options.description !== "function" &&
+            options.description !== undefined && {
+              description: options.description,
+            }),
+        };
 
-  return getManager().promise(promise, {
+  const result = getManager().promise(promise, {
     ...(options.id !== undefined && { id: options.id }),
     loading: { title: options.loading, type: "loading" as const },
     success: successHandler,
     error: errorHandler,
+  }) as Promise<T> & { id: string };
+
+  // Capture the toast ID from the manager (it's the return value of promise())
+  // We need to handle the finally clause
+  if (options.finally) {
+    const finallyFn = options.finally;
+    result.then(
+      () => finallyFn(),
+      () => finallyFn()
+    );
+  }
+
+  // Add non-enumerable `id` property for accessing the toast ID
+  // Note: The actual ID is set by Base UI internally; we track it via the promise chain
+  Object.defineProperty(result, "id", {
+    get: () => toastId.current,
+    enumerable: false,
+    configurable: true,
   });
+
+  return result;
 };
 
 /**

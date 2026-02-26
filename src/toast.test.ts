@@ -127,7 +127,9 @@ describe("toast", () => {
       toast("Title", { icon: "star-icon" });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ icon: "star-icon" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ icon: "star-icon" }),
+          }),
         })
       );
     });
@@ -139,7 +141,9 @@ describe("toast", () => {
       toast("Title", { action });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ action }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ action }),
+          }),
         })
       );
     });
@@ -151,7 +155,9 @@ describe("toast", () => {
       toast("Title", { cancel });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ cancel }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ cancel }),
+          }),
         })
       );
     });
@@ -162,7 +168,9 @@ describe("toast", () => {
       toast("Title", { className: "my-toast" });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ className: "my-toast" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ className: "my-toast" }),
+          }),
         })
       );
     });
@@ -174,7 +182,9 @@ describe("toast", () => {
       toast("Title", { style });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ style }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ style }),
+          }),
         })
       );
     });
@@ -185,7 +195,9 @@ describe("toast", () => {
       toast("Title", { dismissible: false });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ dismissible: false }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ dismissible: false }),
+          }),
         })
       );
     });
@@ -196,7 +208,9 @@ describe("toast", () => {
       toast("Title", { dismissible: true });
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
-          data: expect.objectContaining({ dismissible: true }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ dismissible: true }),
+          }),
         })
       );
     });
@@ -249,8 +263,10 @@ describe("toast", () => {
         expect.objectContaining({
           data: expect.objectContaining({
             custom: "value",
-            icon: "my-icon",
-            className: "my-class",
+            __popser: expect.objectContaining({
+              icon: "my-icon",
+              className: "my-class",
+            }),
           }),
         })
       );
@@ -395,7 +411,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ icon: "new-icon" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ icon: "new-icon" }),
+          }),
         })
       );
     });
@@ -409,7 +427,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ action }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ action }),
+          }),
         })
       );
     });
@@ -423,7 +443,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ cancel }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ cancel }),
+          }),
         })
       );
     });
@@ -436,7 +458,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ className: "updated-class" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ className: "updated-class" }),
+          }),
         })
       );
     });
@@ -450,7 +474,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ style }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ style }),
+          }),
         })
       );
     });
@@ -463,7 +489,9 @@ describe("toast", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ dismissible: false }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ dismissible: false }),
+          }),
         })
       );
     });
@@ -672,7 +700,7 @@ describe("toast", () => {
       };
       expect(typeof callArgs.success).toBe("function");
       const mapped = callArgs.success("skip-me");
-      expect(mapped).toEqual({ title: "", type: "default", timeout: 1 });
+      expect(mapped).toEqual({ title: "", type: "success", timeout: 1 });
     });
 
     it("dismisses toast when error function returns undefined", async () => {
@@ -696,7 +724,7 @@ describe("toast", () => {
       };
       expect(typeof callArgs.error).toBe("function");
       const mapped = callArgs.error(err);
-      expect(mapped).toEqual({ title: "", type: "default", timeout: 1 });
+      expect(mapped).toEqual({ title: "", type: "error", timeout: 1 });
     });
   });
 
@@ -1092,6 +1120,765 @@ describe("toast", () => {
       toast.close();
 
       expect(toast.getToasts()).toEqual([]);
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // v0.2.0 Features
+  // ---------------------------------------------------------------------------
+
+  describe("toast.message() (Phase 3.1)", () => {
+    it("creates a toast with type default", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.message("Hello");
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "default", title: "Hello" })
+      );
+    });
+
+    it("returns a string ID", () => {
+      const id = toast.message("Hello");
+      expect(typeof id).toBe("string");
+      expect(id.length).toBeGreaterThan(0);
+    });
+
+    it("accepts options (description, timeout, etc.) but not type", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.message("Hello", { description: "Details", timeout: 3000 });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "default",
+          title: "Hello",
+          description: "Details",
+          timeout: 3000,
+        })
+      );
+    });
+
+    it("tracks the toast in activeToasts", () => {
+      const id = toast.message("Tracked message");
+      expect(isActiveToast(id)).toBe(true);
+    });
+  });
+
+  describe("toast.custom() (Phase 2.1)", () => {
+    it("returns a string ID", () => {
+      const id = toast.custom((id) => createElement("div", null, "Custom"));
+      expect(typeof id).toBe("string");
+      expect(id.length).toBeGreaterThan(0);
+    });
+
+    it("calls manager with type __custom", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.custom((id) => createElement("div", null, "Custom"));
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ type: "__custom" })
+      );
+    });
+
+    it("stores jsx function in data.__popser.jsx", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const jsxFn = (id: string) => createElement("div", null, `Toast ${id}`);
+      toast.custom(jsxFn);
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: { __popser: { jsx: (id: string) => unknown } };
+      };
+      expect(typeof callArgs.data.__popser.jsx).toBe("function");
+    });
+
+    it("accepts options but not type/icon/action/cancel", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.custom((id) => createElement("div", null, "Custom"), {
+        className: "custom-class",
+        timeout: 5000,
+      });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          type: "__custom",
+          timeout: 5000,
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ className: "custom-class" }),
+          }),
+        })
+      );
+    });
+
+    it("can be closed via toast.close(id)", () => {
+      const id = toast.custom((id) => createElement("div", null, "Closeable"));
+      expect(isActiveToast(id)).toBe(true);
+      toast.close(id);
+      expect(isActiveToast(id)).toBe(false);
+    });
+
+    it("title is undefined for custom toasts", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.custom(() => createElement("div", null, "No title"));
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({ title: undefined })
+      );
+    });
+  });
+
+  describe("enhanced toast.promise() (Phase 2.2)", () => {
+    describe("lazy promise", () => {
+      it("accepts a function that returns a promise", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const factory = vi.fn(() => Promise.resolve(42));
+        await toast.promise(factory, {
+          loading: "Loading...",
+          success: "Done!",
+          error: "Failed",
+        });
+        // The factory function should be called immediately
+        expect(factory).toHaveBeenCalledOnce();
+        // The manager.promise should receive the resolved promise, not the function
+        expect(promiseSpy).toHaveBeenCalledWith(
+          expect.any(Promise),
+          expect.any(Object)
+        );
+      });
+
+      it("lazy promise works the same as direct promise", async () => {
+        const result = await toast.promise(() => Promise.resolve(42), {
+          loading: "Loading...",
+          success: "Done!",
+          error: "Failed",
+        });
+        expect(result).toBe(42);
+      });
+
+      it("lazy promise rejects correctly", async () => {
+        await expect(
+          toast.promise(() => Promise.reject(new Error("lazy fail")), {
+            loading: "Loading...",
+            success: "Done",
+            error: "Failed",
+          })
+        ).rejects.toThrow("lazy fail");
+      });
+    });
+
+    describe("extended result", () => {
+      it("success callback with extended result passes title, type, timeout, icon", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const iconElement = createElement("span", null, "icon");
+        const p = Promise.resolve(42);
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: (result: number) => ({
+            title: `Done: ${result}`,
+            timeout: 3000,
+            icon: iconElement,
+          }),
+          error: "Failed",
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: number) => Record<string, unknown>;
+        };
+        expect(typeof callArgs.success).toBe("function");
+        const mapped = callArgs.success(42);
+        expect(mapped.title).toBe("Done: 42");
+        expect(mapped.type).toBe("success");
+        expect(mapped.timeout).toBe(3000);
+        expect(mapped.data).toEqual(
+          expect.objectContaining({
+            __popser: expect.objectContaining({ icon: iconElement }),
+          })
+        );
+      });
+
+      it("error callback with extended result passes title, type, timeout", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const err = new Error("boom");
+        const p = Promise.reject(err);
+        await toast
+          .promise(p, {
+            loading: "Loading...",
+            success: "Done",
+            error: () => ({
+              title: "Failed",
+              timeout: 10000,
+            }),
+          })
+          .catch(() => {});
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          error: (err: unknown) => Record<string, unknown>;
+        };
+        expect(typeof callArgs.error).toBe("function");
+        const mapped = callArgs.error(err);
+        expect(mapped.title).toBe("Failed");
+        expect(mapped.type).toBe("error");
+        expect(mapped.timeout).toBe(10000);
+      });
+
+      it("extended result with action and cancel passes through in data.__popser", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const action = { label: "Retry", onClick: vi.fn() };
+        const cancel = { label: "Cancel", onClick: vi.fn() };
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: () => ({
+            title: "Done",
+            action,
+            cancel,
+          }),
+          error: "Failed",
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: string) => Record<string, unknown>;
+        };
+        const mapped = callArgs.success("ok") as {
+          data: { __popser: Record<string, unknown> };
+        };
+        expect(mapped.data.__popser.action).toBe(action);
+        expect(mapped.data.__popser.cancel).toBe(cancel);
+      });
+
+      it("extended result with description passes through", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: () => ({
+            title: "Saved",
+            description: "Your changes have been saved.",
+          }),
+          error: "Failed",
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: string) => Record<string, unknown>;
+        };
+        const mapped = callArgs.success("ok");
+        expect(mapped.description).toBe("Your changes have been saved.");
+      });
+    });
+
+    describe("finally clause", () => {
+      it("finally is called after success", async () => {
+        const cleanup = vi.fn();
+        await toast.promise(Promise.resolve("ok"), {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+          finally: cleanup,
+        });
+        expect(cleanup).toHaveBeenCalledOnce();
+      });
+
+      it("finally is called after error", async () => {
+        const cleanup = vi.fn();
+        await toast
+          .promise(Promise.reject(new Error("fail")), {
+            loading: "Loading...",
+            success: "Done",
+            error: "Failed",
+            finally: cleanup,
+          })
+          .catch(() => {});
+        expect(cleanup).toHaveBeenCalledOnce();
+      });
+
+      it("finally is called regardless of outcome", async () => {
+        const cleanup1 = vi.fn();
+        const cleanup2 = vi.fn();
+
+        // Success path
+        await toast.promise(Promise.resolve(1), {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+          finally: cleanup1,
+        });
+
+        // Error path
+        await toast
+          .promise(Promise.reject(new Error("fail")), {
+            loading: "Loading...",
+            success: "Done",
+            error: "Failed",
+            finally: cleanup2,
+          })
+          .catch(() => {});
+
+        expect(cleanup1).toHaveBeenCalledOnce();
+        expect(cleanup2).toHaveBeenCalledOnce();
+      });
+    });
+
+    describe("per-state description", () => {
+      it("description function is called with the result on success", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const p = Promise.resolve(42);
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: (result: number) => `Got ${result}`,
+          error: "Failed",
+          description: (data: number) => `Result was ${data}`,
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: number) => { description?: string };
+        };
+        const mapped = callArgs.success(42);
+        expect(mapped.description).toBe("Result was 42");
+      });
+
+      it("description function is called with the error on failure", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const err = new Error("test error");
+        const p = Promise.reject(err);
+        await toast
+          .promise(p, {
+            loading: "Loading...",
+            success: "Done",
+            error: (e: unknown) =>
+              `Error: ${e instanceof Error ? e.message : "unknown"}`,
+            description: (e: unknown) =>
+              `Details: ${e instanceof Error ? e.message : "unknown"}`,
+          })
+          .catch(() => {});
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          error: (err: unknown) => { description?: string };
+        };
+        const mapped = callArgs.error(err);
+        expect(mapped.description).toBe("Details: test error");
+      });
+
+      it("static description is passed through for static success", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+          description: "Static description",
+        });
+        expect(promiseSpy).toHaveBeenCalledWith(
+          p,
+          expect.objectContaining({
+            success: expect.objectContaining({
+              description: "Static description",
+            }),
+          })
+        );
+      });
+
+      it("function description is not included in static success mapping", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+          description: () => "Dynamic",
+        });
+        // When success is static and description is a function, description
+        // should not be included in the static mapping
+        expect(promiseSpy).toHaveBeenCalledWith(
+          p,
+          expect.objectContaining({
+            success: { title: "Done", type: "success" },
+          })
+        );
+      });
+    });
+
+    describe("return type has non-enumerable id", () => {
+      it("return value has a non-enumerable id property", async () => {
+        const result = toast.promise(Promise.resolve("ok"), {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+        });
+
+        // id should be accessible
+        expect(result).toHaveProperty("id");
+
+        // id should be non-enumerable
+        const descriptor = Object.getOwnPropertyDescriptor(result, "id");
+        expect(descriptor?.enumerable).toBe(false);
+
+        await result;
+      });
+
+      it("id is a string", async () => {
+        const result = toast.promise(Promise.resolve("ok"), {
+          loading: "Loading...",
+          success: "Done",
+          error: "Failed",
+        });
+
+        // The id should be a string (may be empty initially)
+        expect(typeof result.id).toBe("string");
+
+        await result;
+      });
+    });
+
+    describe("B1 fix verification", () => {
+      it("success returning undefined sets type to success (not default)", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: () => undefined,
+          error: "Failed",
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: string) => { type: string; timeout: number };
+        };
+        const mapped = callArgs.success("ok");
+        expect(mapped.type).toBe("success");
+        expect(mapped.timeout).toBe(1);
+      });
+
+      it("error returning undefined sets type to error (not default)", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const err = new Error("boom");
+        const p = Promise.reject(err);
+        await toast
+          .promise(p, {
+            loading: "Loading...",
+            success: "Done",
+            error: () => undefined,
+          })
+          .catch(() => {});
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          error: (err: unknown) => { type: string; timeout: number };
+        };
+        const mapped = callArgs.error(err);
+        expect(mapped.type).toBe("error");
+        expect(mapped.timeout).toBe(1);
+      });
+
+      it("success returning undefined calls queueMicrotask to close toast", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const closeSpy = vi.spyOn(manager, "close");
+        const queueMicrotaskSpy = vi.spyOn(globalThis, "queueMicrotask");
+        const p = Promise.resolve("ok");
+        await toast.promise(p, {
+          loading: "Loading...",
+          success: () => undefined,
+          error: "Failed",
+        });
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          success: (result: string) => unknown;
+        };
+        callArgs.success("ok");
+        expect(queueMicrotaskSpy).toHaveBeenCalled();
+        // Flush the microtask
+        await new Promise((resolve) => queueMicrotask(resolve));
+        expect(closeSpy).toHaveBeenCalled();
+        queueMicrotaskSpy.mockRestore();
+      });
+
+      it("error returning undefined calls queueMicrotask to close toast", async () => {
+        const manager = getManager();
+        const promiseSpy = vi.spyOn(manager, "promise");
+        const closeSpy = vi.spyOn(manager, "close");
+        const queueMicrotaskSpy = vi.spyOn(globalThis, "queueMicrotask");
+        const err = new Error("fail");
+        const p = Promise.reject(err);
+        await toast
+          .promise(p, {
+            loading: "Loading...",
+            success: "Done",
+            error: () => undefined,
+          })
+          .catch(() => {});
+        const callArgs = promiseSpy.mock.calls[0]?.[1] as {
+          error: (err: unknown) => unknown;
+        };
+        callArgs.error(err);
+        expect(queueMicrotaskSpy).toHaveBeenCalled();
+        await new Promise((resolve) => queueMicrotask(resolve));
+        expect(closeSpy).toHaveBeenCalled();
+        queueMicrotaskSpy.mockRestore();
+      });
+    });
+  });
+
+  describe("per-toast classNames (Phase 2.3)", () => {
+    it("stores classNames in data.__popser.classNames", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Hello", { classNames: { root: "custom-root" } });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({
+              classNames: { root: "custom-root" },
+            }),
+          }),
+        })
+      );
+    });
+
+    it("stores classNames with multiple slots", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const classNames = {
+        root: "cr",
+        content: "cc",
+        title: "ct",
+        description: "cd",
+      };
+      toast("Hello", { classNames });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ classNames }),
+          }),
+        })
+      );
+    });
+
+    it("stores classNames alongside className", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Hello", {
+        className: "my-toast",
+        classNames: { root: "custom-root" },
+      });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({
+              className: "my-toast",
+              classNames: { root: "custom-root" },
+            }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe("per-toast unstyled (Phase 2.4)", () => {
+    it("stores unstyled: true in data.__popser.unstyled", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Hello", { unstyled: true });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ unstyled: true }),
+          }),
+        })
+      );
+    });
+
+    it("stores unstyled: false in data.__popser.unstyled", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Hello", { unstyled: false });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ unstyled: false }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe("action/cancel as ReactNode (Phase 2.6)", () => {
+    it("stores ReactNode action in data.__popser.action", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const actionNode = createElement("button", null, "Undo");
+      toast("Hello", { action: actionNode });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ action: actionNode }),
+          }),
+        })
+      );
+    });
+
+    it("stores ReactNode cancel in data.__popser.cancel", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const cancelNode = createElement("button", null, "Cancel");
+      toast("Hello", { cancel: cancelNode });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ cancel: cancelNode }),
+          }),
+        })
+      );
+    });
+
+    it("object format still works (backward compat)", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const action = { label: "Undo", onClick: vi.fn() };
+      toast("Hello", { action });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ action }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe("per-toast richColors (Phase 3.3)", () => {
+    it("stores richColors: true in data.__popser.richColors", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.success("Saved", { richColors: true });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ richColors: true }),
+          }),
+        })
+      );
+    });
+
+    it("stores richColors: false in data.__popser.richColors", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast.error("Error", { richColors: false });
+      expect(addSpy).toHaveBeenCalledWith(
+        expect.objectContaining({
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ richColors: false }),
+          }),
+        })
+      );
+    });
+  });
+
+  describe("callbacks receive toast ID (Phase 3.4)", () => {
+    it("onClose callback receives the toast ID as argument", () => {
+      const onClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const id = toast("Title", { onClose });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      callArgs.onClose?.();
+
+      expect(onClose).toHaveBeenCalledWith(id);
+    });
+
+    it("onAutoClose callback receives the toast ID as argument", () => {
+      const onAutoClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const id = toast("Title", { onAutoClose });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      // Simulate auto-close (no manual close flag set)
+      callArgs.onClose?.();
+
+      expect(onAutoClose).toHaveBeenCalledWith(id);
+    });
+
+    it("onDismiss callback receives the toast ID as argument", () => {
+      const onDismiss = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const id = toast("Title", { onDismiss });
+
+      // Manually close to set the flag
+      toast.close(id);
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      callArgs.onClose?.();
+
+      expect(onDismiss).toHaveBeenCalledWith(id);
+    });
+
+    it("existing () => void callbacks still work (backward compat)", () => {
+      const onClose = vi.fn();
+      const onAutoClose = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", { onClose, onAutoClose });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      callArgs.onClose?.();
+
+      // Both should be called without errors even though they are simple () => void
+      expect(onClose).toHaveBeenCalledOnce();
+      expect(onAutoClose).toHaveBeenCalledOnce();
+    });
+  });
+
+  describe("data collision fix (B4)", () => {
+    it("user data survives alongside popser icon on create", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", {
+        data: { icon: "mydata" },
+        icon: "popser-icon",
+      });
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: { icon: string; __popser: { icon: string } };
+      };
+      // User's data.icon should be preserved at the top level
+      expect(callArgs.data.icon).toBe("mydata");
+      // Popser's icon should be in __popser namespace
+      expect(callArgs.data.__popser.icon).toBe("popser-icon");
+    });
+
+    it("user data survives alongside popser icon on update", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+      const id = toast("Title");
+      toast.update(id, {
+        data: { icon: "user-icon-data" },
+        icon: "popser-update-icon",
+      });
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        data: { icon: string; __popser: { icon: string } };
+      };
+      expect(updateArgs.data.icon).toBe("user-icon-data");
+      expect(updateArgs.data.__popser.icon).toBe("popser-update-icon");
+    });
+
+    it("user data with other fields is preserved alongside __popser", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      toast("Title", {
+        data: { userId: 123, action: "custom-action-data" },
+        action: { label: "Undo", onClick: vi.fn() },
+      });
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: {
+          userId: number;
+          action: string;
+          __popser: { action: { label: string } };
+        };
+      };
+      expect(callArgs.data.userId).toBe(123);
+      expect(callArgs.data.action).toBe("custom-action-data");
+      expect(callArgs.data.__popser.action).toEqual(
+        expect.objectContaining({ label: "Undo" })
+      );
     });
   });
 });

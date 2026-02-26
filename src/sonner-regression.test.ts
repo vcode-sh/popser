@@ -201,7 +201,9 @@ describe("Sonner regression tests", () => {
         id,
         expect.objectContaining({
           type: "success",
-          data: expect.objectContaining({ icon: "check-icon" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ icon: "check-icon" }),
+          }),
         })
       );
     });
@@ -217,7 +219,9 @@ describe("Sonner regression tests", () => {
       expect(updateSpy).toHaveBeenCalledWith(
         id,
         expect.objectContaining({
-          data: expect.objectContaining({ icon: false }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ icon: false }),
+          }),
         })
       );
     });
@@ -279,15 +283,21 @@ describe("Sonner regression tests", () => {
       toast("Second", { id: "shared", action: action2 });
 
       const firstCallData = (
-        addSpy.mock.calls[0]?.[0] as { data: { action: unknown } }
+        addSpy.mock.calls[0]?.[0] as {
+          data: { __popser: { action: unknown } };
+        }
       ).data;
       const secondCallData = (
-        addSpy.mock.calls[1]?.[0] as { data: { action: unknown } }
+        addSpy.mock.calls[1]?.[0] as {
+          data: { __popser: { action: unknown } };
+        }
       ).data;
 
-      expect(firstCallData.action).toBe(action1);
-      expect(secondCallData.action).toBe(action2);
-      expect(firstCallData.action).not.toBe(secondCallData.action);
+      expect(firstCallData.__popser.action).toBe(action1);
+      expect(secondCallData.__popser.action).toBe(action2);
+      expect(firstCallData.__popser.action).not.toBe(
+        secondCallData.__popser.action
+      );
     });
   });
 
@@ -387,16 +397,16 @@ describe("Sonner regression tests", () => {
       toast.update(id, { icon: "new-icon" });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown> };
       };
 
-      // Icon should be present in data
-      expect(updateArgs.data.icon).toBe("new-icon");
+      // Icon should be present in data.__popser
+      expect(updateArgs.data.__popser?.icon).toBe("new-icon");
 
       // Action and cancel should NOT be in the update payload
       // (undefined fields are not spread, so they won't overwrite existing values)
-      expect(updateArgs.data).not.toHaveProperty("action");
-      expect(updateArgs.data).not.toHaveProperty("cancel");
+      expect(updateArgs.data.__popser).not.toHaveProperty("action");
+      expect(updateArgs.data.__popser).not.toHaveProperty("cancel");
     });
 
     it("updates only className without affecting icon", () => {
@@ -408,11 +418,11 @@ describe("Sonner regression tests", () => {
       toast.update(id, { className: "highlighted" });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown> };
       };
 
-      expect(updateArgs.data.className).toBe("highlighted");
-      expect(updateArgs.data).not.toHaveProperty("icon");
+      expect(updateArgs.data.__popser?.className).toBe("highlighted");
+      expect(updateArgs.data.__popser).not.toHaveProperty("icon");
     });
 
     it("updates only style without affecting className", () => {
@@ -424,11 +434,11 @@ describe("Sonner regression tests", () => {
       toast.update(id, { style: { color: "red" } });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown> };
       };
 
-      expect(updateArgs.data.style).toEqual({ color: "red" });
-      expect(updateArgs.data).not.toHaveProperty("className");
+      expect(updateArgs.data.__popser?.style).toEqual({ color: "red" });
+      expect(updateArgs.data.__popser).not.toHaveProperty("className");
     });
 
     it("updates title and type without touching data fields", () => {
@@ -445,15 +455,14 @@ describe("Sonner regression tests", () => {
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
         title: string;
         type: string;
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown> };
       };
 
       expect(updateArgs.title).toBe("Updated");
       expect(updateArgs.type).toBe("success");
 
       // Data fields from the original toast should not appear in the update
-      expect(updateArgs.data).not.toHaveProperty("icon");
-      expect(updateArgs.data).not.toHaveProperty("action");
+      expect(updateArgs.data).not.toHaveProperty("__popser");
     });
 
     it("merges custom data with popser data fields on update", () => {
@@ -468,10 +477,10 @@ describe("Sonner regression tests", () => {
       });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown>; [key: string]: unknown };
       };
 
-      expect(updateArgs.data.icon).toBe("star");
+      expect(updateArgs.data.__popser?.icon).toBe("star");
       expect(updateArgs.data.custom).toBe("value");
       expect(updateArgs.data.nested).toEqual({ key: true });
     });
@@ -738,8 +747,10 @@ describe("Sonner regression tests", () => {
           type: "error",
           timeout: 0,
           data: expect.objectContaining({
-            action: expect.objectContaining({ label: "Retry" }),
-            cancel: expect.objectContaining({ label: "Dismiss" }),
+            __popser: expect.objectContaining({
+              action: expect.objectContaining({ label: "Retry" }),
+              cancel: expect.objectContaining({ label: "Dismiss" }),
+            }),
           }),
         })
       );
@@ -1064,12 +1075,14 @@ describe("Sonner regression tests", () => {
           priority: "high",
           onRemove: onRemoveFn,
           data: expect.objectContaining({
-            icon: "custom-icon",
-            action,
-            cancel,
-            className: "my-toast",
-            style: { background: "red" },
             custom: "field",
+            __popser: expect.objectContaining({
+              icon: "custom-icon",
+              action,
+              cancel,
+              className: "my-toast",
+              style: { background: "red" },
+            }),
           }),
         })
       );
@@ -1082,9 +1095,9 @@ describe("Sonner regression tests", () => {
       toast("No icon toast", { icon: false });
 
       const callArgs = addSpy.mock.calls[0]?.[0] as {
-        data: { icon: unknown };
+        data: { __popser: { icon: unknown } };
       };
-      expect(callArgs.data.icon).toBe(false);
+      expect(callArgs.data.__popser.icon).toBe(false);
     });
 
     it("custom className replaces default via data pass-through", () => {
@@ -1094,9 +1107,9 @@ describe("Sonner regression tests", () => {
       toast("Styled toast", { className: "custom-class" });
 
       const callArgs = addSpy.mock.calls[0]?.[0] as {
-        data: { className: string };
+        data: { __popser: { className: string } };
       };
-      expect(callArgs.data.className).toBe("custom-class");
+      expect(callArgs.data.__popser.className).toBe("custom-class");
     });
 
     it("unstyled toast still gets proper type and data", () => {
@@ -1113,8 +1126,10 @@ describe("Sonner regression tests", () => {
           type: "error",
           title: "Unstyled error",
           data: expect.objectContaining({
-            icon: "error-icon",
-            className: "unstyled-toast",
+            __popser: expect.objectContaining({
+              icon: "error-icon",
+              className: "unstyled-toast",
+            }),
           }),
         })
       );
@@ -1176,11 +1191,11 @@ describe("Sonner regression tests", () => {
       toast.update(id, { action: newAction });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: { action: typeof newAction };
+        data: { __popser: { action: typeof newAction } };
       };
-      expect(updateArgs.data.action).toBe(newAction);
-      expect(updateArgs.data.action).not.toBe(originalAction);
-      expect(updateArgs.data.action.label).toBe("Retry");
+      expect(updateArgs.data.__popser.action).toBe(newAction);
+      expect(updateArgs.data.__popser.action).not.toBe(originalAction);
+      expect(updateArgs.data.__popser.action.label).toBe("Retry");
     });
 
     it("updating with cancel: undefined does not include cancel in the update payload", () => {
@@ -1191,13 +1206,14 @@ describe("Sonner regression tests", () => {
         cancel: { label: "Dismiss", onClick: vi.fn() },
       });
 
-      // Passing cancel: undefined should not spread cancel into data
+      // Passing cancel: undefined should not spread cancel into data.__popser
       toast.update(id, { title: "Updated" });
 
       const updateArgs = updateSpy.mock.calls[0]?.[1] as {
-        data: Record<string, unknown>;
+        data: { __popser?: Record<string, unknown> };
       };
-      expect(updateArgs.data).not.toHaveProperty("cancel");
+      // When no __popser fields are provided in update, __popser is not present
+      expect(updateArgs.data).not.toHaveProperty("__popser");
     });
 
     it("creating sequential toasts with same ID gets independent action handlers", () => {
@@ -1223,27 +1239,31 @@ describe("Sonner regression tests", () => {
 
       const call1Data = (
         addSpy.mock.calls[0]?.[0] as {
-          data: { action: { onClick: typeof handler1 } };
+          data: { __popser: { action: { onClick: typeof handler1 } } };
         }
       ).data;
       const call2Data = (
         addSpy.mock.calls[1]?.[0] as {
-          data: { action: { onClick: typeof handler2 } };
+          data: { __popser: { action: { onClick: typeof handler2 } } };
         }
       ).data;
       const call3Data = (
         addSpy.mock.calls[2]?.[0] as {
-          data: { action: { onClick: typeof handler3 } };
+          data: { __popser: { action: { onClick: typeof handler3 } } };
         }
       ).data;
 
-      expect(call1Data.action.onClick).toBe(handler1);
-      expect(call2Data.action.onClick).toBe(handler2);
-      expect(call3Data.action.onClick).toBe(handler3);
+      expect(call1Data.__popser.action.onClick).toBe(handler1);
+      expect(call2Data.__popser.action.onClick).toBe(handler2);
+      expect(call3Data.__popser.action.onClick).toBe(handler3);
 
       // All three handlers are distinct references
-      expect(call1Data.action.onClick).not.toBe(call2Data.action.onClick);
-      expect(call2Data.action.onClick).not.toBe(call3Data.action.onClick);
+      expect(call1Data.__popser.action.onClick).not.toBe(
+        call2Data.__popser.action.onClick
+      );
+      expect(call2Data.__popser.action.onClick).not.toBe(
+        call3Data.__popser.action.onClick
+      );
     });
   });
 
@@ -1315,7 +1335,9 @@ describe("Sonner regression tests", () => {
       expect(addSpy).toHaveBeenCalledWith(
         expect.objectContaining({
           type: "loading",
-          data: expect.objectContaining({ icon: "custom-spinner" }),
+          data: expect.objectContaining({
+            __popser: expect.objectContaining({ icon: "custom-spinner" }),
+          }),
         })
       );
     });
@@ -1397,7 +1419,7 @@ describe("Sonner regression tests", () => {
       expect(typeof callArgs.onClose).toBe("function");
     });
 
-    it("data bag contains icon, action, cancel, className, style AND custom data fields", () => {
+    it("data bag contains __popser with icon, action, cancel, className, style AND custom data fields at top level", () => {
       const manager = getManager();
       const addSpy = vi.spyOn(manager, "add");
 
@@ -1415,18 +1437,21 @@ describe("Sonner regression tests", () => {
       });
 
       const callArgs = addSpy.mock.calls[0]?.[0] as {
-        data: Record<string, unknown>;
+        data: {
+          __popser: Record<string, unknown>;
+          [key: string]: unknown;
+        };
       };
       const dataBag = callArgs.data;
 
-      // Popser-specific fields in data
-      expect(dataBag.icon).toBe("data-icon");
-      expect(dataBag.action).toBe(action);
-      expect(dataBag.cancel).toBe(cancel);
-      expect(dataBag.className).toBe("data-class");
-      expect(dataBag.style).toEqual(customStyle);
+      // Popser-specific fields in data.__popser
+      expect(dataBag.__popser.icon).toBe("data-icon");
+      expect(dataBag.__popser.action).toBe(action);
+      expect(dataBag.__popser.cancel).toBe(cancel);
+      expect(dataBag.__popser.className).toBe("data-class");
+      expect(dataBag.__popser.style).toEqual(customStyle);
 
-      // Custom user data fields merged into data
+      // Custom user data fields merged into data (top level)
       expect(dataBag.userId).toBe("abc-123");
       expect(dataBag.feature).toBe("toasts");
       expect(dataBag.count).toBe(7);
@@ -1705,7 +1730,7 @@ describe("Sonner regression tests", () => {
       expect(typeof callArgs.success).toBe("function");
       const mapped = callArgs.success("silent-success");
       expect(mapped.title).toBe("");
-      expect(mapped.type).toBe("default");
+      expect(mapped.type).toBe("success");
       expect(mapped.timeout).toBe(1);
     });
 
@@ -1731,7 +1756,7 @@ describe("Sonner regression tests", () => {
       expect(typeof callArgs.error).toBe("function");
       const mapped = callArgs.error(err);
       expect(mapped.title).toBe("");
-      expect(mapped.type).toBe("default");
+      expect(mapped.type).toBe("error");
       expect(mapped.timeout).toBe(1);
     });
 
@@ -1754,7 +1779,7 @@ describe("Sonner regression tests", () => {
       };
       // Skipped case
       const skipped = callArgs.success({ skipped: true, count: 0 });
-      expect(skipped).toEqual({ title: "", type: "default", timeout: 1 });
+      expect(skipped).toEqual({ title: "", type: "success", timeout: 1 });
 
       // Non-skipped case
       const shown = callArgs.success({ skipped: false, count: 5 });
@@ -1785,7 +1810,7 @@ describe("Sonner regression tests", () => {
       };
       // AbortError should be skipped
       const abortResult = callArgs.error(new Error("AbortError"));
-      expect(abortResult).toEqual({ title: "", type: "default", timeout: 1 });
+      expect(abortResult).toEqual({ title: "", type: "error", timeout: 1 });
 
       // Other errors should show
       const otherResult = callArgs.error(new Error("NetworkError"));
@@ -1845,6 +1870,123 @@ describe("Sonner regression tests", () => {
           error: { title: "Something broke", type: "error" },
         })
       );
+    });
+  });
+
+  // ---------------------------------------------------------------------------
+  // 21. Data collision fix (B4)
+  // User-provided `data` fields should not collide with popser's internal
+  // `__popser` namespace. If the user sets `data: { icon: "mydata" }`, it
+  // should be preserved at the top level while popser's icon lives in
+  // `data.__popser.icon`.
+  // ---------------------------------------------------------------------------
+  describe("Data collision fix (B4)", () => {
+    it("user data.icon survives alongside popser's icon on create", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+
+      toast("Collision test", {
+        data: { icon: "user-icon-data" },
+        icon: "popser-icon",
+      });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: { icon: string; __popser: { icon: string } };
+      };
+      expect(callArgs.data.icon).toBe("user-icon-data");
+      expect(callArgs.data.__popser.icon).toBe("popser-icon");
+    });
+
+    it("user data.icon survives alongside popser's icon on update", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+
+      const id = toast("Original");
+      toast.update(id, {
+        data: { icon: "user-update-icon" },
+        icon: "popser-update-icon",
+      });
+
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        data: { icon: string; __popser: { icon: string } };
+      };
+      expect(updateArgs.data.icon).toBe("user-update-icon");
+      expect(updateArgs.data.__popser.icon).toBe("popser-update-icon");
+    });
+
+    it("user data.action does not collide with popser action", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const action = { label: "Undo", onClick: vi.fn() };
+
+      toast("Action collision", {
+        data: { action: "user-action-string" },
+        action,
+      });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: {
+          action: string;
+          __popser: { action: { label: string } };
+        };
+      };
+      expect(callArgs.data.action).toBe("user-action-string");
+      expect(callArgs.data.__popser.action.label).toBe("Undo");
+    });
+
+    it("multiple user data fields coexist with __popser namespace", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+
+      toast("Multi-field", {
+        data: {
+          icon: "user-icon",
+          action: "user-action",
+          className: "user-class",
+          custom: "field",
+        },
+        icon: "popser-icon",
+        action: { label: "Retry", onClick: vi.fn() },
+        className: "popser-class",
+      });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: {
+          icon: string;
+          action: string;
+          className: string;
+          custom: string;
+          __popser: {
+            icon: string;
+            action: { label: string };
+            className: string;
+          };
+        };
+      };
+
+      // User data at top level
+      expect(callArgs.data.icon).toBe("user-icon");
+      expect(callArgs.data.action).toBe("user-action");
+      expect(callArgs.data.className).toBe("user-class");
+      expect(callArgs.data.custom).toBe("field");
+
+      // Popser data in __popser namespace
+      expect(callArgs.data.__popser.icon).toBe("popser-icon");
+      expect(callArgs.data.__popser.action.label).toBe("Retry");
+      expect(callArgs.data.__popser.className).toBe("popser-class");
+    });
+
+    it("__popser namespace is always present even without user data", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+
+      toast("No user data", { icon: "popser-icon" });
+
+      const callArgs = addSpy.mock.calls[0]?.[0] as {
+        data: { __popser: { icon: string } };
+      };
+      expect(callArgs.data.__popser).toBeDefined();
+      expect(callArgs.data.__popser.icon).toBe("popser-icon");
     });
   });
 });

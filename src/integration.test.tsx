@@ -516,6 +516,211 @@ describe("Integration tests", () => {
     });
   });
 
+  describe("v0.2.0 features", () => {
+    it("renders custom toast via toast.custom()", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast.custom((id) => (
+          <div data-custom-id={id} data-custom-toast>
+            Custom content
+          </div>
+        ));
+      });
+
+      const customEl = document.querySelector("[data-custom-toast]");
+      expect(customEl).toBeTruthy();
+      expect(customEl?.textContent).toBe("Custom content");
+      expect(customEl?.getAttribute("data-custom-id")).toBeTruthy();
+
+      const toastRoot = document.querySelector("[data-popser-root]");
+      expect(toastRoot?.getAttribute("data-type")).toBe("custom");
+    });
+
+    it("merges per-toast classNames with Toaster classNames", () => {
+      act(() => {
+        root.render(
+          <Toaster
+            classNames={{
+              root: "toaster-root",
+              title: "toaster-title",
+            }}
+          />
+        );
+      });
+      act(() => {
+        toast("Merged", {
+          classNames: {
+            root: "toast-root",
+            title: "toast-title",
+          },
+        });
+      });
+
+      const rootEl = document.querySelector("[data-popser-root]");
+      expect(rootEl?.className).toContain("toaster-root");
+      expect(rootEl?.className).toContain("toast-root");
+
+      const titleEl = document.querySelector("[data-popser-title]");
+      expect(titleEl?.className).toContain("toaster-title");
+      expect(titleEl?.className).toContain("toast-title");
+    });
+
+    it("renders per-toast unstyled with data-unstyled", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast("Unstyled", { unstyled: true });
+      });
+
+      const toastRoot = document.querySelector("[data-popser-root]");
+      expect(toastRoot?.getAttribute("data-unstyled")).toBe("true");
+    });
+
+    it("renders per-toast richColors with data-rich-colors", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast.success("Rich", { richColors: true });
+      });
+
+      const toastRoot = document.querySelector("[data-popser-root]");
+      expect(toastRoot?.getAttribute("data-rich-colors")).toBe("true");
+    });
+
+    it("renders ReactNode action buttons", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast("ReactNode actions", {
+          action: <span data-custom-action>Custom Action</span>,
+          cancel: <span data-custom-cancel>Custom Cancel</span>,
+        });
+      });
+
+      const actionEl = document.querySelector("[data-custom-action]");
+      expect(actionEl).toBeTruthy();
+      expect(actionEl?.textContent).toBe("Custom Action");
+
+      const cancelEl = document.querySelector("[data-custom-cancel]");
+      expect(cancelEl).toBeTruthy();
+      expect(cancelEl?.textContent).toBe("Custom Cancel");
+    });
+
+    it("applies toastOptions defaults to all toasts", () => {
+      act(() => {
+        root.render(
+          <Toaster
+            toastOptions={{
+              className: "global-class",
+            }}
+          />
+        );
+      });
+      act(() => {
+        toast("With global options");
+      });
+
+      const rootEl = document.querySelector("[data-popser-root]");
+      expect(rootEl?.className).toContain("global-class");
+    });
+
+    it("applies toastOptions classNames merged with per-toast classNames", () => {
+      act(() => {
+        root.render(
+          <Toaster
+            toastOptions={{
+              classNames: { root: "opts-root", title: "opts-title" },
+            }}
+          />
+        );
+      });
+      act(() => {
+        toast("With merged classNames", {
+          classNames: { root: "per-toast-root" },
+        });
+      });
+
+      const rootEl = document.querySelector("[data-popser-root]");
+      expect(rootEl?.className).toContain("opts-root");
+      expect(rootEl?.className).toContain("per-toast-root");
+
+      const titleEl = document.querySelector("[data-popser-title]");
+      expect(titleEl?.className).toContain("opts-title");
+    });
+
+    it("renders toast.message() with type default", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast.message("Simple message");
+      });
+
+      const toastRoot = document.querySelector("[data-popser-root]");
+      expect(toastRoot?.getAttribute("data-type")).toBe("default");
+      expect(document.querySelector("[data-popser-title]")?.textContent).toBe(
+        "Simple message"
+      );
+    });
+
+    it("per-toast classNames only (no Toaster classNames)", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      act(() => {
+        toast("Only per-toast", {
+          classNames: { title: "solo-title" },
+        });
+      });
+
+      const titleEl = document.querySelector("[data-popser-title]");
+      expect(titleEl?.className).toContain("solo-title");
+    });
+
+    it("sets mobileOffset CSS variable when provided", () => {
+      act(() => {
+        root.render(<Toaster mobileOffset={8} />);
+      });
+
+      const viewport = document.querySelector("[data-popser-viewport]");
+      const style = viewport?.getAttribute("style") ?? "";
+      expect(style).toContain("--popser-mobile-offset: 8px");
+    });
+  });
+
+  describe("error boundary", () => {
+    it("logs to console.error when toast rendering throws", () => {
+      const errorSpy = vi.spyOn(console, "error").mockImplementation(() => {});
+
+      act(() => {
+        root.render(<Toaster />);
+      });
+
+      // Create a toast that will crash the renderer by providing
+      // a jsx function that throws
+      act(() => {
+        toast.custom(() => {
+          throw new Error("Render crash");
+        });
+      });
+
+      expect(errorSpy).toHaveBeenCalled();
+      const call = errorSpy.mock.calls.find(
+        (args) =>
+          typeof args[0] === "string" &&
+          args[0].includes("[popser] Toast rendering failed:")
+      );
+      expect(call).toBeTruthy();
+
+      errorSpy.mockRestore();
+    });
+  });
+
   describe("multiple toasts lifecycle", () => {
     it("renders and closes multiple toasts independently", () => {
       act(() => {

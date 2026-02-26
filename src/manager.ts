@@ -1,16 +1,19 @@
 import { Toast } from "@base-ui/react";
+import type { PopserToastData } from "./types.js";
 
-let manager: ReturnType<typeof Toast.createToastManager> | null = null;
+let manager: ReturnType<
+  typeof Toast.createToastManager<PopserToastData>
+> | null = null;
 
 export function getManager() {
   if (!manager) {
-    manager = Toast.createToastManager();
+    manager = Toast.createToastManager<PopserToastData>();
   }
   return manager;
 }
 
 export function resetManager() {
-  manager = Toast.createToastManager();
+  manager = Toast.createToastManager<PopserToastData>();
   return manager;
 }
 

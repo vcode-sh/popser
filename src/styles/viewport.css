@@ -47,14 +47,18 @@
 
 [data-popser-viewport][data-mobile] {
   top: auto;
-  right: var(--popser-offset, 16px);
-  bottom: var(--popser-offset, 16px);
-  left: var(--popser-offset, 16px);
+  right: var(--popser-mobile-offset, var(--popser-offset, 16px));
+  bottom: var(--popser-mobile-offset, var(--popser-offset, 16px));
+  left: var(--popser-mobile-offset, var(--popser-offset, 16px));
   transform: none;
 }
 
 [data-popser-viewport][data-mobile] [data-popser-root] {
-  width: calc(100vw - 2 * var(--popser-offset, 16px));
+  width: calc(
+    100vw -
+    2 *
+    var(--popser-mobile-offset, var(--popser-offset, 16px))
+  );
 }
 
 /* On mobile, always show close button */

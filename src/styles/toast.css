@@ -17,6 +17,15 @@
   box-shadow: var(--popser-shadow);
 }
 
+/* Custom JSX toasts: strip decorative styles so user content renders cleanly */
+[data-popser-root][data-type="custom"] {
+  padding: 0;
+  background: transparent;
+  border: none;
+  border-radius: 0;
+  box-shadow: none;
+}
+
 /* Transitions only apply in collapsed mode (stacking animations).
  * In expanded mode, toasts switch to relative positioning instantly
  * to avoid jarring height/transform transitions during layout switch. */

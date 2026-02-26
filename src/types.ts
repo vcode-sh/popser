@@ -7,10 +7,25 @@ export interface PopserAction {
   onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
 }
 
+export interface PopserClassNames {
+  actionButton?: string;
+  actions?: string;
+  cancelButton?: string;
+  closeButton?: string;
+  content?: string;
+  description?: string;
+  header?: string;
+  icon?: string;
+  root?: string;
+  title?: string;
+  viewport?: string;
+}
+
 export interface PopserOptions {
-  action?: PopserAction;
-  cancel?: PopserAction;
+  action?: PopserAction | ReactNode;
+  cancel?: PopserAction | ReactNode;
   className?: string;
+  classNames?: Partial<PopserClassNames>;
   data?: Record<string, unknown>;
   deduplicate?: boolean;
   description?: ReactNode;
@@ -21,22 +36,47 @@ export interface PopserOptions {
   icon?: ReactNode | false;
   id?: string;
   /** Callback fired when the toast is auto-dismissed after its timeout expires. */
-  onAutoClose?: () => void;
-  onClose?: () => void;
+  onAutoClose?: (id: string) => void;
+  onClose?: (id: string) => void;
   /** Callback fired when the toast is dismissed by user action (e.g. `toast.close(id)`). */
-  onDismiss?: () => void;
+  onDismiss?: (id: string) => void;
+  /**
+   * Called after the toast's exit animation completes and it is removed from the DOM.
+   * Fires after `onClose`/`onAutoClose`/`onDismiss`.
+   *
+   * Callback firing order: `onDismiss`/`onAutoClose` -> `onClose` -> (exit animation) -> `onRemove`
+   */
   onRemove?: () => void;
   priority?: "low" | "high";
+  richColors?: boolean;
   style?: React.CSSProperties;
   timeout?: number;
   type?: PopserType | (string & {});
+  unstyled?: boolean;
+}
+
+/**
+ * Extended result from a promise handler. When the success or error callback
+ * returns an object with a `title` property, it is treated as extended options.
+ */
+export interface PopserPromiseExtendedResult extends Partial<PopserOptions> {
+  title: ReactNode;
 }
 
 export interface PopserPromiseOptions<T = unknown> {
-  error: ReactNode | ((error: unknown) => ReactNode | undefined);
+  description?:
+    | ReactNode
+    | ((data: T) => ReactNode)
+    | ((error: unknown) => ReactNode);
+  error:
+    | ReactNode
+    | ((error: unknown) => ReactNode | PopserPromiseExtendedResult | undefined);
+  finally?: () => void | Promise<void>;
   id?: string;
   loading: ReactNode;
-  success: ReactNode | ((result: T) => ReactNode | undefined);
+  success:
+    | ReactNode
+    | ((result: T) => ReactNode | PopserPromiseExtendedResult | undefined);
 }
 
 export interface PopserUpdateOptions extends Partial<PopserOptions> {
@@ -62,27 +102,25 @@ export type PopserPosition =
 
 export type PopserSwipeDirection = "up" | "down" | "left" | "right";
 
-export interface PopserClassNames {
-  actionButton?: string;
-  actions?: string;
-  cancelButton?: string;
-  closeButton?: string;
-  content?: string;
-  description?: string;
-  header?: string;
-  icon?: string;
-  root?: string;
-  title?: string;
-  viewport?: string;
+/**
+ * Internal data stored under `__popser` key in the toast data object.
+ * This namespace prevents collision with user-provided `data` fields.
+ */
+export interface PopserInternalData {
+  action?: PopserAction | ReactNode;
+  cancel?: PopserAction | ReactNode;
+  className?: string;
+  classNames?: Partial<PopserClassNames>;
+  dismissible?: boolean;
+  icon?: ReactNode | false;
+  jsx?: (id: string) => ReactNode;
+  richColors?: boolean;
+  style?: React.CSSProperties;
+  unstyled?: boolean;
 }
 
 export interface PopserToastData {
-  action?: PopserAction;
-  cancel?: PopserAction;
-  className?: string;
-  dismissible?: boolean;
-  icon?: ReactNode | false;
-  style?: React.CSSProperties;
+  __popser?: PopserInternalData;
   [key: string]: unknown;
 }
 
@@ -96,6 +134,8 @@ export interface ToasterProps {
   icons?: PopserIcons;
   limit?: number;
   mobileBreakpoint?: number;
+  /** Separate offset for mobile viewports. Falls back to `offset` if not set. */
+  mobileOffset?: number | string;
   offset?: number | string;
   position?: PopserPosition;
   richColors?: boolean;
@@ -103,5 +143,7 @@ export interface ToasterProps {
   swipeDirection?: PopserSwipeDirection | PopserSwipeDirection[];
   theme?: "light" | "dark" | "system";
   timeout?: number;
+  /** Default options applied to all toasts. Per-toast options take precedence. */
+  toastOptions?: Partial<PopserOptions>;
   unstyled?: boolean;
 }

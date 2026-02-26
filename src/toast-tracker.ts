@@ -10,6 +10,12 @@ const activeToasts = new Set<string>();
 const activeToastTitles = new Map<string, string>();
 
 /**
+ * Reverse map: toast ID -> title string for O(1) cleanup in `untrackToast`.
+ * Without this, untracking requires O(n) iteration over `activeToastTitles`.
+ */
+const toastIdToTitle = new Map<string, string>();
+
+/**
  * Tracks toast IDs that were closed via `toast.close(id)` (user action)
  * so the onClose callback can distinguish manual closes from auto-dismissals.
  */
@@ -30,30 +36,31 @@ export function markManuallyClosedToast(id: string): void {
   manuallyClosedToasts.add(id);
 }
 
-/** @internal — exposed for testing only */
+/** @internal -- exposed for testing only */
 export function clearManualCloseFlags(): void {
   manuallyClosedToasts.clear();
 }
 
-/** @internal — exposed for testing only */
+/** @internal -- exposed for testing only */
 export function getActiveToastCount(): number {
   return activeToasts.size;
 }
 
-/** @internal — exposed for testing only */
+/** @internal -- exposed for testing only */
 export function isActiveToast(id: string): boolean {
   return activeToasts.has(id);
 }
 
-/** @internal — exposed for testing only */
+/** @internal -- exposed for testing only */
 export function getActiveToastTitles(): Map<string, string> {
   return activeToastTitles;
 }
 
-/** @internal — exposed for testing only */
+/** @internal -- exposed for testing only */
 export function clearActiveToasts(): void {
   activeToasts.clear();
   activeToastTitles.clear();
+  toastIdToTitle.clear();
 }
 
 /**
@@ -84,19 +91,20 @@ export function trackToast(
   activeToasts.add(id);
   if (deduplicate === true && typeof title === "string") {
     activeToastTitles.set(title, id);
+    toastIdToTitle.set(id, title);
   }
 }
 
 /**
  * Remove a single toast from tracking and clean up its dedup entry.
+ * Uses reverse map for O(1) lookup instead of iterating activeToastTitles.
  */
 export function untrackToast(id: string): void {
   activeToasts.delete(id);
-  for (const [key, value] of activeToastTitles) {
-    if (value === id) {
-      activeToastTitles.delete(key);
-      break;
-    }
+  const title = toastIdToTitle.get(id);
+  if (title !== undefined) {
+    activeToastTitles.delete(title);
+    toastIdToTitle.delete(id);
   }
 }
 

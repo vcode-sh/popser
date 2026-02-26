@@ -1,6 +1,6 @@
 import type { PopserPosition, PopserSwipeDirection } from "./types.js";
 
-export const DEFAULT_TIMEOUT = 5000;
+export const DEFAULT_TIMEOUT = 4000;
 export const DEFAULT_LIMIT = 3;
 export const DEFAULT_POSITION: PopserPosition = "bottom-right";
 export const DEFAULT_SWIPE_DIRECTION: PopserSwipeDirection[] = [

@@ -24,7 +24,6 @@ interface ErrorBoundaryState {
   hasError: boolean;
 }
 
-// biome-ignore lint/style/useReactFunctionComponents: Error boundaries require class components in React
 class ToastErrorBoundary extends React.Component<
   { children: React.ReactNode },
   ErrorBoundaryState
@@ -33,6 +32,10 @@ class ToastErrorBoundary extends React.Component<
 
   static getDerivedStateFromError(): ErrorBoundaryState {
     return { hasError: true };
+  }
+
+  componentDidCatch(error: Error, info: React.ErrorInfo) {
+    console.error("[popser] Toast rendering failed:", error, info);
   }
 
   render() {
@@ -51,6 +54,7 @@ function ToasterContent({
   icons,
   classNames,
   offset = DEFAULT_OFFSET,
+  mobileOffset,
   gap = DEFAULT_GAP,
   mobileBreakpoint = DEFAULT_MOBILE_BREAKPOINT,
   richColors = false,
@@ -59,6 +63,7 @@ function ToasterContent({
   style,
   unstyled = false,
   visibleCount = DEFAULT_LIMIT,
+  toastOptions,
 }: Omit<ToasterProps, "limit" | "timeout"> & { visibleCount?: number }) {
   const { toasts } = Toast.useToastManager();
   const [isMobile, setIsMobile] = useState(false);
@@ -75,10 +80,16 @@ function ToasterContent({
             typeof offset === "number" ? `${offset}px` : offset,
           "--popser-gap": `${gap}px`,
           "--popser-visible-count": `${visibleCount}`,
+          ...(mobileOffset !== undefined && {
+            "--popser-mobile-offset":
+              typeof mobileOffset === "number"
+                ? `${mobileOffset}px`
+                : mobileOffset,
+          }),
         }),
         ...style,
       }) as React.CSSProperties,
-    [unstyled, offset, gap, visibleCount, style]
+    [unstyled, offset, mobileOffset, gap, visibleCount, style]
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -134,8 +145,10 @@ function ToasterContent({
               icons={icons}
               onMouseEnter={handleMouseEnter}
               onMouseLeave={handleMouseLeave}
+              richColors={richColors}
               swipeDirection={swipeDirection}
               toast={toast}
+              toastOptions={toastOptions}
             />
           </ToastErrorBoundary>
         ))}

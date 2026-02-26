@@ -12,6 +12,7 @@ import { LifecycleSection } from "./sections/lifecycle.js";
 import { StressSection } from "./sections/stress.js";
 import { StylingSection } from "./sections/styling.js";
 import { TypesSection } from "./sections/types.js";
+import { V02FeaturesSection } from "./sections/v02-features.js";
 import {
   colors,
   containerStyle,
@@ -50,7 +51,7 @@ export function App() {
       <header style={headerStyle}>
         <div style={headerLeftStyle}>
           <span style={packageNameStyle}>popser</span>
-          <span style={versionBadgeStyle}>v0.1.5</span>
+          <span style={versionBadgeStyle}>v0.2.0</span>
           <span
             style={{ fontSize: 13, color: colors.textFaint, marginLeft: 4 }}
           >
@@ -79,6 +80,7 @@ export function App() {
       <StylingSection />
       <BehaviorSection />
       <LifecycleSection />
+      <V02FeaturesSection />
       <StressSection />
 
       {/* Toaster */}

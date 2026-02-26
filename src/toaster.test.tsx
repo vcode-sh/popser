@@ -431,4 +431,103 @@ describe("Toaster", () => {
       });
     }).not.toThrow();
   });
+
+  // ---------------------------------------------------------------------------
+  // v0.2.0 Features
+  // ---------------------------------------------------------------------------
+
+  describe("mobileOffset (Phase 4.2)", () => {
+    it("sets --popser-mobile-offset CSS variable with number value", () => {
+      act(() => {
+        root.render(<Toaster mobileOffset={8} />);
+      });
+      const viewport = document.querySelector(
+        "[data-popser-viewport]"
+      ) as HTMLElement;
+      expect(viewport.style.getPropertyValue("--popser-mobile-offset")).toBe(
+        "8px"
+      );
+    });
+
+    it("sets --popser-mobile-offset CSS variable with string value", () => {
+      act(() => {
+        root.render(<Toaster mobileOffset="1rem" />);
+      });
+      const viewport = document.querySelector(
+        "[data-popser-viewport]"
+      ) as HTMLElement;
+      expect(viewport.style.getPropertyValue("--popser-mobile-offset")).toBe(
+        "1rem"
+      );
+    });
+
+    it("does not set --popser-mobile-offset when not provided", () => {
+      act(() => {
+        root.render(<Toaster />);
+      });
+      const viewport = document.querySelector(
+        "[data-popser-viewport]"
+      ) as HTMLElement;
+      expect(viewport.style.getPropertyValue("--popser-mobile-offset")).toBe(
+        ""
+      );
+    });
+
+    it("does not set --popser-mobile-offset when unstyled is true", () => {
+      act(() => {
+        root.render(<Toaster mobileOffset={8} unstyled />);
+      });
+      const viewport = document.querySelector(
+        "[data-popser-viewport]"
+      ) as HTMLElement;
+      expect(viewport.style.getPropertyValue("--popser-mobile-offset")).toBe(
+        ""
+      );
+    });
+  });
+
+  describe("error boundary logging (B2)", () => {
+    it("logs to console.error when toast rendering throws", () => {
+      const consoleSpy = vi
+        .spyOn(console, "error")
+        .mockImplementation(() => {});
+
+      act(() => {
+        root.render(<Toaster />);
+      });
+
+      // Create a toast with a custom JSX that throws during render
+      const manager = resetManager();
+
+      // Re-render with the new manager
+      act(() => {
+        root.render(<Toaster />);
+      });
+
+      // Add a toast via the manager directly that will cause a rendering error
+      // by injecting a bad jsx function that throws
+      act(() => {
+        manager.add({
+          title: "test",
+          type: "__custom",
+          data: {
+            __popser: {
+              jsx: () => {
+                throw new Error("Render failed!");
+              },
+            },
+          },
+        });
+      });
+
+      // The error boundary should have logged the error
+      expect(consoleSpy).toHaveBeenCalledWith(
+        "[popser] Toast rendering failed:",
+        expect.any(Error),
+        expect.any(Object)
+      );
+
+      consoleSpy.mockRestore();
+    });
+  });
 });
