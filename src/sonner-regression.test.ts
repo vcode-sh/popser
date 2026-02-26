@@ -297,7 +297,7 @@ describe("Sonner regression tests", () => {
   // were previously uncovered by tests.
   // ---------------------------------------------------------------------------
   describe("toast.update() with onClose/onRemove", () => {
-    it("passes onClose through to manager.update()", () => {
+    it("passes onClose through to manager.update() (wrapped for tracking)", () => {
       const manager = getManager();
       const updateSpy = vi.spyOn(manager, "update");
       const onCloseFn = vi.fn();
@@ -306,10 +306,14 @@ describe("Sonner regression tests", () => {
 
       toast.update(id, { onClose: onCloseFn });
 
-      expect(updateSpy).toHaveBeenCalledWith(
-        id,
-        expect.objectContaining({ onClose: onCloseFn })
-      );
+      // onClose is now wrapped to include internal tracking cleanup,
+      // so we verify it's a function and that invoking it calls the original
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        onClose?: () => void;
+      };
+      expect(typeof updateArgs.onClose).toBe("function");
+      updateArgs.onClose?.();
+      expect(onCloseFn).toHaveBeenCalledOnce();
     });
 
     it("passes onRemove through to manager.update()", () => {
@@ -337,13 +341,15 @@ describe("Sonner regression tests", () => {
 
       toast.update(id, { onClose: onCloseFn, onRemove: onRemoveFn });
 
-      expect(updateSpy).toHaveBeenCalledWith(
-        id,
-        expect.objectContaining({
-          onClose: onCloseFn,
-          onRemove: onRemoveFn,
-        })
-      );
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        onClose?: () => void;
+        onRemove?: () => void;
+      };
+      // onClose is wrapped, onRemove is passed raw
+      expect(typeof updateArgs.onClose).toBe("function");
+      updateArgs.onClose?.();
+      expect(onCloseFn).toHaveBeenCalledOnce();
+      expect(updateArgs.onRemove).toBe(onRemoveFn);
     });
 
     it("does not include onClose in update when not provided", () => {

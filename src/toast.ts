@@ -156,7 +156,10 @@ toast.close = (id?: string): void => {
  * ```
  */
 toast.update = (id: string, options: PopserUpdateOptions): void => {
-  getManager().update(id, toManagerUpdateOptions(options));
+  getManager().update(
+    id,
+    toManagerUpdateOptions(id, options, () => untrackToast(id))
+  );
 };
 
 /**

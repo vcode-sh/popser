@@ -53,7 +53,8 @@
  * The front toast (index 0) is full size. Toasts behind it are scaled down
  * and shifted slightly to create a layered card stack appearance.
  *
- * --popser-gap controls peek distance between stacked toasts (default 14px).
+ * --popser-stack-peek controls peek distance between stacked toasts (default 14px).
+ * --popser-gap controls the expanded spacing between toasts (default 8px).
  */
 
 /* Collapsed: bottom positions (toasts stack upward) */
@@ -73,7 +74,7 @@
     (1 - var(--toast-index, 0) * 0.1)
   );
   transform: translateY(
-      calc(-1 * var(--toast-index, 0) * var(--popser-gap, 14px))
+      calc(-1 * var(--toast-index, 0) * var(--popser-stack-peek, 14px))
     )
     scale(calc(1 - var(--toast-index, 0) * 0.05));
 }
@@ -88,7 +89,9 @@
     clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
     (1 - var(--toast-index, 0) * 0.1)
   );
-  transform: translateY(calc(var(--toast-index, 0) * var(--popser-gap, 14px)))
+  transform: translateY(
+      calc(var(--toast-index, 0) * var(--popser-stack-peek, 14px))
+    )
     scale(calc(1 - var(--toast-index, 0) * 0.05));
 }
 
@@ -130,7 +133,7 @@
   bottom: var(--popser-offset, 16px);
   display: flex;
   flex-direction: column-reverse;
-  gap: var(--popser-gap, 14px);
+  gap: var(--popser-gap, 8px);
 }
 
 /* Expanded viewport: top positions (expand downward with scroll) */
@@ -139,7 +142,7 @@
   bottom: var(--popser-offset, 16px);
   display: flex;
   flex-direction: column;
-  gap: var(--popser-gap, 14px);
+  gap: var(--popser-gap, 8px);
 }
 
 /* Hide scrollbar for Webkit browsers */

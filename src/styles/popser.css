@@ -10,75 +10,31 @@
 
 /* Swipe exit: slide in swipe direction */
 [data-popser-root][data-ending-style][data-swipe-direction="left"] {
-  transform: translateX(-100%);
   opacity: 0;
+  transform: translateX(-100%);
 }
 
 [data-popser-root][data-ending-style][data-swipe-direction="right"] {
-  transform: translateX(100%);
   opacity: 0;
+  transform: translateX(100%);
 }
 
 [data-popser-root][data-ending-style][data-swipe-direction="up"] {
-  transform: translateY(-100%);
   opacity: 0;
+  transform: translateY(-100%);
 }
 
 [data-popser-root][data-ending-style][data-swipe-direction="down"] {
-  transform: translateY(100%);
   opacity: 0;
+  transform: translateY(100%);
 }
 
 /* ─── Limit-removed exit animation (#8) ───────────────────────────── */
 
 /* Toasts removed by limit: quick fade instead of slide */
 [data-popser-root][data-ending-style][data-limited] {
-  transform: none;
   opacity: 0;
-}
-
-/* ─── Gap token split (#11) ───────────────────────────────────────── */
-/*
- * --popser-gap controls expanded spacing between toasts (default 8px).
- * --popser-stack-peek controls collapsed stacking offset (default 14px).
- */
-
-/* Collapsed: bottom positions — use --popser-stack-peek for peek distance */
-[data-popser-viewport][data-position^="bottom"]:not([data-expanded])
-  [data-popser-root] {
-  transform: translateY(
-      calc(-1 * var(--toast-index, 0) * var(--popser-stack-peek, 14px))
-    )
-    scale(calc(1 - var(--toast-index, 0) * 0.05));
-}
-
-/* Collapsed: top positions — use --popser-stack-peek for peek distance */
-[data-popser-viewport][data-position^="top"]:not([data-expanded])
-  [data-popser-root] {
-  transform: translateY(
-      calc(var(--toast-index, 0) * var(--popser-stack-peek, 14px))
-    )
-    scale(calc(1 - var(--toast-index, 0) * 0.05));
-}
-
-/* Expanded viewport: bottom — use --popser-gap for flex gap */
-[data-popser-viewport][data-position^="bottom"][data-expanded] {
-  gap: var(--popser-gap, 8px);
-}
-
-/* Expanded viewport: top — use --popser-gap for flex gap */
-[data-popser-viewport][data-position^="top"][data-expanded] {
-  gap: var(--popser-gap, 8px);
-}
-
-/* ─── Dark mode hover bg (#12) ────────────────────────────────────── */
-
-[data-popser-close]:hover {
-  background: var(--popser-hover-bg);
-}
-
-[data-popser-cancel]:hover {
-  background: var(--popser-hover-bg);
+  transform: none;
 }
 
 /* ─── Reduced motion (a11y) ───────────────────────────────────────── */
@@ -93,8 +49,8 @@
   }
 
   [data-popser-spinner-bar] {
-    animation: none;
     opacity: 0.3;
+    animation: none;
   }
 
   [data-popser-action],
@@ -104,8 +60,8 @@
 
   [data-popser-root][data-starting-style],
   [data-popser-root][data-ending-style] {
-    transform: none;
     opacity: 0;
+    transform: none;
   }
 
   [data-popser-viewport]:not([data-expanded]) [data-popser-root] {

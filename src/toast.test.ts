@@ -946,6 +946,116 @@ describe("toast", () => {
     });
   });
 
+  describe("toast.update callback handling", () => {
+    it("toast.update with onClose preserves internal tracking cleanup", () => {
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+      const updateSpy = vi.spyOn(manager, "update");
+
+      const id = toast("Title");
+      expect(isActiveToast(id)).toBe(true);
+
+      // Update with a new onClose
+      const newOnClose = vi.fn();
+      toast.update(id, { onClose: newOnClose });
+
+      // Get the update call's onClose
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        onClose?: () => void;
+      };
+
+      // Simulate Base UI firing the updated onClose (e.g., auto-dismiss)
+      // If toast.update passes raw onClose, the internal untrackToast cleanup is lost
+      if (updateArgs.onClose) {
+        updateArgs.onClose();
+      }
+
+      // The original wrapped onClose (from add()) should have been the one
+      // to clean up activeToasts. Since update replaced it with raw onClose,
+      // the toast is still tracked — this is a bug.
+      // The toast SHOULD be untracked after its onClose fires.
+      expect(isActiveToast(id)).toBe(false);
+    });
+
+    it("toast.update with onAutoClose retroactively fires on auto-dismiss", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+
+      const onAutoClose = vi.fn();
+      const id = toast("Title");
+
+      // Update with onAutoClose added retroactively
+      toast.update(id, { onAutoClose });
+
+      // After update, the manager's onClose for this toast should be the
+      // new wrapped onClose from toManagerUpdateOptions. Simulate Base UI
+      // firing the updated onClose (auto-dismiss — no manual close flag).
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        onClose?: () => void;
+      };
+      expect(typeof updateArgs.onClose).toBe("function");
+      updateArgs.onClose?.();
+
+      expect(onAutoClose).toHaveBeenCalledOnce();
+    });
+
+    it("toast.close(all) fires onDismiss for each toast", () => {
+      const onDismiss1 = vi.fn();
+      const onDismiss2 = vi.fn();
+      const manager = getManager();
+      const addSpy = vi.spyOn(manager, "add");
+
+      toast("First", { onDismiss: onDismiss1 });
+      toast("Second", { onDismiss: onDismiss2 });
+
+      // Close all
+      toast.close();
+
+      // Simulate Base UI firing onClose for both toasts
+      const callArgs1 = addSpy.mock.calls[0]?.[0] as { onClose?: () => void };
+      const callArgs2 = addSpy.mock.calls[1]?.[0] as { onClose?: () => void };
+      callArgs1.onClose?.();
+      callArgs2.onClose?.();
+
+      // Both should fire onDismiss since toast.close() is a manual action
+      expect(onDismiss1).toHaveBeenCalledOnce();
+      expect(onDismiss2).toHaveBeenCalledOnce();
+    });
+
+    it("toast.update with onDismiss fires on manual close", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+
+      const onDismiss = vi.fn();
+      const id = toast("Title");
+
+      // Add onDismiss retroactively
+      toast.update(id, { onDismiss });
+
+      // Manually close the toast
+      toast.close(id);
+
+      // Simulate Base UI firing the updated onClose
+      const updateArgs = updateSpy.mock.calls[0]?.[1] as {
+        onClose?: () => void;
+      };
+      updateArgs.onClose?.();
+
+      expect(onDismiss).toHaveBeenCalledOnce();
+    });
+
+    it("duration alias works in toast.update", () => {
+      const manager = getManager();
+      const updateSpy = vi.spyOn(manager, "update");
+      const id = toast("Title");
+      toast.update(id, { duration: 8000 });
+      expect(updateSpy).toHaveBeenCalledWith(
+        id,
+        expect.objectContaining({ timeout: 8000 })
+      );
+    });
+  });
+
   describe("toast.getToasts", () => {
     it("returns empty array when no toasts are active", () => {
       expect(toast.getToasts()).toEqual([]);
