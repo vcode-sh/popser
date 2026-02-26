@@ -6,8 +6,9 @@
   position: fixed;
   z-index: 9999;
   box-sizing: border-box;
+  width: var(--popser-width, 356px);
   pointer-events: none;
-  /* No flex/grid - toasts are absolutely positioned */
+  /* Collapsed: toasts are absolutely positioned inside this anchor point */
   /* Offset is applied via inset values in position variants below */
 }
 
@@ -61,6 +62,12 @@
   border: 1px solid var(--popser-border);
   border-radius: var(--popser-radius, 8px);
   box-shadow: var(--popser-shadow);
+}
+
+/* Transitions only apply in collapsed mode (stacking animations).
+ * In expanded mode, toasts switch to relative positioning instantly
+ * to avoid jarring height/transform transitions during layout switch. */
+[data-popser-viewport]:not([data-expanded]) [data-popser-root] {
   transition:
     transform 400ms,
     opacity 400ms,
@@ -101,7 +108,16 @@
   [data-popser-root]:not([data-expanded]) {
   height: var(--toast-frontmost-height, auto);
   overflow: hidden;
-  opacity: calc(1 - var(--toast-index, 0) * 0.1);
+  /*
+   * Opacity combines two concerns:
+   * 1. Progressive fade: (1 - index * 0.1) → 1.0, 0.9, 0.8 ...
+   * 2. Visibility cutoff: clamp(0, visibleCount - index, 1) → 1 when visible, 0 when hidden
+   * Result: toasts beyond --popser-visible-count are fully transparent.
+   */
+  opacity: calc(
+    clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
+    (1 - var(--toast-index, 0) * 0.1)
+  );
   transform: translateY(
       calc(-1 * var(--toast-index, 0) * var(--popser-gap, 14px))
     )
@@ -113,7 +129,10 @@
   [data-popser-root]:not([data-expanded]) {
   height: var(--toast-frontmost-height, auto);
   overflow: hidden;
-  opacity: calc(1 - var(--toast-index, 0) * 0.1);
+  opacity: calc(
+    clamp(0, var(--popser-visible-count, 3) - var(--toast-index, 0), 1) *
+    (1 - var(--toast-index, 0) * 0.1)
+  );
   transform: translateY(calc(var(--toast-index, 0) * var(--popser-gap, 14px)))
     scale(calc(1 - var(--toast-index, 0) * 0.05));
 }
@@ -127,129 +146,74 @@
   transition: opacity 400ms;
 }
 
-/* Collapsed: hide toasts beyond 3 visible (4th child onward = index 3+) */
-[data-popser-viewport]:not([data-expanded])
-  [data-popser-root]:not([data-expanded]):nth-child(n + 4) {
-  pointer-events: none;
-  opacity: 0;
-}
-
 /* ─── Expanded state ───────────────────────────────────────────────── */
 /*
- * Expansion triggers:
- * 1. Viewport has [data-expanded] when expand={true} prop is set
- * 2. Base UI sets [data-expanded] on each Toast.Root on hover/focus
+ * Expansion is controlled entirely by JS via [data-expanded] on the viewport.
+ * The Toaster component sets this attribute when:
+ * 1. expand={true} prop is set
+ * 2. User hovers or focuses the viewport (onMouseEnter/onMouseLeave)
  *
- * When expanded, toasts show at their natural height with proper spacing
- * using the --toast-offset-y custom property for cumulative offset.
+ * Using JS state instead of CSS :has() prevents feedback loops where
+ * layout changes cause mouseLeave → collapse → mouseEnter → expand cycles.
+ *
+ * When expanded, the viewport switches from a stacking container to a
+ * scrollable flex column. Toasts become relative flow items so that
+ * overflow-y: auto produces a scrollbar when they exceed viewport height.
  */
 
-/* Expanded via viewport prop: bottom positions */
-[data-popser-viewport][data-expanded][data-position^="bottom"]
-  [data-popser-root] {
-  height: auto;
-  overflow: visible;
-  opacity: 1;
-  transform: translateY(
-    calc(
-      -1 *
-      var(--toast-offset-y, 0px) -
-      var(--toast-index, 0) *
-      var(--popser-gap, 14px)
-    )
-  );
+/* Expanded viewport: shared */
+[data-popser-viewport][data-expanded] {
+  overflow-x: hidden;
+  overflow-y: auto;
+  pointer-events: auto;
+  scrollbar-width: none;
 }
 
-/* Expanded via viewport prop: top positions */
-[data-popser-viewport][data-expanded][data-position^="top"] [data-popser-root] {
-  height: auto;
-  overflow: visible;
-  opacity: 1;
-  transform: translateY(
-    calc(
-      var(--toast-offset-y, 0px) +
-      var(--toast-index, 0) *
-      var(--popser-gap, 14px)
-    )
-  );
+/* Expanded viewport: bottom positions (expand upward with scroll) */
+[data-popser-viewport][data-position^="bottom"][data-expanded] {
+  top: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  display: flex;
+  flex-direction: column-reverse;
+  gap: var(--popser-gap, 14px);
 }
 
-/* Expanded via hover on individual toast (Base UI sets data-expanded on Root) */
-/* Bottom positions */
-[data-popser-viewport][data-position^="bottom"]:not([data-expanded])
-  [data-popser-root][data-expanded] {
-  height: auto;
-  overflow: visible;
-  opacity: 1;
-  transform: translateY(
-    calc(
-      -1 *
-      var(--toast-offset-y, 0px) -
-      var(--toast-index, 0) *
-      var(--popser-gap, 14px)
-    )
-  );
+/* Expanded viewport: top positions (expand downward with scroll) */
+[data-popser-viewport][data-position^="top"][data-expanded] {
+  top: var(--popser-offset, 16px);
+  bottom: var(--popser-offset, 16px);
+  display: flex;
+  flex-direction: column;
+  gap: var(--popser-gap, 14px);
 }
 
-/* Top positions */
-[data-popser-viewport][data-position^="top"]:not([data-expanded])
-  [data-popser-root][data-expanded] {
+/* Hide scrollbar for Webkit browsers */
+[data-popser-viewport][data-expanded]::-webkit-scrollbar {
+  display: none;
+}
+
+/* Expanded toasts: switch from absolute to flow items */
+[data-popser-viewport][data-expanded] [data-popser-root] {
+  position: relative;
+  top: auto;
+  right: auto;
+  bottom: auto;
+  left: auto;
+  z-index: auto;
+  flex-shrink: 0;
   height: auto;
   overflow: visible;
+  pointer-events: auto;
   opacity: 1;
-  transform: translateY(
-    calc(
-      var(--toast-offset-y, 0px) +
-      var(--toast-index, 0) *
-      var(--popser-gap, 14px)
-    )
-  );
+  transform: none;
 }
 
 /* Expanded: restore content visibility for all toasts */
 [data-popser-viewport][data-expanded]
   [data-popser-root]
   [data-popser-content]
-  > *,
-[data-popser-root][data-expanded] [data-popser-content] > * {
+  > * {
   opacity: 1;
-}
-
-/* Expanded: ensure all toasts are visible (override collapsed nth-child hiding) */
-[data-popser-viewport][data-expanded] [data-popser-root]:nth-child(n + 4),
-[data-popser-root][data-expanded]:nth-child(n + 4) {
-  pointer-events: auto;
-  opacity: 1;
-}
-
-/* ─── Anti-gap pseudo-element ──────────────────────────────────────── */
-/* Prevents mouse-leave gap between expanded toasts */
-
-[data-popser-root][data-expanded]::after {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  width: 100%;
-  height: calc(var(--popser-gap, 14px) + 1px);
-  content: "";
-}
-
-[data-popser-viewport][data-expanded] [data-popser-root]::after {
-  position: absolute;
-  bottom: 100%;
-  left: 0;
-  width: 100%;
-  height: calc(var(--popser-gap, 14px) + 1px);
-  content: "";
-}
-
-/* Top positions: gap is below the toast */
-[data-popser-viewport][data-position^="top"]
-  [data-popser-root][data-expanded]::after,
-[data-popser-viewport][data-expanded][data-position^="top"]
-  [data-popser-root]::after {
-  top: 100%;
-  bottom: auto;
 }
 
 /* ─── Enter / exit transitions (Base UI data attributes) ───────────── */

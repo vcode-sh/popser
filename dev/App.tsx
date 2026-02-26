@@ -708,6 +708,65 @@ export function App() {
         </div>
       </div>
 
+      {/* Stress Test */}
+      <div style={sectionStyle}>
+        <div style={sectionHeaderStyle}>
+          <span style={sectionTitleStyle}>Stress Test</span>
+          <span style={sectionDescStyle}>
+            Rapid-fire toast generation for stacking & performance testing
+          </span>
+        </div>
+        <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
+          <button
+            onClick={() => {
+              const types = ["success", "error", "info", "warning"] as const;
+              for (let i = 0; i < 20; i++) {
+                const type = types[i % types.length];
+                const fn = toast[type];
+                tracked(
+                  (t: string, o?: Record<string, unknown>) => fn(t, o),
+                  `Toast #${i + 1} (${type})`,
+                  { timeout: 0 }
+                );
+              }
+            }}
+            style={pillStyle(false)}
+            type="button"
+          >
+            Spam 20 persistent toasts
+          </button>
+          <button
+            onClick={() => {
+              const types = ["success", "error", "info", "warning"] as const;
+              for (let i = 0; i < 20; i++) {
+                const type = types[i % types.length];
+                const fn = toast[type];
+                tracked(
+                  (t: string, o?: Record<string, unknown>) => fn(t, o),
+                  `Toast #${i + 1} (${type})`,
+                  {}
+                );
+              }
+            }}
+            style={pillStyle(false)}
+            type="button"
+          >
+            Spam 20 auto-dismiss toasts
+          </button>
+          <button
+            onClick={closeAll}
+            style={{
+              ...pillStyle(false),
+              borderColor: "#ef4444",
+              color: "#ef4444",
+            }}
+            type="button"
+          >
+            Close all
+          </button>
+        </div>
+      </div>
+
       <Toaster
         expand={expand}
         position={position}

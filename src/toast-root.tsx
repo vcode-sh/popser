@@ -18,6 +18,8 @@ export interface ToastRootProps {
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";
   icons?: PopserIcons;
+  onMouseEnter?: () => void;
+  onMouseLeave?: () => void;
   swipeDirection?:
     | ("up" | "down" | "left" | "right")
     | ("up" | "down" | "left" | "right")[];
@@ -30,6 +32,8 @@ export function PopserToastRoot({
   closeButton = "hover",
   icons,
   classNames,
+  onMouseEnter,
+  onMouseLeave,
 }: ToastRootProps) {
   const data = (toastData.data ?? {}) as PopserToastData;
   const type = toastData.type;
@@ -42,6 +46,8 @@ export function PopserToastRoot({
       }
       data-popser-root
       data-type={type}
+      onMouseEnter={onMouseEnter}
+      onMouseLeave={onMouseLeave}
       style={data.style}
       swipeDirection={swipeDirection}
       toast={toastData}

@@ -1,5 +1,5 @@
 import { Toast } from "@base-ui/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   DEFAULT_CLOSE_BUTTON,
   DEFAULT_GAP,
@@ -28,9 +28,37 @@ function ToasterContent({
   expand = false,
   style,
   unstyled = false,
-}: Omit<ToasterProps, "limit" | "timeout">) {
+  visibleCount = DEFAULT_LIMIT,
+}: Omit<ToasterProps, "limit" | "timeout"> & { visibleCount?: number }) {
   const { toasts } = Toast.useToastManager();
   const [isMobile, setIsMobile] = useState(false);
+  const [isHovering, setIsHovering] = useState(false);
+  const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const isExpanded = expand || isHovering;
+
+  const handleMouseEnter = useCallback(() => {
+    if (hoverTimeoutRef.current) {
+      clearTimeout(hoverTimeoutRef.current);
+      hoverTimeoutRef.current = null;
+    }
+    setIsHovering(true);
+  }, []);
+
+  const handleMouseLeave = useCallback(() => {
+    // Small delay to prevent flicker when moving between toasts
+    hoverTimeoutRef.current = setTimeout(() => {
+      setIsHovering(false);
+    }, 100);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${mobileBreakpoint}px)`);
@@ -44,18 +72,20 @@ function ToasterContent({
     <Toast.Portal>
       <Toast.Viewport
         className={classNames?.viewport}
-        data-expanded={expand || undefined}
+        data-expanded={isExpanded || undefined}
         data-mobile={isMobile || undefined}
         data-popser-viewport
         data-position={position}
         data-rich-colors={richColors || undefined}
         data-theme={theme}
+        onMouseLeave={handleMouseLeave}
         style={
           {
             ...(!unstyled && {
               "--popser-offset":
                 typeof offset === "number" ? `${offset}px` : offset,
               "--popser-gap": `${gap}px`,
+              "--popser-visible-count": `${visibleCount}`,
             }),
             ...style,
           } as React.CSSProperties
@@ -67,6 +97,8 @@ function ToasterContent({
             closeButton={closeButton}
             icons={icons}
             key={toast.id}
+            onMouseEnter={handleMouseEnter}
+            onMouseLeave={handleMouseLeave}
             swipeDirection={swipeDirection}
             toast={toast}
           />
@@ -83,7 +115,7 @@ export function Toaster({
 }: ToasterProps) {
   return (
     <Toast.Provider limit={limit} timeout={timeout} toastManager={getManager()}>
-      <ToasterContent {...rest} />
+      <ToasterContent visibleCount={limit} {...rest} />
     </Toast.Provider>
   );
 }
