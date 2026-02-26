@@ -6,7 +6,9 @@
   --popser-radius: 8px;
   --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.1);
   --popser-gap: 8px;
+  --popser-stack-peek: 14px;
   --popser-offset: 16px;
+  --popser-hover-bg: oklch(0 0 0 / 0.05);
 
   /* Rich colors (opt-in via richColors prop on Toaster) */
   --popser-success-bg: oklch(0.962 0.044 153);
@@ -49,4 +51,6 @@
   --popser-loading-bg: oklch(0.25 0 0);
   --popser-loading-border: oklch(0.33 0 0);
   --popser-loading-fg: oklch(0.65 0 0);
+
+  --popser-hover-bg: oklch(1 0 0 / 0.1);
 }
