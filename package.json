@@ -1,6 +1,6 @@
 {
   "name": "popser",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "type": "module",
   "description": "Toast notifications for React. Built on Base UI. Sonner-compatible API.",
   "main": "./dist/index.cjs",
