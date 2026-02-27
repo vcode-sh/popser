@@ -7,7 +7,7 @@ export default defineConfig({
   format: ["esm", "cjs"],
   dts: true,
   clean: true,
-  sourcemap: true,
+  sourcemap: false,
   external: ["react", "react-dom", "@base-ui/react"],
   onSuccess: "mkdir -p dist/styles && cp src/styles/*.css dist/styles/",
 });
