@@ -6,17 +6,60 @@
 @import "./controls.css";
 
 /* ─── Arrow for anchored toasts ──────────────────────────────────── */
+/*
+ * Base UI renders Toast.Arrow as position:absolute with left/top
+ * computed by Floating UI's arrow middleware — but only the PERPENDICULAR
+ * axis (e.g. `left` for top/bottom sides). The side-axis edge position
+ * must be set via CSS.
+ *
+ * Each data-side rule:
+ * 1. Pins the arrow to the correct toast edge (top/bottom/left/right: 0)
+ * 2. Shifts it by -50% of its own size so its center sits on the edge
+ *    (half protruding outside the toast, half hidden behind it)
+ * 3. Rotates 45deg to turn the square into a diamond
+ * 4. Shows 2 borders to form the visible triangle pointing at the anchor
+ *
+ * data-side = side the TOAST is on relative to the anchor.
+ * The arrow points TOWARD the anchor (opposite direction to data-side).
+ */
 
 [data-popser-arrow] {
-  width: 10px;
-  height: 10px;
-  background: var(--popser-bg, oklch(1 0 0));
-  transform: rotate(45deg);
+  z-index: 1;
+  width: 8px;
+  height: 8px;
+  background: var(--popser-bg);
 }
 
-[data-popser-viewport][data-theme="dark"] [data-popser-arrow],
-[data-popser-viewport][data-rich-colors] [data-popser-arrow] {
-  background: inherit;
+/* Toast below anchor → arrow at top edge, pointing up */
+[data-popser-arrow][data-side="bottom"] {
+  top: 0;
+  border-top: 1px solid var(--popser-border);
+  border-left: 1px solid var(--popser-border);
+  transform: translateY(-50%) rotate(45deg);
+}
+
+/* Toast above anchor → arrow at bottom edge, pointing down */
+[data-popser-arrow][data-side="top"] {
+  bottom: 0;
+  border-right: 1px solid var(--popser-border);
+  border-bottom: 1px solid var(--popser-border);
+  transform: translateY(50%) rotate(45deg);
+}
+
+/* Toast right of anchor → arrow at left edge, pointing left */
+[data-popser-arrow][data-side="right"] {
+  left: 0;
+  border-bottom: 1px solid var(--popser-border);
+  border-left: 1px solid var(--popser-border);
+  transform: translateX(-50%) rotate(45deg);
+}
+
+/* Toast left of anchor → arrow at right edge, pointing right */
+[data-popser-arrow][data-side="left"] {
+  right: 0;
+  border-top: 1px solid var(--popser-border);
+  border-right: 1px solid var(--popser-border);
+  transform: translateX(50%) rotate(45deg);
 }
 
 /* ─── Swipe exit animations (#7) ──────────────────────────────────── */
@@ -78,14 +121,13 @@
     transform: none;
   }
 
-  [data-popser-viewport]:not([data-expanded]) [data-popser-root] {
+  [data-popser-viewport] [data-popser-root] {
     transition: none;
   }
 
   [data-popser-viewport]:not([data-expanded])
     [data-popser-root]:not(:first-child)
-    [data-popser-content]
-    > * {
+    [data-popser-content] {
     transition: none;
   }
 }

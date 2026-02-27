@@ -10,16 +10,28 @@
   opacity: 0;
 }
 
+/* ─── Anchored toast enter / exit ──────────────────────────────────── */
+
+[data-popser-root][data-anchored][data-starting-style] {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
+[data-popser-root][data-anchored][data-ending-style] {
+  opacity: 0;
+  transform: scale(0.95);
+}
+
 /* Bottom: slide up from below on enter */
 [data-popser-viewport][data-position^="bottom"]
   [data-popser-root]:not([data-anchored])[data-starting-style] {
   transform: translateY(100%) scale(0.95);
 }
 
-/* Bottom: slide down on exit */
+/* Bottom: slide back down on exit (same direction as entry) */
 [data-popser-viewport][data-position^="bottom"]
   [data-popser-root]:not([data-anchored])[data-ending-style] {
-  transform: translateY(calc(-1 * var(--toast-height, 0px))) scale(0.95);
+  transform: translateY(calc(var(--toast-height, 0px) + 8px)) scale(0.95);
 }
 
 /* Top: slide down from above on enter */
@@ -28,10 +40,10 @@
   transform: translateY(-100%) scale(0.95);
 }
 
-/* Top: slide up on exit */
+/* Top: slide back up on exit (same direction as entry) */
 [data-popser-viewport][data-position^="top"]
   [data-popser-root]:not([data-anchored])[data-ending-style] {
-  transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95);
+  transform: translateY(calc(-1 * var(--toast-height, 0px) - 8px)) scale(0.95);
 }
 
 /* ─── Rich colors (opt-in via data-rich-colors on viewport or per-toast) ─── */

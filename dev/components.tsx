@@ -51,8 +51,8 @@ export function DemoCard({ label, code, onClick }: DemoButton) {
     <button
       onClick={onClick}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "#c0c0c0";
-        e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)";
+        e.currentTarget.style.borderColor = colors.hoverBorder;
+        e.currentTarget.style.boxShadow = colors.hoverShadow;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = colors.border;

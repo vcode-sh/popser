@@ -55,8 +55,8 @@ function AnchorCard({
         }
       }}
       onMouseEnter={(e) => {
-        e.currentTarget.style.borderColor = "#c0c0c0";
-        e.currentTarget.style.boxShadow = "0 1px 4px rgba(0,0,0,0.06)";
+        e.currentTarget.style.borderColor = colors.hoverBorder;
+        e.currentTarget.style.boxShadow = colors.hoverShadow;
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = colors.border;
@@ -211,20 +211,32 @@ export function AnchoredSection() {
           }
         />
         <AnchorCard
-          code={`toast("Copied!", {\n  anchor: event,\n})`}
+          code={`toast("Copied!", {\n  anchor: event,\n  anchorSide: "bottom",\n  anchorAlign: "start",\n  anchorOffset: 12,\n})`}
           label="Cursor Anchor"
           onClick={(_el, event) =>
-            trackedAnchored("Copied at cursor!", event.nativeEvent)
+            trackedAnchored("Copied at cursor!", event.nativeEvent, {
+              anchorSide: "bottom",
+              anchorAlign: "start",
+              anchorOffset: 12,
+            })
           }
         />
         <AnchorCard
-          code={`toast("Saved!", {\n  anchor: { x, y },\n})`}
+          code={`toast("Saved!", {\n  anchor: { x, y },\n  anchorSide: "bottom",\n  anchorAlign: "start",\n  anchorOffset: 12,\n})`}
           label="Coordinates Anchor"
           onClick={(_el, event) =>
-            trackedAnchored("Saved at coords!", {
-              x: event.clientX,
-              y: event.clientY,
-            })
+            trackedAnchored(
+              "Saved at coords!",
+              {
+                x: event.clientX,
+                y: event.clientY,
+              },
+              {
+                anchorSide: "bottom",
+                anchorAlign: "start",
+                anchorOffset: 12,
+              }
+            )
           }
         />
       </div>

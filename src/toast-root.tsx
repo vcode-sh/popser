@@ -61,8 +61,6 @@ export interface ToastRootProps {
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";
   icons?: PopserIcons;
-  onMouseEnter?: () => void;
-  onMouseLeave?: () => void;
   richColors?: boolean;
   swipeDirection?:
     | ("up" | "down" | "left" | "right")
@@ -78,8 +76,6 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
   icons,
   classNames,
   richColors: toasterRichColors,
-  onMouseEnter,
-  onMouseLeave,
   toastOptions,
 }: ToastRootProps) {
   const popser = (toastData.data?.__popser ?? {}) as PopserInternalData;
@@ -121,8 +117,6 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
         data-rich-colors={effectiveRichColors || undefined}
         data-type="custom"
         data-unstyled={isUnstyled || undefined}
-        onMouseEnter={onMouseEnter}
-        onMouseLeave={onMouseLeave}
         style={popser.style}
         swipeDirection={effectiveSwipeDirection}
         toast={toastData}
@@ -186,8 +180,6 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
       data-rich-colors={effectiveRichColors || undefined}
       data-type={type}
       data-unstyled={isUnstyled || undefined}
-      onMouseEnter={onMouseEnter}
-      onMouseLeave={onMouseLeave}
       style={popser.style}
       swipeDirection={effectiveSwipeDirection}
       toast={toastData}

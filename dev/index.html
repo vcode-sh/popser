@@ -4,6 +4,59 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Popser Dev Preview</title>
+    <style>
+    :root {
+      --page-bg: #fafafa;
+      --page-card: #ffffff;
+      --page-border: #e5e5e5;
+      --page-border-light: #f0f0f0;
+      --page-text: #111111;
+      --page-text-muted: #666666;
+      --page-text-faint: #999999;
+      --page-accent: #111111;
+      --page-accent-text: #ffffff;
+      --page-code-bg: #f5f5f5;
+      --page-code-border: #ebebeb;
+      --page-badge-bg: #111111;
+      --page-badge-text: #ffffff;
+      --page-hover-border: #c0c0c0;
+      --page-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+      --page-green: #22c55e;
+      --page-counter-active-bg: #f0f0f0;
+    }
+    [data-page-theme="dark"] {
+      --page-bg: #0a0a0a;
+      --page-card: #141414;
+      --page-border: #272727;
+      --page-border-light: #1c1c1c;
+      --page-text: #ededed;
+      --page-text-muted: #a0a0a0;
+      --page-text-faint: #606060;
+      --page-accent: #ededed;
+      --page-accent-text: #0a0a0a;
+      --page-code-bg: #1a1a1a;
+      --page-code-border: #272727;
+      --page-badge-bg: #ededed;
+      --page-badge-text: #0a0a0a;
+      --page-hover-border: #444444;
+      --page-hover-shadow: 0 1px 4px rgba(0, 0, 0, 0.3);
+      --page-green: #4ade80;
+      --page-counter-active-bg: #1c1c1c;
+    }
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    body {
+      margin: 0;
+      color: var(--page-text);
+      background: var(--page-bg);
+      transition:
+        background 0.3s ease,
+        color 0.3s ease;
+    }
+    </style>
   </head>
   <body>
     <div id="root"></div>

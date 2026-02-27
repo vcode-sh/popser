@@ -2,7 +2,7 @@ import { toast } from "popser";
 import { createElement } from "react";
 import type { DemoButton } from "../components.js";
 import { DemoCard, DemoSection } from "../components.js";
-import { gridStyle } from "../styles.js";
+import { colors, gridStyle } from "../styles.js";
 import { decrement, increment, tracked } from "../toast-counter.js";
 
 const buttons: DemoButton[] = [
@@ -30,11 +30,12 @@ const buttons: DemoButton[] = [
                 alignItems: "center",
                 gap: 12,
                 padding: "14px 16px",
-                background: "#fff",
+                background: "var(--popser-bg)",
                 borderRadius: 8,
-                border: "1px solid #e5e5e5",
-                boxShadow: "0 4px 12px rgba(0,0,0,0.08)",
+                border: "1px solid var(--popser-border)",
+                boxShadow: "var(--popser-shadow)",
                 fontSize: 14,
+                color: "var(--popser-fg)",
               },
             },
             createElement("span", null, "Custom JSX toast!"),
@@ -50,9 +51,10 @@ const buttons: DemoButton[] = [
                   padding: "4px 10px",
                   fontSize: 12,
                   fontWeight: 600,
-                  border: "1px solid #e5e5e5",
+                  border: "1px solid var(--popser-border)",
                   borderRadius: 6,
-                  background: "#fff",
+                  background: "var(--popser-bg)",
+                  color: "var(--popser-fg)",
                   cursor: "pointer",
                 },
               },
@@ -185,8 +187,8 @@ const buttons: DemoButton[] = [
               padding: "4px 10px",
               fontSize: 12,
               fontWeight: 600,
-              background: "#111",
-              color: "#fff",
+              background: colors.accent,
+              color: colors.accentText,
               border: "none",
               borderRadius: 4,
               cursor: "pointer",
@@ -203,8 +205,8 @@ const buttons: DemoButton[] = [
               fontSize: 12,
               fontWeight: 500,
               background: "transparent",
-              color: "#666",
-              border: "1px solid #e5e5e5",
+              color: colors.textMuted,
+              border: `1px solid ${colors.border}`,
               borderRadius: 4,
               cursor: "pointer",
             },

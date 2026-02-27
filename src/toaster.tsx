@@ -68,9 +68,13 @@ function ToasterContent({
   const { toasts } = Toast.useToastManager();
   const [isMobile, setIsMobile] = useState(false);
   const [isHovering, setIsHovering] = useState(false);
+  const [resolvedTheme, setResolvedTheme] = useState<"light" | "dark">(
+    theme === "system" ? "light" : theme
+  );
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const isExpanded = expand || isHovering;
+  const effectivePosition = isMobile ? "bottom-center" : position;
 
   const viewportStyle = useMemo(
     () =>
@@ -116,6 +120,19 @@ function ToasterContent({
   }, []);
 
   useEffect(() => {
+    if (theme !== "system") {
+      setResolvedTheme(theme);
+      return;
+    }
+    const mql = window.matchMedia("(prefers-color-scheme: dark)");
+    setResolvedTheme(mql.matches ? "dark" : "light");
+    const handler = (e: MediaQueryListEvent) =>
+      setResolvedTheme(e.matches ? "dark" : "light");
+    mql.addEventListener("change", handler);
+    return () => mql.removeEventListener("change", handler);
+  }, [theme]);
+
+  useEffect(() => {
     const mql = window.matchMedia(`(max-width: ${mobileBreakpoint}px)`);
     setIsMobile(mql.matches);
     const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
@@ -131,9 +148,10 @@ function ToasterContent({
         data-expanded={isExpanded || undefined}
         data-mobile={isMobile || undefined}
         data-popser-viewport
-        data-position={position}
+        data-position={effectivePosition}
         data-rich-colors={richColors || undefined}
-        data-theme={theme}
+        data-theme={resolvedTheme}
+        onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
         style={viewportStyle}
       >
@@ -145,8 +163,6 @@ function ToasterContent({
                 classNames={classNames}
                 closeButton={closeButton}
                 icons={icons}
-                onMouseEnter={isAnchored ? undefined : handleMouseEnter}
-                onMouseLeave={isAnchored ? undefined : handleMouseLeave}
                 richColors={richColors}
                 swipeDirection={swipeDirection}
                 toast={toast}

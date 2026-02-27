@@ -57,12 +57,13 @@ describe("Toaster", () => {
     expect(viewport?.getAttribute("data-position")).toBe("top-center");
   });
 
-  it("renders viewport with default theme system", () => {
+  it("renders viewport with default theme system (resolves to light/dark)", () => {
     act(() => {
       root.render(<Toaster />);
     });
     const viewport = document.querySelector("[data-popser-viewport]");
-    expect(viewport?.getAttribute("data-theme")).toBe("system");
+    // "system" theme resolves to "light" or "dark" based on prefers-color-scheme
+    expect(["light", "dark"]).toContain(viewport?.getAttribute("data-theme"));
   });
 
   it("renders viewport with custom theme", () => {

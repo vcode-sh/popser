@@ -50,7 +50,7 @@ function buildCodePreview(config: ToasterConfig): string {
     .join("\n");
 }
 
-const rowBorder = {
+const rowBorder: React.CSSProperties = {
   ...controlRowStyle,
   marginTop: 10,
   paddingTop: 10,

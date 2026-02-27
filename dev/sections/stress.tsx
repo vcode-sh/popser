@@ -75,8 +75,8 @@ export function StressSection() {
           onClick={closeAll}
           style={{
             ...pillStyle(false),
-            borderColor: "#ef4444",
-            color: "#ef4444",
+            borderColor: "oklch(0.637 0.237 25)",
+            color: "oklch(0.637 0.237 25)",
           }}
           type="button"
         >

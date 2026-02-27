@@ -28,7 +28,7 @@ export const defaultConfig: ToasterConfig = {
   position: "bottom-right",
   richColors: false,
   swipeDirection: ["down", "right"],
-  theme: "light",
+  theme: "system",
   timeout: 5000,
   unstyled: false,
   useCustomIcons: false,

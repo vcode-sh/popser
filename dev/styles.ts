@@ -1,17 +1,21 @@
 export const colors = {
-  bg: "#fafafa",
-  card: "#ffffff",
-  border: "#e5e5e5",
-  borderLight: "#f0f0f0",
-  text: "#111111",
-  textMuted: "#666666",
-  textFaint: "#999999",
-  accent: "#111111",
-  accentText: "#ffffff",
-  codeBackground: "#f5f5f5",
-  codeBorder: "#ebebeb",
-  badgeBg: "#111111",
-  badgeText: "#ffffff",
+  bg: "var(--page-bg)",
+  card: "var(--page-card)",
+  border: "var(--page-border)",
+  borderLight: "var(--page-border-light)",
+  text: "var(--page-text)",
+  textMuted: "var(--page-text-muted)",
+  textFaint: "var(--page-text-faint)",
+  accent: "var(--page-accent)",
+  accentText: "var(--page-accent-text)",
+  codeBackground: "var(--page-code-bg)",
+  codeBorder: "var(--page-code-border)",
+  badgeBg: "var(--page-badge-bg)",
+  badgeText: "var(--page-badge-text)",
+  hoverBorder: "var(--page-hover-border)",
+  hoverShadow: "var(--page-hover-shadow)",
+  green: "var(--page-green)",
+  counterActiveBg: "var(--page-counter-active-bg)",
 };
 
 export const containerStyle: React.CSSProperties = {
@@ -65,7 +69,7 @@ export const toastCounterStyle = (count: number): React.CSSProperties => ({
   color: count > 0 ? colors.text : colors.textFaint,
   padding: "6px 14px",
   borderRadius: 9999,
-  background: count > 0 ? "#f0f0f0" : "transparent",
+  background: count > 0 ? colors.counterActiveBg : "transparent",
   border: `1px solid ${count > 0 ? colors.border : "transparent"}`,
   transition: "all 0.2s ease",
 });
@@ -74,7 +78,7 @@ export const counterDotStyle = (count: number): React.CSSProperties => ({
   width: 8,
   height: 8,
   borderRadius: "50%",
-  background: count > 0 ? "#22c55e" : colors.border,
+  background: count > 0 ? colors.green : colors.border,
   transition: "background 0.2s ease",
 });
 
