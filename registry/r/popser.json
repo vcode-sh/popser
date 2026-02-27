@@ -4,15 +4,15 @@
   "type": "registry:ui",
   "title": "Popser",
   "description": "Toast notifications built on Base UI. Sonner-compatible imperative API with deduplication and rich colors.",
-  "dependencies": ["popser", "next-themes"],
+  "dependencies": ["@vcui/popser", "next-themes"],
   "devDependencies": [],
   "registryDependencies": [],
   "categories": ["notifications"],
-  "docs": "## Usage\n\nAdd the `<Toaster />` component to your root layout:\n\n```tsx\nimport { Toaster } from \"@/components/ui/popser\";\n\nexport default function RootLayout({ children }) {\n  return (\n    <html>\n      <body>\n        {children}\n        <Toaster />\n      </body>\n    </html>\n  );\n}\n```\n\nThen trigger toasts from anywhere:\n\n```tsx\nimport { toast } from \"popser\";\n\ntoast.success(\"Saved successfully\");\ntoast.error(\"Something went wrong\");\ntoast.promise(fetchData(), {\n  loading: \"Loading...\",\n  success: \"Done!\",\n  error: \"Failed\",\n});\n```",
+  "docs": "## Usage\n\nAdd the `<Toaster />` component to your root layout:\n\n```tsx\nimport { Toaster } from \"@/components/ui/popser\";\n\nexport default function RootLayout({ children }) {\n  return (\n    <html>\n      <body>\n        {children}\n        <Toaster />\n      </body>\n    </html>\n  );\n}\n```\n\nThen trigger toasts from anywhere:\n\n```tsx\nimport { toast } from \"@vcui/popser\";\n\ntoast.success(\"Saved successfully\");\ntoast.error(\"Something went wrong\");\ntoast.promise(fetchData(), {\n  loading: \"Loading...\",\n  success: \"Done!\",\n  error: \"Failed\",\n});\n```",
   "files": [
     {
       "path": "ui/popser.tsx",
-      "content": "\"use client\";\n\nimport \"popser/styles\";\n\nimport { useTheme } from \"next-themes\";\nimport { Toaster as PopserToaster } from \"popser\";\nimport type { ToasterProps } from \"popser\";\n\nconst Toaster = ({\n  richColors = true,\n  style,\n  ...props\n}: Partial<ToasterProps>) => {\n  const { theme = \"system\" } = useTheme();\n\n  return (\n    <PopserToaster\n      theme={theme as ToasterProps[\"theme\"]}\n      richColors={richColors}\n      style={\n        {\n          \"--popser-bg\": \"var(--popover)\",\n          \"--popser-fg\": \"var(--popover-foreground)\",\n          \"--popser-border\": \"var(--border)\",\n          \"--popser-radius\": \"var(--radius)\",\n          \"--popser-shadow\":\n            \"0 4px 12px color-mix(in oklch, var(--foreground) 10%, transparent)\",\n          ...style,\n        } as React.CSSProperties\n      }\n      {...props}\n    />\n  );\n};\n\nexport { Toaster };\n",
+      "content": "\"use client\";\n\nimport \"@vcui/popser/styles\";\n\nimport { useTheme } from \"next-themes\";\nimport { Toaster as PopserToaster } from \"@vcui/popser\";\nimport type { ToasterProps } from \"@vcui/popser\";\n\nconst Toaster = ({\n  richColors = true,\n  style,\n  ...props\n}: Partial<ToasterProps>) => {\n  const { theme = \"system\" } = useTheme();\n\n  return (\n    <PopserToaster\n      theme={theme as ToasterProps[\"theme\"]}\n      richColors={richColors}\n      style={\n        {\n          \"--popser-bg\": \"var(--popover)\",\n          \"--popser-fg\": \"var(--popover-foreground)\",\n          \"--popser-border\": \"var(--border)\",\n          \"--popser-radius\": \"var(--radius)\",\n          \"--popser-shadow\":\n            \"0 4px 12px color-mix(in oklch, var(--foreground) 10%, transparent)\",\n          ...style,\n        } as React.CSSProperties\n      }\n      {...props}\n    />\n  );\n};\n\nexport { Toaster };\n",
       "type": "registry:ui"
     }
   ]

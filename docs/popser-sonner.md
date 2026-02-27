@@ -51,7 +51,7 @@
 
 ```diff
 - import { toast } from "sonner";
-+ import { toast } from "popser";
++ import { toast } from "@vcui/popser";
 
 - toast.dismiss(id);
 + toast.close(id);
@@ -166,7 +166,7 @@
 
 **Sonner #632, #633 (5 upvotes each):** Critical styling is gated behind `data-styled="true"` selector. Custom styles require `!important` to override.
 
-**Popser:** Headless Base UI primitives. CSS is opt-in (`import "popser/styles"`). Your styles always win. OKLCH tokens via CSS variables -- override with a single `:root` block. The only `!important` usage is internal: enter/exit animations (`data-starting-style`/`data-ending-style`) use `!important` to override the collapsed stacking transforms. User-facing styles never need it.
+**Popser:** Headless Base UI primitives. CSS is opt-in (`import "@vcui/popser/styles"`). Your styles always win. OKLCH tokens via CSS variables -- override with a single `:root` block. The only `!important` usage is internal: enter/exit animations (`data-starting-style`/`data-ending-style`) use `!important` to override the collapsed stacking transforms. User-facing styles never need it.
 
 ### 8. Tailwind v4 Compatible
 
@@ -330,10 +330,10 @@ Toast.createToastManager() (Base UI singleton)
 
 ### Popser
 
-- CSS is a separate opt-in file (`import "popser/styles"`)
+- CSS is a separate opt-in file (`import "@vcui/popser/styles"`)
 - OKLCH color space (Tailwind v4 native)
 - CSS custom properties documented and prefixed (`--popser-*`)
-- Token file importable separately (`import "popser/tokens"`)
+- Token file importable separately (`import "@vcui/popser/tokens"`)
 - User styles never need `!important` (internal `!important` only on enter/exit to override stacking)
 - `mobileBreakpoint` prop drives JS `matchMedia` + `data-mobile` attribute
 - `unstyled` mode for zero default styles
@@ -511,7 +511,7 @@ function Toaster(props) {
 
 ```tsx
 // components/ui/popser.tsx (via npx shadcn add @vcode-sh/popser)
-import { Toaster as PopserToaster } from "popser";
+import { Toaster as PopserToaster } from "@vcui/popser";
 
 function Toaster(props) {
   const { theme } = useTheme();

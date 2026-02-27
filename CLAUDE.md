@@ -1,12 +1,12 @@
 # popser
 
-Toast notifications for React. Built on Base UI Toast primitives. Sonner-compatible imperative API. Published as `popser` on npm.
+Toast notifications for React. Built on Base UI Toast primitives. Sonner-compatible imperative API. Published as `@vcui/popser` on npm.
 
 ## Architecture
 
 Single entry point:
 
-- **`src/index.ts`** -> `popser` -- Public barrel export (toast, Toaster, useToaster, types)
+- **`src/index.ts`** -> `@vcui/popser` -- Public barrel export (toast, Toaster, useToaster, types)
 
 Core modules:
 
@@ -26,7 +26,7 @@ Components:
 
 Styles:
 
-- **`src/styles/popser.css`** -- Default styles (opt-in import via `popser/styles`)
+- **`src/styles/popser.css`** -- Default styles (opt-in import via `@vcui/popser/styles`)
 - **`src/styles/tokens.css`** -- CSS custom properties (color tokens, sizes)
 
 ## Code Style

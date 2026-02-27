@@ -8,9 +8,9 @@
       "type": "registry:ui",
       "title": "Popser",
       "description": "Toast notifications built on Base UI. Sonner-compatible imperative API with deduplication and rich colors.",
-      "dependencies": ["popser", "next-themes"],
+      "dependencies": ["@vcui/popser", "next-themes"],
       "categories": ["notifications"],
-      "docs": "## Usage\n\nAdd the `<Toaster />` component to your root layout:\n\n```tsx\nimport { Toaster } from \"@/components/ui/popser\";\n\nexport default function RootLayout({ children }) {\n  return (\n    <html>\n      <body>\n        {children}\n        <Toaster />\n      </body>\n    </html>\n  );\n}\n```\n\nThen trigger toasts from anywhere:\n\n```tsx\nimport { toast } from \"popser\";\n\ntoast.success(\"Saved successfully\");\ntoast.error(\"Something went wrong\");\ntoast.promise(fetchData(), {\n  loading: \"Loading...\",\n  success: \"Done!\",\n  error: \"Failed\",\n});\n```",
+      "docs": "## Usage\n\nAdd the `<Toaster />` component to your root layout:\n\n```tsx\nimport { Toaster } from \"@/components/ui/popser\";\n\nexport default function RootLayout({ children }) {\n  return (\n    <html>\n      <body>\n        {children}\n        <Toaster />\n      </body>\n    </html>\n  );\n}\n```\n\nThen trigger toasts from anywhere:\n\n```tsx\nimport { toast } from \"@vcui/popser\";\n\ntoast.success(\"Saved successfully\");\ntoast.error(\"Something went wrong\");\ntoast.promise(fetchData(), {\n  loading: \"Loading...\",\n  success: \"Done!\",\n  error: \"Failed\",\n});\n```",
       "files": [
         {
           "path": "ui/popser.tsx",

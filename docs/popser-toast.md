@@ -131,7 +131,7 @@ Popser provides an imperative API callable from anywhere:
 
 ```ts
 // Popser -- works outside React
-import { toast } from "popser";
+import { toast } from "@vcui/popser";
 
 toast.success("Photo uploaded", {
   description: "12 photos added.",
@@ -154,8 +154,8 @@ Base UI ships zero CSS. You style from scratch.
 Popser ships two opt-in CSS files:
 
 ```ts
-import "popser/styles";  // Full default styles (~9 KB)
-import "popser/tokens";  // Just CSS custom properties (~2 KB)
+import "@vcui/popser/styles";  // Full default styles (~9 KB)
+import "@vcui/popser/tokens";  // Just CSS custom properties (~2 KB)
 ```
 
 OKLCH color space. Light + dark themes. Rich color variants for all 5 types. Loading spinner animation. Mobile responsive. Position variants. Enter/exit transitions.

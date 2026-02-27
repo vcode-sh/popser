@@ -6,14 +6,14 @@ No `!important`. No memory leaks. No hardcoded breakpoints.
 ## Install
 
 ```bash
-npm install popser @base-ui/react
+npm install @vcui/popser @base-ui/react
 ```
 
 ## Quick Start
 
 ```tsx
-import { toast, Toaster } from "popser";
-import "popser/styles";
+import { toast, Toaster } from "@vcui/popser";
+import "@vcui/popser/styles";
 
 function App() {
   return (
@@ -197,7 +197,7 @@ Target every part of the toast:
 React hook that returns the Base UI toast manager context. Use it when you need direct access to the toast list or manager methods inside a component.
 
 ```tsx
-import { useToaster } from "popser";
+import { useToaster } from "@vcui/popser";
 
 function ToastCount() {
   const { toasts } = useToaster();
@@ -214,13 +214,13 @@ Must be rendered inside a `<Toaster>` (which provides the Base UI `Toast.Provide
 Import the built-in stylesheet for a working setup out of the box:
 
 ```ts
-import "popser/styles";
+import "@vcui/popser/styles";
 ```
 
 This includes layout, animations, and light/dark token defaults. You can also import tokens separately:
 
 ```ts
-import "popser/tokens";
+import "@vcui/popser/tokens";
 ```
 
 ### CSS custom properties

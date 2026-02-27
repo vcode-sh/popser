@@ -689,4 +689,53 @@ describe("anchored toasts", () => {
 
     expect(onClick).toHaveBeenCalledOnce();
   });
+
+  it("anchored toast with promise state transitions preserves anchor", async () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+
+    let resolve: (value: string) => void;
+    const p = new Promise<string>((r) => {
+      resolve = r;
+    });
+
+    act(() => {
+      toast.promise(p, {
+        loading: "Saving...",
+        success: "Saved!",
+        error: "Failed",
+      });
+    });
+
+    // Loading state should not have anchored (promise doesn't pass anchor options)
+    // Now test with anchor options via a direct anchored toast + update approach
+    let id: string;
+    act(() => {
+      id = toast("Promise-like loading", { anchor, type: "loading" });
+    });
+
+    let toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot?.getAttribute("data-anchored")).toBeTruthy();
+    expect(toastRoot?.getAttribute("data-type")).toBe("loading");
+
+    // Simulate promise resolution by updating to success
+    act(() => {
+      toast.update(id!, {
+        title: "Promise resolved!",
+        type: "success",
+        anchor,
+      });
+    });
+
+    toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot?.getAttribute("data-anchored")).toBeTruthy();
+    expect(toastRoot?.getAttribute("data-type")).toBe("success");
+
+    // Resolve the actual promise to avoid unhandled rejection
+    resolve!("done");
+    await act(async () => {
+      await p;
+    });
+  });
 });

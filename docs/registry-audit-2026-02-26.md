@@ -66,7 +66,7 @@ Both files validated against official shadcn schemas.
 | `type` | `registry:ui` | ✓ Valid |
 | `title` | `Popser` | ✓ Clear |
 | `description` | Toast notifications... | ✓ Accurate |
-| `dependencies` | `["popser", "next-themes"]` | ✓ Correct |
+| `dependencies` | `["@vcui/popser", "next-themes"]` | ✓ Correct |
 | `devDependencies` | `[]` | ✓ Correct (empty) |
 | `registryDependencies` | `[]` | ✓ Correct (empty) |
 | `categories` | `["notifications"]` | ✓ Valid |
@@ -85,15 +85,15 @@ Both files validated against official shadcn schemas.
 ```tsx
 "use client";
 
-import "popser/styles";
+import "@vcui/popser/styles";
 
 import { useTheme } from "next-themes";
-import { Toaster as PopserToaster } from "popser";
-import type { ToasterProps } from "popser";
+import { Toaster as PopserToaster } from "@vcui/popser";
+import type { ToasterProps } from "@vcui/popser";
 ```
 
 - ✓ "use client" directive present (required for client component)
-- ✓ CSS import for default styles: `import "popser/styles"`
+- ✓ CSS import for default styles: `import "@vcui/popser/styles"`
 - ✓ useTheme hook from next-themes
 - ✓ Toaster component properly aliased
 - ✓ ToasterProps imported as type (correct `type` keyword)
@@ -253,7 +253,7 @@ Default light mode values:
 
 ### Declared in popser.json
 ```json
-"dependencies": ["popser", "next-themes"]
+"dependencies": ["@vcui/popser", "next-themes"]
 ```
 
 ### Verification
@@ -271,7 +271,7 @@ Default light mode values:
 
 ### Side-Effect CSS Import Issue
 
-**Finding:** popser package has `"sideEffects": false`, but registry component does `import "popser/styles"` (side-effect import).
+**Finding:** popser package has `"sideEffects": false`, but registry component does `import "@vcui/popser/styles"` (side-effect import).
 
 **Analysis:**
 ```
@@ -332,7 +332,7 @@ export default function RootLayout({ children }) {
 Then trigger toasts from anywhere:
 
 ```tsx
-import { toast } from "popser";
+import { toast } from "@vcui/popser";
 
 toast.success("Saved successfully");
 toast.error("Something went wrong");
@@ -363,7 +363,7 @@ toast.promise(fetchData(), {
 | type | "registry:ui" | "registry:ui" | ✓ |
 | title | "Popser" | "Popser" | ✓ |
 | description | (identical text) | (identical text) | ✓ |
-| dependencies | ["popser", "next-themes"] | ["popser", "next-themes"] | ✓ |
+| dependencies | ["@vcui/popser", "next-themes"] | ["@vcui/popser", "next-themes"] | ✓ |
 | categories | ["notifications"] | ["notifications"] | ✓ |
 | docs | (identical markdown) | (identical markdown) | ✓ |
 
@@ -415,7 +415,7 @@ export { Toaster }
 |--------|--------|--------|--------|
 | "use client" directive | ✓ | ✓ | Identical |
 | useTheme from next-themes | ✓ | ✓ | Identical |
-| Type definition | `type ToasterProps = React.ComponentProps<typeof Sonner>` | `import type { ToasterProps } from "popser"` | Both valid; Popser cleaner (exported type) |
+| Type definition | `type ToasterProps = React.ComponentProps<typeof Sonner>` | `import type { ToasterProps } from "@vcui/popser"` | Both valid; Popser cleaner (exported type) |
 | Theme assignment | `theme as ToasterProps["theme"]` | `theme as ToasterProps["theme"]` | Identical |
 | Component wrapping | `<Sonner />` | `<PopserToaster />` | Same pattern |
 | Props spreading | `{...props}` at end | `{...props}` at end | Identical |
@@ -459,7 +459,7 @@ export { Toaster }
 
 **Details:**
 - popser's package.json has `"sideEffects": false`
-- Registry component imports CSS: `import "popser/styles"`
+- Registry component imports CSS: `import "@vcui/popser/styles"`
 - Concern: Will CSS still load?
 
 **Resolution:**
@@ -563,11 +563,11 @@ $ npx shadcn-ui add popser
 **Step 1: CLI reads registry**
 - Loads registry.json
 - Finds "popser" entry
-- Identifies dependencies: ["popser", "next-themes"]
+- Identifies dependencies: ["@vcui/popser", "next-themes"]
 
 **Step 2: CLI installs dependencies**
 ```bash
-npm install popser next-themes
+npm install @vcui/popser next-themes
 ```
 - ✓ popser on npm (v0.2.0)
 - ✓ next-themes on npm (14.0+)
@@ -595,7 +595,7 @@ export default function RootLayout({ children }) {
 
 **Step 5: User uses toast API**
 ```tsx
-import { toast } from "popser";
+import { toast } from "@vcui/popser";
 
 function MyComponent() {
   return (

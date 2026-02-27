@@ -19,8 +19,8 @@ All notable changes to this project will be documented in this file.
 - Swipe to dismiss with configurable direction(s)
 - `useToaster()` hook for React context consumers
 - shadcn registry support (`npx shadcn add @vcode-sh/popser`)
-- Default styles via `import "popser/styles"`
-- Separate token import via `import "popser/tokens"`
+- Default styles via `import "@vcui/popser/styles"`
+- Separate token import via `import "@vcui/popser/tokens"`
 - Unstyled mode for full CSS control
 - Stacking with expand-on-hover
 - Per-toast `className`, `style`, `onClose`, `onRemove` overrides
