@@ -9,7 +9,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 0.4.0 | 2.x |
+| Version | 1.0.0 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | ~12.6 KB (unminified) | ~2-3 KB (minified+gzip) |
