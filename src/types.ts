@@ -10,6 +10,7 @@ export interface PopserAction {
 export interface PopserClassNames {
   actionButton?: string;
   actions?: string;
+  arrow?: string;
   cancelButton?: string;
   closeButton?: string;
   content?: string;
@@ -23,6 +24,34 @@ export interface PopserClassNames {
 
 export interface PopserOptions {
   action?: PopserAction | ReactNode;
+  /** Element to position the toast against. When set, toast becomes anchored. */
+  anchor?: Element | null;
+  /** Alignment along the anchor edge. @default "center" */
+  anchorAlign?: "start" | "center" | "end";
+  /** Alignment axis offset in pixels. @default 0 */
+  anchorAlignOffset?: number;
+  /** Collision boundary for auto-flip. @default "clipping-ancestors" */
+  anchorCollisionBoundary?: "clipping-ancestors" | Element | Element[];
+  /** Padding from collision boundary. @default 5 */
+  anchorCollisionPadding?: number;
+  /** Distance from anchor in pixels. @default 8 */
+  anchorOffset?: number;
+  /** CSS position method for anchor positioning. @default "absolute" */
+  anchorPositionMethod?: "absolute" | "fixed";
+  /** Which side of the anchor to place the toast. @default "bottom" */
+  anchorSide?:
+    | "top"
+    | "bottom"
+    | "left"
+    | "right"
+    | "inline-end"
+    | "inline-start";
+  /** Keep toast visible when anchor scrolls out of view. @default false */
+  anchorSticky?: boolean;
+  /** Whether to show an arrow pointing at the anchor. @default false */
+  arrow?: boolean;
+  /** Padding around arrow from toast edges. @default 5 */
+  arrowPadding?: number;
   cancel?: PopserAction | ReactNode;
   className?: string;
   classNames?: Partial<PopserClassNames>;
@@ -108,6 +137,7 @@ export type PopserSwipeDirection = "up" | "down" | "left" | "right";
  */
 export interface PopserInternalData {
   action?: PopserAction | ReactNode;
+  arrow?: boolean;
   cancel?: PopserAction | ReactNode;
   className?: string;
   classNames?: Partial<PopserClassNames>;

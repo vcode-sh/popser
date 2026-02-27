@@ -20,7 +20,9 @@
     "./styles": "./dist/styles/popser.css",
     "./tokens": "./dist/styles/tokens.css"
   },
-  "sideEffects": false,
+  "sideEffects": [
+    "**/*.css"
+  ],
   "files": [
     "dist"
   ],

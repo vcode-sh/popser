@@ -5,6 +5,20 @@
 @import "./content.css";
 @import "./controls.css";
 
+/* ─── Arrow for anchored toasts ──────────────────────────────────── */
+
+[data-popser-arrow] {
+  width: 10px;
+  height: 10px;
+  background: var(--popser-bg, oklch(1 0 0));
+  transform: rotate(45deg);
+}
+
+[data-popser-viewport][data-theme="dark"] [data-popser-arrow],
+[data-popser-viewport][data-rich-colors] [data-popser-arrow] {
+  background: inherit;
+}
+
 /* ─── Swipe exit animations (#7) ──────────────────────────────────── */
 /* Base UI sets data-swipe-direction on toast roots during swipe dismissal */
 

@@ -10,6 +10,50 @@ import type {
 } from "./types.js";
 
 /**
+ * Builds the `positionerProps` object from anchor-related options.
+ * Returns `undefined` when no anchor is set.
+ */
+function buildPositionerProps(options: Partial<PopserOptions>) {
+  const {
+    anchor,
+    anchorSide,
+    anchorAlign,
+    anchorOffset,
+    anchorAlignOffset,
+    arrowPadding,
+    anchorPositionMethod,
+    anchorSticky,
+    anchorCollisionBoundary,
+    anchorCollisionPadding,
+  } = options;
+
+  if (!anchor) {
+    return undefined;
+  }
+
+  return {
+    anchor,
+    side: anchorSide ?? "bottom",
+    sideOffset: anchorOffset ?? 8,
+    align: anchorAlign ?? "center",
+    ...(anchorAlignOffset !== undefined && {
+      alignOffset: anchorAlignOffset,
+    }),
+    ...(anchorPositionMethod !== undefined && {
+      positionMethod: anchorPositionMethod,
+    }),
+    ...(anchorSticky !== undefined && { sticky: anchorSticky }),
+    ...(anchorCollisionBoundary !== undefined && {
+      collisionBoundary: anchorCollisionBoundary,
+    }),
+    ...(anchorCollisionPadding !== undefined && {
+      collisionPadding: anchorCollisionPadding,
+    }),
+    ...(arrowPadding !== undefined && { arrowPadding }),
+  };
+}
+
+/**
  * Converts PopserOptions into the shape expected by Base UI's
  * `ToastManager.add()`. Popser-specific fields are stored inside
  * `data.__popser` to prevent collision with user-provided data fields.
@@ -41,10 +85,13 @@ export function toManagerOptions(
     dismissible,
     richColors,
     unstyled,
+    arrow,
     data,
   } = options;
 
   const effectiveTimeout = timeout ?? duration;
+
+  const positionerProps = buildPositionerProps(options);
 
   const __popser: PopserInternalData = {
     icon,
@@ -57,6 +104,7 @@ export function toManagerOptions(
     richColors,
     unstyled,
     ...(jsx !== undefined && { jsx }),
+    ...(arrow !== undefined && { arrow }),
   };
 
   return {
@@ -66,6 +114,7 @@ export function toManagerOptions(
     description,
     timeout: effectiveTimeout,
     priority,
+    positionerProps,
     onClose: () => {
       const toastId = resolvedId.current;
       const wasManuallyClosed = isManuallyClosedToast(toastId);
@@ -83,6 +132,40 @@ export function toManagerOptions(
       ...data,
       __popser,
     },
+  };
+}
+
+/**
+ * Builds a partial `PopserInternalData` from update options,
+ * only including fields that were explicitly provided.
+ */
+function buildUpdateInternalData(
+  options: PopserUpdateOptions
+): Partial<PopserInternalData> {
+  const {
+    icon,
+    action,
+    cancel,
+    className,
+    classNames,
+    style,
+    dismissible,
+    richColors,
+    unstyled,
+    arrow,
+  } = options;
+
+  return {
+    ...(icon !== undefined && { icon }),
+    ...(action !== undefined && { action }),
+    ...(cancel !== undefined && { cancel }),
+    ...(className !== undefined && { className }),
+    ...(classNames !== undefined && { classNames }),
+    ...(style !== undefined && { style }),
+    ...(dismissible !== undefined && { dismissible }),
+    ...(richColors !== undefined && { richColors }),
+    ...(unstyled !== undefined && { unstyled }),
+    ...(arrow !== undefined && { arrow }),
   };
 }
 
@@ -106,23 +189,16 @@ export function toManagerUpdateOptions(
     timeout,
     duration,
     priority,
-    icon,
-    action,
-    cancel,
     onClose,
     onAutoClose,
     onDismiss,
     onRemove,
-    className,
-    classNames,
-    style,
-    dismissible,
-    richColors,
-    unstyled,
     data,
   } = options;
 
   const effectiveTimeout = timeout ?? duration;
+
+  const positionerProps = buildPositionerProps(options);
 
   // If any close-related callback is being updated, wrap it with internal
   // tracking logic just like toManagerOptions does at creation time.
@@ -145,17 +221,7 @@ export function toManagerUpdateOptions(
       }
     : undefined;
 
-  const __popser: Partial<PopserInternalData> = {
-    ...(icon !== undefined && { icon }),
-    ...(action !== undefined && { action }),
-    ...(cancel !== undefined && { cancel }),
-    ...(className !== undefined && { className }),
-    ...(classNames !== undefined && { classNames }),
-    ...(style !== undefined && { style }),
-    ...(dismissible !== undefined && { dismissible }),
-    ...(richColors !== undefined && { richColors }),
-    ...(unstyled !== undefined && { unstyled }),
-  };
+  const __popser = buildUpdateInternalData(options);
 
   return {
     ...(title !== undefined && { title }),
@@ -165,6 +231,7 @@ export function toManagerUpdateOptions(
     ...(priority !== undefined && { priority }),
     ...(wrappedOnClose !== undefined && { onClose: wrappedOnClose }),
     ...(onRemove !== undefined && { onRemove }),
+    ...(positionerProps !== undefined && { positionerProps }),
     data: {
       ...data,
       ...(Object.keys(__popser).length > 0 && { __popser }),
