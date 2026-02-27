@@ -1,4 +1,5 @@
 import type { ReactNode } from "react";
+import { resolveAnchor } from "./anchor-resolver.js";
 import {
   isManuallyClosedToast,
   removeManualCloseFlag,
@@ -12,6 +13,8 @@ import type {
 /**
  * Builds the `positionerProps` object from anchor-related options.
  * Returns `undefined` when no anchor is set.
+ * When a MouseEvent or {x,y} coordinates are provided, a synthetic DOM element
+ * is created and a `cleanup` function is returned to remove it.
  */
 function buildPositionerProps(options: Partial<PopserOptions>) {
   const {
@@ -27,29 +30,34 @@ function buildPositionerProps(options: Partial<PopserOptions>) {
     anchorCollisionPadding,
   } = options;
 
-  if (!anchor) {
-    return undefined;
+  const resolved = resolveAnchor(anchor ?? null);
+
+  if (!resolved) {
+    return { props: undefined, cleanup: undefined };
   }
 
   return {
-    anchor,
-    side: anchorSide ?? "bottom",
-    sideOffset: anchorOffset ?? 8,
-    align: anchorAlign ?? "center",
-    ...(anchorAlignOffset !== undefined && {
-      alignOffset: anchorAlignOffset,
-    }),
-    ...(anchorPositionMethod !== undefined && {
-      positionMethod: anchorPositionMethod,
-    }),
-    ...(anchorSticky !== undefined && { sticky: anchorSticky }),
-    ...(anchorCollisionBoundary !== undefined && {
-      collisionBoundary: anchorCollisionBoundary,
-    }),
-    ...(anchorCollisionPadding !== undefined && {
-      collisionPadding: anchorCollisionPadding,
-    }),
-    ...(arrowPadding !== undefined && { arrowPadding }),
+    props: {
+      anchor: resolved.element,
+      side: anchorSide ?? "bottom",
+      sideOffset: anchorOffset ?? 8,
+      align: anchorAlign ?? "center",
+      ...(anchorAlignOffset !== undefined && {
+        alignOffset: anchorAlignOffset,
+      }),
+      ...(anchorPositionMethod !== undefined && {
+        positionMethod: anchorPositionMethod,
+      }),
+      ...(anchorSticky !== undefined && { sticky: anchorSticky }),
+      ...(anchorCollisionBoundary !== undefined && {
+        collisionBoundary: anchorCollisionBoundary,
+      }),
+      ...(anchorCollisionPadding !== undefined && {
+        collisionPadding: anchorCollisionPadding,
+      }),
+      ...(arrowPadding !== undefined && { arrowPadding }),
+    },
+    cleanup: resolved.cleanup,
   };
 }
 
@@ -91,7 +99,8 @@ export function toManagerOptions(
 
   const effectiveTimeout = timeout ?? duration;
 
-  const positionerProps = buildPositionerProps(options);
+  const { props: positionerProps, cleanup: anchorCleanup } =
+    buildPositionerProps(options);
 
   const __popser: PopserInternalData = {
     icon,
@@ -127,7 +136,12 @@ export function toManagerOptions(
       onCloseInternal();
       onClose?.(toastId);
     },
-    onRemove,
+    onRemove: anchorCleanup
+      ? () => {
+          anchorCleanup();
+          onRemove?.();
+        }
+      : onRemove,
     data: {
       ...data,
       __popser,
@@ -198,7 +212,8 @@ export function toManagerUpdateOptions(
 
   const effectiveTimeout = timeout ?? duration;
 
-  const positionerProps = buildPositionerProps(options);
+  const { props: positionerProps, cleanup: anchorCleanup } =
+    buildPositionerProps(options);
 
   // If any close-related callback is being updated, wrap it with internal
   // tracking logic just like toManagerOptions does at creation time.
@@ -221,6 +236,14 @@ export function toManagerUpdateOptions(
       }
     : undefined;
 
+  let wrappedOnRemove = onRemove;
+  if (anchorCleanup) {
+    wrappedOnRemove = () => {
+      anchorCleanup();
+      onRemove?.();
+    };
+  }
+
   const __popser = buildUpdateInternalData(options);
 
   return {
@@ -230,7 +253,7 @@ export function toManagerUpdateOptions(
     ...(effectiveTimeout !== undefined && { timeout: effectiveTimeout }),
     ...(priority !== undefined && { priority }),
     ...(wrappedOnClose !== undefined && { onClose: wrappedOnClose }),
-    ...(onRemove !== undefined && { onRemove }),
+    ...(wrappedOnRemove !== undefined && { onRemove: wrappedOnRemove }),
     ...(positionerProps !== undefined && { positionerProps }),
     data: {
       ...data,

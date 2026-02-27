@@ -2,6 +2,7 @@ export { toast } from "./toast.js";
 export { Toaster } from "./toaster.js";
 export type {
   PopserAction,
+  PopserAnchor,
   PopserClassNames,
   PopserIcons,
   PopserInternalData,

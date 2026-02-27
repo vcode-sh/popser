@@ -1,7 +1,12 @@
 import { act } from "react";
 import { createRoot } from "react-dom/client";
 import { getManager, resetManager } from "./manager.js";
-import { clearActiveToasts, toast } from "./toast.js";
+import {
+  clearActiveAnchoredToastId,
+  clearActiveToasts,
+  getActiveAnchoredToastId,
+  toast,
+} from "./toast.js";
 import { toManagerOptions, toManagerUpdateOptions } from "./toast-mapper.js";
 import { Toaster } from "./toaster.js";
 
@@ -323,6 +328,7 @@ describe("anchored toasts", () => {
     vi.useFakeTimers();
     resetManager();
     clearActiveToasts();
+    clearActiveAnchoredToastId();
     container = document.createElement("div");
     document.body.appendChild(container);
     root = createRoot(container);
@@ -339,6 +345,12 @@ describe("anchored toasts", () => {
     document.body.removeChild(container);
     if (anchor.parentNode) {
       document.body.removeChild(anchor);
+    }
+    // Clean up any synthetic anchors left behind by tests
+    for (const el of document.querySelectorAll(
+      "[data-popser-synthetic-anchor]"
+    )) {
+      el.remove();
     }
     vi.useRealTimers();
   });
@@ -474,17 +486,137 @@ describe("anchored toasts", () => {
     expect(toastRoot?.getAttribute("data-anchored")).toBeTruthy();
   });
 
-  it("multiple anchored toasts to same element both render", () => {
+  it("second anchored toast replaces the first (only one at a time)", () => {
     act(() => {
       root.render(<Toaster limit={5} />);
     });
     act(() => {
       toast("First anchored", { anchor });
+    });
+
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+    expect(document.querySelector("[data-popser-title]")?.textContent).toBe(
+      "First anchored"
+    );
+
+    act(() => {
       toast("Second anchored", { anchor });
     });
 
+    // Only the second should remain
     const toasts = document.querySelectorAll("[data-anchored]");
-    expect(toasts.length).toBe(2);
+    expect(toasts.length).toBe(1);
+    expect(document.querySelector("[data-popser-title]")?.textContent).toBe(
+      "Second anchored"
+    );
+  });
+
+  it("anchored toast replaces previous even with different anchor types", () => {
+    act(() => {
+      root.render(<Toaster limit={5} />);
+    });
+
+    // Element anchor
+    act(() => {
+      toast("Element anchored", { anchor });
+    });
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+
+    // MouseEvent anchor replaces element anchor
+    const event = new MouseEvent("click", { clientX: 100, clientY: 200 });
+    act(() => {
+      toast("Cursor anchored", { anchor: event });
+    });
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+    expect(document.querySelector("[data-popser-title]")?.textContent).toBe(
+      "Cursor anchored"
+    );
+
+    // Coordinate anchor replaces MouseEvent anchor
+    act(() => {
+      toast("Coord anchored", { anchor: { x: 50, y: 50 } });
+    });
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+    expect(document.querySelector("[data-popser-title]")?.textContent).toBe(
+      "Coord anchored"
+    );
+  });
+
+  it("non-anchored toasts are NOT dismissed when anchored toast is created", () => {
+    act(() => {
+      root.render(<Toaster limit={5} />);
+    });
+
+    act(() => {
+      toast("Regular toast");
+    });
+    expect(document.querySelectorAll("[data-popser-root]").length).toBe(1);
+
+    act(() => {
+      toast("Anchored toast", { anchor });
+    });
+
+    // Both should exist: the regular toast + the anchored toast
+    expect(document.querySelectorAll("[data-popser-root]").length).toBe(2);
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+  });
+
+  it("non-anchored toast after anchored toast does NOT replace it", () => {
+    act(() => {
+      root.render(<Toaster limit={5} />);
+    });
+
+    act(() => {
+      toast("Anchored toast", { anchor });
+    });
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+
+    act(() => {
+      toast("Regular toast");
+    });
+
+    // Both should exist
+    expect(document.querySelectorAll("[data-popser-root]").length).toBe(2);
+    expect(document.querySelectorAll("[data-anchored]").length).toBe(1);
+  });
+
+  it("tracks activeAnchoredToastId correctly through lifecycle", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+
+    // No anchored toast initially
+    expect(getActiveAnchoredToastId()).toBeNull();
+
+    // Create anchored toast
+    let id: string;
+    act(() => {
+      id = toast("Anchored", { anchor });
+    });
+    expect(getActiveAnchoredToastId()).toBe(id!);
+
+    // Close it — tracking should clear
+    act(() => {
+      toast.close(id!);
+    });
+    expect(getActiveAnchoredToastId()).toBeNull();
+  });
+
+  it("toast.close() without args clears anchored tracking", () => {
+    act(() => {
+      root.render(<Toaster limit={5} />);
+    });
+
+    act(() => {
+      toast("Regular toast");
+      toast("Anchored toast", { anchor });
+    });
+    expect(getActiveAnchoredToastId()).not.toBeNull();
+
+    act(() => {
+      toast.close();
+    });
+    expect(getActiveAnchoredToastId()).toBeNull();
   });
 
   it("anchored toast with richColors applies data-rich-colors", () => {
@@ -688,6 +820,92 @@ describe("anchored toasts", () => {
     });
 
     expect(onClick).toHaveBeenCalledOnce();
+  });
+
+  it("MouseEvent anchor creates synthetic element and renders with data-anchored", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+
+    const event = new MouseEvent("click", { clientX: 150, clientY: 250 });
+    act(() => {
+      toast("Cursor toast", { anchor: event });
+    });
+
+    const toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot).toBeTruthy();
+    expect(toastRoot?.getAttribute("data-anchored")).toBeTruthy();
+
+    // Synthetic anchor element should be in the DOM
+    const synthetic = document.querySelector(
+      "[data-popser-synthetic-anchor]"
+    ) as HTMLElement;
+    expect(synthetic).toBeTruthy();
+    expect(synthetic.style.transform).toBe("translate(150px, 250px)");
+  });
+
+  it("{x, y} coordinate anchor creates synthetic element and renders with data-anchored", () => {
+    act(() => {
+      root.render(<Toaster />);
+    });
+
+    act(() => {
+      toast("Coord toast", { anchor: { x: 300, y: 100 } });
+    });
+
+    const toastRoot = document.querySelector("[data-popser-root]");
+    expect(toastRoot).toBeTruthy();
+    expect(toastRoot?.getAttribute("data-anchored")).toBeTruthy();
+
+    const synthetic = document.querySelector(
+      "[data-popser-synthetic-anchor]"
+    ) as HTMLElement;
+    expect(synthetic).toBeTruthy();
+    expect(synthetic.style.transform).toBe("translate(300px, 100px)");
+  });
+
+  it("synthetic anchor cleanup is composed into onRemove", () => {
+    const onRemoveSpy = vi.fn();
+    act(() => {
+      root.render(<Toaster />);
+    });
+
+    act(() => {
+      toast("Cleanup toast", {
+        anchor: { x: 50, y: 50 },
+        onRemove: onRemoveSpy,
+      });
+    });
+
+    // Synthetic anchor should exist in the DOM
+    const synthetic = document.querySelector(
+      "[data-popser-synthetic-anchor]"
+    ) as HTMLElement;
+    expect(synthetic).toBeTruthy();
+    expect(synthetic.style.transform).toBe("translate(50px, 50px)");
+
+    // Verify composition at the unit level: toManagerOptions wraps onRemove
+    // with synthetic anchor cleanup
+    const result = toManagerOptions(
+      "test",
+      { anchor: { x: 10, y: 20 }, onRemove: onRemoveSpy },
+      () => {},
+      { current: "" }
+    );
+
+    // The onRemove should be wrapped (not the raw spy)
+    expect(result.onRemove).not.toBe(onRemoveSpy);
+
+    // Calling the composed onRemove should call both cleanup and user callback
+    const syntheticFromMapper = document.querySelector(
+      "[data-popser-synthetic-anchor]:last-child"
+    ) as HTMLElement;
+    expect(syntheticFromMapper).toBeTruthy();
+
+    result.onRemove!();
+    expect(onRemoveSpy).toHaveBeenCalledOnce();
+    // The synthetic element created by toManagerOptions should be removed
+    expect(syntheticFromMapper.parentNode).toBeNull();
   });
 
   it("anchored toast with promise state transitions preserves anchor", async () => {

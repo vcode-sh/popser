@@ -17,6 +17,24 @@
   box-shadow: var(--popser-shadow);
 }
 
+/* ─── Anchored toasts ─────────────────────────────────────────────── */
+/* Anchored toasts are positioned by Toast.Positioner (Floating UI),
+ * not by the viewport stacking system. Reset all viewport-driven
+ * positioning, stacking opacity/transforms, and transitions. */
+
+[data-popser-root][data-anchored] {
+  position: relative;
+  inset: auto;
+  z-index: auto;
+  width: max-content;
+  max-width: var(--popser-width, 356px);
+  max-height: none;
+  overflow: visible;
+  opacity: 1;
+  transform: none;
+  transition: none;
+}
+
 /* Custom JSX toasts: strip decorative styles so user content renders cleanly */
 [data-popser-root][data-type="custom"] {
   padding: 0;
@@ -28,8 +46,10 @@
 
 /* Transitions only apply in collapsed mode (stacking animations).
  * In expanded mode, toasts switch to relative positioning instantly
- * to avoid jarring height/transform transitions during layout switch. */
-[data-popser-viewport]:not([data-expanded]) [data-popser-root] {
+ * to avoid jarring height/transform transitions during layout switch.
+ * Anchored toasts are excluded — positioned by Floating UI, not the stack. */
+[data-popser-viewport]:not([data-expanded])
+  [data-popser-root]:not([data-anchored]) {
   transition:
     transform 400ms,
     opacity 400ms,
@@ -37,14 +57,16 @@
 }
 
 /* Bottom positions: anchor toasts to the bottom of the viewport */
-[data-popser-viewport][data-position^="bottom"] [data-popser-root] {
+[data-popser-viewport][data-position^="bottom"]
+  [data-popser-root]:not([data-anchored]) {
   right: 0;
   bottom: 0;
   transform-origin: center bottom;
 }
 
 /* Top positions: anchor toasts to the top of the viewport */
-[data-popser-viewport][data-position^="top"] [data-popser-root] {
+[data-popser-viewport][data-position^="top"]
+  [data-popser-root]:not([data-anchored]) {
   top: 0;
   left: 0;
   transform-origin: center top;
@@ -68,7 +90,7 @@
 
 /* Collapsed: bottom positions (toasts stack upward) */
 [data-popser-viewport][data-position^="bottom"]:not([data-expanded])
-  [data-popser-root] {
+  [data-popser-root]:not([data-anchored]) {
   height: auto;
   max-height: var(--toast-frontmost-height, none);
   overflow: hidden;
@@ -90,7 +112,7 @@
 
 /* Collapsed: top positions (toasts stack downward) */
 [data-popser-viewport][data-position^="top"]:not([data-expanded])
-  [data-popser-root] {
+  [data-popser-root]:not([data-anchored]) {
   height: auto;
   max-height: var(--toast-frontmost-height, none);
   overflow: hidden;
@@ -106,7 +128,7 @@
 
 /* Collapsed: hide content of non-front toasts (only card shell visible) */
 [data-popser-viewport]:not([data-expanded])
-  [data-popser-root]:not(:first-child)
+  [data-popser-root]:not(:first-child):not([data-anchored])
   [data-popser-content]
   > * {
   opacity: 0;
@@ -160,7 +182,7 @@
 }
 
 /* Expanded toasts: switch from absolute to flow items */
-[data-popser-viewport][data-expanded] [data-popser-root] {
+[data-popser-viewport][data-expanded] [data-popser-root]:not([data-anchored]) {
   position: relative;
   inset: auto;
   z-index: auto;
@@ -174,7 +196,7 @@
 
 /* Expanded: restore content visibility for all toasts */
 [data-popser-viewport][data-expanded]
-  [data-popser-root]
+  [data-popser-root]:not([data-anchored])
   [data-popser-content]
   > * {
   opacity: 1;

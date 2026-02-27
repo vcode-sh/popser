@@ -127,19 +127,10 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
         swipeDirection={effectiveSwipeDirection}
         toast={toastData}
       >
-        {isAnchored ? (
-          <Toast.Positioner toast={toastData}>
-            {popser.arrow && (
-              <Toast.Arrow
-                className={mergedClassNames?.arrow}
-                data-popser-arrow
-              />
-            )}
-            {customContent}
-          </Toast.Positioner>
-        ) : (
-          customContent
+        {isAnchored && popser.arrow && (
+          <Toast.Arrow className={mergedClassNames?.arrow} data-popser-arrow />
         )}
+        {customContent}
       </Toast.Root>
     );
   }
@@ -201,19 +192,10 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
       swipeDirection={effectiveSwipeDirection}
       toast={toastData}
     >
-      {isAnchored ? (
-        <Toast.Positioner toast={toastData}>
-          {popser.arrow && (
-            <Toast.Arrow
-              className={mergedClassNames?.arrow}
-              data-popser-arrow
-            />
-          )}
-          {toastContent}
-        </Toast.Positioner>
-      ) : (
-        toastContent
+      {isAnchored && popser.arrow && (
+        <Toast.Arrow className={mergedClassNames?.arrow} data-popser-arrow />
       )}
+      {toastContent}
     </Toast.Root>
   );
 });

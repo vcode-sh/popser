@@ -1,34 +1,36 @@
 /* ─── Enter / exit transitions (Base UI data attributes) ───────────── */
 
-[data-popser-viewport] [data-popser-root][data-starting-style] {
+[data-popser-viewport]
+  [data-popser-root]:not([data-anchored])[data-starting-style] {
   opacity: 0;
 }
 
-[data-popser-viewport] [data-popser-root][data-ending-style] {
+[data-popser-viewport]
+  [data-popser-root]:not([data-anchored])[data-ending-style] {
   opacity: 0;
 }
 
 /* Bottom: slide up from below on enter */
 [data-popser-viewport][data-position^="bottom"]
-  [data-popser-root][data-starting-style] {
+  [data-popser-root]:not([data-anchored])[data-starting-style] {
   transform: translateY(100%) scale(0.95);
 }
 
 /* Bottom: slide down on exit */
 [data-popser-viewport][data-position^="bottom"]
-  [data-popser-root][data-ending-style] {
+  [data-popser-root]:not([data-anchored])[data-ending-style] {
   transform: translateY(calc(-1 * var(--toast-height, 0px))) scale(0.95);
 }
 
 /* Top: slide down from above on enter */
 [data-popser-viewport][data-position^="top"]
-  [data-popser-root][data-starting-style] {
+  [data-popser-root]:not([data-anchored])[data-starting-style] {
   transform: translateY(-100%) scale(0.95);
 }
 
 /* Top: slide up on exit */
 [data-popser-viewport][data-position^="top"]
-  [data-popser-root][data-ending-style] {
+  [data-popser-root]:not([data-anchored])[data-ending-style] {
   transform: translateY(calc(var(--toast-height, 0px) * -1)) scale(0.95);
 }
 

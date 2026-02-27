@@ -1,5 +1,11 @@
 import type { ReactNode } from "react";
 
+export type PopserAnchor =
+  | Element
+  | MouseEvent
+  | { x: number; y: number }
+  | null;
+
 export type PopserType = "success" | "error" | "info" | "warning" | "loading";
 
 export interface PopserAction {
@@ -24,8 +30,8 @@ export interface PopserClassNames {
 
 export interface PopserOptions {
   action?: PopserAction | ReactNode;
-  /** Element to position the toast against. When set, toast becomes anchored. */
-  anchor?: Element | null;
+  /** Element, MouseEvent, or {x,y} coordinates to position the toast against. When set, toast becomes anchored. */
+  anchor?: PopserAnchor;
   /** Alignment along the anchor edge. @default "center" */
   anchorAlign?: "start" | "center" | "end";
   /** Alignment axis offset in pixels. @default 0 */

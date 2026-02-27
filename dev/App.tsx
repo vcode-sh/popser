@@ -6,6 +6,7 @@ import "popser/styles";
 import { DemoSection } from "./components.js";
 import { ConfigPanel } from "./config-panel.js";
 import { defaultConfig, type ToasterConfig } from "./config-types.js";
+import { AnchoredSection } from "./sections/anchored.js";
 import { BehaviorSection } from "./sections/behavior.js";
 import { ContentSection } from "./sections/content.js";
 import { LifecycleSection } from "./sections/lifecycle.js";
@@ -81,6 +82,7 @@ export function App() {
       <BehaviorSection />
       <LifecycleSection />
       <V02FeaturesSection />
+      <AnchoredSection />
       <StressSection />
 
       {/* Toaster */}

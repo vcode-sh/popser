@@ -137,21 +137,34 @@ function ToasterContent({
         onMouseLeave={handleMouseLeave}
         style={viewportStyle}
       >
-        {toasts.map((toast) => (
-          <ToastErrorBoundary key={toast.id}>
-            <PopserToastRoot
-              classNames={classNames}
-              closeButton={closeButton}
-              icons={icons}
-              onMouseEnter={handleMouseEnter}
-              onMouseLeave={handleMouseLeave}
-              richColors={richColors}
-              swipeDirection={swipeDirection}
-              toast={toast}
-              toastOptions={toastOptions}
-            />
-          </ToastErrorBoundary>
-        ))}
+        {toasts.map((toast) => {
+          const isAnchored = !!toast.positionerProps?.anchor;
+          const inner = (
+            <ToastErrorBoundary>
+              <PopserToastRoot
+                classNames={classNames}
+                closeButton={closeButton}
+                icons={icons}
+                onMouseEnter={isAnchored ? undefined : handleMouseEnter}
+                onMouseLeave={isAnchored ? undefined : handleMouseLeave}
+                richColors={richColors}
+                swipeDirection={swipeDirection}
+                toast={toast}
+                toastOptions={toastOptions}
+              />
+            </ToastErrorBoundary>
+          );
+
+          if (isAnchored) {
+            return (
+              <Toast.Positioner key={toast.id} toast={toast}>
+                {inner}
+              </Toast.Positioner>
+            );
+          }
+
+          return <React.Fragment key={toast.id}>{inner}</React.Fragment>;
+        })}
       </Toast.Viewport>
     </Toast.Portal>
   );

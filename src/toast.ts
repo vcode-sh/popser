@@ -27,6 +27,23 @@ export {
 } from "./toast-tracker.js";
 
 /**
+ * Tracks the currently active anchored toast ID.
+ * Only one anchored toast can be visible at a time — creating a new one
+ * automatically dismisses the previous.
+ */
+let activeAnchoredToastId: string | null = null;
+
+/** @internal -- exposed for testing only */
+export function getActiveAnchoredToastId(): string | null {
+  return activeAnchoredToastId;
+}
+
+/** @internal -- exposed for testing only */
+export function clearActiveAnchoredToastId(): void {
+  activeAnchoredToastId = null;
+}
+
+/**
  * Internal helper that calls `getManager().add()` and keeps
  * active toast tracking in sync.
  */
@@ -36,17 +53,35 @@ function createToast(title: ReactNode, options: PopserOptions = {}): string {
     return existingId;
   }
 
+  const isAnchored = options.anchor != null;
+
+  // Only one anchored toast at a time — close the previous one
+  if (isAnchored && activeAnchoredToastId !== null) {
+    toast.close(activeAnchoredToastId);
+    activeAnchoredToastId = null;
+  }
+
   // Use a ref-like object so the onClose callback always sees the real ID
   const resolvedId = { current: "" };
   const managerOptions = toManagerOptions(
     title,
     options,
-    () => untrackToast(resolvedId.current),
+    () => {
+      untrackToast(resolvedId.current);
+      // Clear anchored tracking when this toast closes
+      if (activeAnchoredToastId === resolvedId.current) {
+        activeAnchoredToastId = null;
+      }
+    },
     resolvedId
   );
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
   trackToast(id, title, options.deduplicate);
+
+  if (isAnchored) {
+    activeAnchoredToastId = id;
+  }
 
   return id;
 }
@@ -127,17 +162,35 @@ toast.custom = (
   jsx: (id: string) => ReactNode,
   options?: Omit<PopserOptions, "type" | "icon" | "action" | "cancel">
 ): string => {
+  const isAnchored = options?.anchor != null;
+
+  // Only one anchored toast at a time — close the previous one
+  if (isAnchored && activeAnchoredToastId !== null) {
+    toast.close(activeAnchoredToastId);
+    activeAnchoredToastId = null;
+  }
+
   const resolvedId = { current: "" };
   const managerOptions = toManagerOptions(
     undefined,
     { ...options, type: "__custom" },
-    () => untrackToast(resolvedId.current),
+    () => {
+      untrackToast(resolvedId.current);
+      if (activeAnchoredToastId === resolvedId.current) {
+        activeAnchoredToastId = null;
+      }
+    },
     resolvedId,
     jsx
   );
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
   trackToast(id, undefined, false);
+
+  if (isAnchored) {
+    activeAnchoredToastId = id;
+  }
+
   return id;
 };
 
@@ -317,12 +370,16 @@ toast.close = (id?: string): void => {
     markManuallyClosedToast(id);
     getManager().close(id);
     untrackToast(id);
+    if (activeAnchoredToastId === id) {
+      activeAnchoredToastId = null;
+    }
   } else {
     for (const toastId of getActiveToastIds()) {
       markManuallyClosedToast(toastId);
       getManager().close(toastId);
     }
     clearActiveToasts();
+    activeAnchoredToastId = null;
   }
 };
 
