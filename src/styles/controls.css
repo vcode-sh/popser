@@ -40,6 +40,17 @@
   opacity: 1;
 }
 
+/* Expanded stack: show close buttons on all toasts */
+[data-popser-viewport][data-expanded]
+  [data-popser-close][data-close-button="hover"] {
+  opacity: 0.5;
+}
+
+[data-popser-viewport][data-expanded]
+  [data-popser-close][data-close-button="hover"]:hover {
+  opacity: 1;
+}
+
 /* ─── Action buttons ───────────────────────────────────────────────── */
 
 [data-popser-actions] {

@@ -1,6 +1,6 @@
 # Popser vs Sonner
 
-> Comparative analysis. Popser is built to be a drop-in replacement for Sonner with zero compromises.
+Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 
 ---
 
@@ -9,18 +9,14 @@
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 0.2.0 | 2.x |
+| Version | 0.4.0 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | ~12.6 KB (unminified) | ~2-3 KB (minified+gzip) |
 | CSS | Opt-in file, OKLCH tokens | Bundled inline, HSL gray scale |
 | Dependencies | `@base-ui/react` (peer) | Zero runtime deps |
-| Source files | 10 modules + 2 CSS | 6 files (`index.tsx`, `state.ts`, `types.ts`, `hooks.tsx`, `assets.tsx`, `styles.css`) |
-| npm downloads | New | ~10.9M/week |
-| Stars | New | 12K+ |
-| Open issues | 0 | 65 |
-| Last push | Active | Sporadic (v2.x, community PRs) |
-| shadcn/ui | Registry-ready | Official integration |
+| shadcn/ui | Registry (`npx shadcn add @vcode-sh/popser`) | Official integration |
+| Anchored toasts | Full Floating UI positioning with arrow | Not available |
 | License | MIT | MIT |
 
 ---
@@ -79,17 +75,19 @@
 | `cancel` | `{ label, onClick }` or `ReactNode` | `{ label, onClick }` or `ReactNode` | Both formats supported |
 | `type` | `PopserType \| string` | Internal only | Popser exposes custom types |
 | `priority` | `"low" \| "high"` | Not available | Screen reader urgency (ARIA) |
+| `dismissible` | `boolean` | `boolean` | Per-toast dismiss control |
 | `onClose` | `(id: string) => void` | `onDismiss` | General close callback, receives toast ID |
 | `onAutoClose` | `(id: string) => void` | `onAutoClose` | Same name -- fired on timeout expiry, receives toast ID |
 | `onDismiss` | `(id: string) => void` | N/A | Fired on manual user dismiss, receives toast ID |
 | `onRemove` | `() => void` | N/A | Called after exit animation completes and DOM removal |
 | `className` | `string` | Via `classNames` | Per-toast class |
-| `classNames` | `Partial<PopserClassNames>` | `ToastClassnames` | Per-toast classNames (11 slots) |
+| `classNames` | `Partial<PopserClassNames>` | `ToastClassnames` | Per-toast classNames (12 slots) |
 | `unstyled` | `boolean` | `boolean` | Per-toast unstyled override |
 | `richColors` | `boolean` | Not available | Per-toast rich colors override |
 | `style` | `CSSProperties` | `style` | Same |
 | `data` | `Record<string, unknown>` | Not available | Custom data bag |
-| `dismissible` | Controlled via CSS/swipe | `boolean` | Popser uses `swipeDirection` |
+| `anchor` | `Element \| MouseEvent \| {x,y}` | Not available | Pin toast to element or coordinates |
+| `arrow` | `boolean` | Not available | Arrow pointing at anchor |
 | `invert` | Not needed | `boolean` | Popser uses `theme` prop |
 | `testId` | `data-popser-root` always | `testId` prop | Stable selectors by default |
 | `position` | On `<Toaster>` only | Per-toast override | Architectural choice |
@@ -102,20 +100,20 @@
 |---|---|---|---|
 | `position` | 6 positions | 6 positions | Same |
 | `limit` | `number` (default: 3) | `visibleToasts` (default: 3) | Same behavior, better name |
-| `timeout` | `number` (default: 5000) | `toastOptions.duration` (default: 4000) | Top-level prop |
+| `timeout` | `number` (default: 4000) | `toastOptions.duration` (default: 4000) | Top-level prop |
 | `closeButton` | `"always" \| "hover" \| "never"` | `boolean` | 3 modes vs on/off |
 | `expand` | `boolean` | `boolean` | Same |
 | `richColors` | `boolean` | `boolean` | Same |
 | `theme` | `"light" \| "dark" \| "system"` | `"light" \| "dark" \| "system"` | Same |
 | `offset` | `number \| string` | `string \| number \| object` | Simpler |
+| `mobileOffset` | `number \| string` | Not available | Separate mobile offset |
 | `gap` | `number` | `number` | Same |
-| `mobileBreakpoint` | `number` (default: 600) | Hardcoded 600px | Configurable! |
+| `mobileBreakpoint` | `number` (default: 600) | Hardcoded 600px | Configurable |
 | `swipeDirection` | `string \| string[]` | `string[]` | Same |
 | `icons` | `PopserIcons` | `object` | Same concept |
-| `classNames` | `PopserClassNames` (11 slots) | 6 slots | More granular |
+| `classNames` | `PopserClassNames` (12 slots) | 6 slots | More granular |
 | `style` | `CSSProperties` | Not available | Viewport inline styles |
 | `unstyled` | `boolean` | `boolean` | Same |
-| `mobileOffset` | `number \| string` | `string \| number \| object` | Separate mobile offset |
 | `toastOptions` | `Partial<PopserOptions>` | `object` | Global defaults for all toasts |
 | `dir` | Not needed | `"ltr" \| "rtl"` | Base UI handles this |
 | `hotkey` | F6 (Base UI built-in) | `Alt+T` | F6 is ARIA standard |
@@ -215,35 +213,42 @@
 
 **Popser:** Width controlled by `--popser-width` CSS variable (default `356px`). Override globally with `:root { --popser-width: 400px; }` or per-toast with `classNames.root`. No `--width` constraint fighting.
 
-### 15. Sonner-quality Stacking with CSS Variables
+### 15. CSS-Driven Stacking
 
 **Sonner:** Collapsed stacking via JS height measurement (`getBoundingClientRect`) + manual offset calculation. Layout thrashing on every toast add/remove.
 
 **Popser:** Collapsed stacking via Base UI CSS variables (`--toast-index`, `--toast-frontmost-height`). Toasts are `position: absolute`, layered with `z-index: calc(100 - var(--toast-index))`, scaled down with `scale(1 - index * 0.05)`, and faded with progressive opacity. Content behind the front toast is hidden with `overflow: hidden` + `opacity: 0`. The `--popser-visible-count` CSS variable (from `limit` prop) cuts off toasts beyond the visible count. Expand on hover switches the viewport to `display: flex` with `overflow-y: auto` for scrollable toast lists -- fully CSS-driven layout shift, no JS measurement.
 
+### 16. Anchored Toasts
+
+**Sonner:** Not available. Toasts only appear in fixed viewport positions.
+
+**Popser:** Pin toasts to DOM elements, mouse events, or `{x, y}` coordinates. Full Floating UI positioning via Base UI's `Toast.Positioner`:
+
+```ts
+toast.success("Copied!", {
+  anchor: buttonRef.current,
+  anchorSide: "top",
+  arrow: true,
+  timeout: 2000,
+});
+```
+
+Configurable side, alignment, offset, collision boundary, position method, and sticky behavior. Arrow included. Only one anchored toast visible at a time.
+
 ---
 
-## What Sonner Does That We Don't (Yet)
+## What Sonner Does That We Don't
 
 | Feature | Status | Notes |
 |---|---|---|
-| `toast.custom(jsx)` | **Implemented v0.2** | Full custom JSX render |
-| `toast.message()` | **Implemented v0.2** | Explicit default-type toast |
 | `toast.getHistory()` | Not planned | Sonner never cleans up, so it can return all past toasts |
-| `toast.getToasts()` | **Implemented** | Returns active toast IDs as `string[]` |
-| `useSonner()` hook | `useToaster()` | Same concept, different name |
 | `invert` prop | Not planned | Use `theme` instead |
-| `dir` (RTL) | Base UI handles | No prop needed |
 | `hotkey` customization | Base UI default (F6) | F6 is the ARIA standard |
 | `toasterId` (multiple Toasters) | Not planned | Single manager pattern |
-| `containerAriaLabel` | **Implemented** as `ariaLabel` prop | Direct prop on `<Toaster>` |
-| `dismissible: false` | Via `swipeDirection={[]}` | Different approach |
-| `mobileOffset` | Via CSS variable | `--popser-offset` |
-| `testId` per toast | Not needed | `data-popser-root` is always present |
-| `descriptionClassName` | Via `classNames.description` | More consistent API |
-| `cancelButtonStyle` / `actionButtonStyle` | Via `classNames` | CSS > inline styles |
-| Headless/custom render | Planned | Via Base UI `render` prop |
 | Multi-toaster (`id` prop) | Not planned | Single manager is simpler |
+| `pauseOnHover: false` | Deferred | Base UI limitation |
+| Vanilla (non-React) support | Not planned | React-only |
 
 ---
 
@@ -296,22 +301,15 @@ Toast.createToastManager() (Base UI singleton)
     └── <Toast.Viewport data-expanded data-mobile data-position data-theme>
     │     └── CSS vars: --popser-offset, --popser-gap, --popser-visible-count
     └── <Toast.Root> per toast (onMouseEnter/Leave forwarded)
-          └── CSS vars: --toast-index, --toast-height, --toast-frontmost-height
-          └── Collapsed: position:absolute, stacking via transforms + z-index
-          └── Expanded: position:relative, flex flow, scrollable overflow
-          └── data-starting-style / data-ending-style for enter/exit
-          └── Native swipe handling (accessible, Base UI)
+    │     └── CSS vars: --toast-index, --toast-height, --toast-frontmost-height
+    │     └── Collapsed: position:absolute, stacking via transforms + z-index
+    │     └── Expanded: position:relative, flex flow, scrollable overflow
+    │     └── data-starting-style / data-ending-style for enter/exit
+    │     └── Native swipe handling (accessible, Base UI)
+    └── <Toast.Positioner> for anchored toasts
+          └── Floating UI positioning (side, align, offset, collision)
+          └── <Toast.Arrow> optional arrow element
 ```
-
-**Advantages:**
-- Reactive store replaces mutable array -- no memory leaks
-- CSS variables for collapsed stacking (no JS height measurement)
-- JS-driven expansion with debounce (prevents mouseEnter/Leave flicker loops)
-- JS-driven mobile detection via `matchMedia` (configurable breakpoint prop)
-- `data-starting-style` / `data-ending-style` for enter/exit (CSS transitions)
-- Base UI handles swipe, ARIA, keyboard, height recalculation
-- Portal renders after mount (no hydration mismatch)
-- `--popser-visible-count` CSS variable for opacity cutoff beyond visible limit
 
 ---
 
@@ -334,16 +332,11 @@ Toast.createToastManager() (Base UI singleton)
 - OKLCH color space (Tailwind v4 native)
 - CSS custom properties documented and prefixed (`--popser-*`)
 - Token file importable separately (`import "@vcui/popser/tokens"`)
-- User styles never need `!important` (internal `!important` only on enter/exit to override stacking)
+- User styles never need `!important`
 - `mobileBreakpoint` prop drives JS `matchMedia` + `data-mobile` attribute
 - `unstyled` mode for zero default styles
-- `classNames` prop with 11 target slots
+- `classNames` prop with 12 target slots
 - Dark mode via `[data-theme="dark"]` or `.dark` class
-- Collapsed stacking: `position: absolute` with `--toast-index` z-ordering, scale, opacity cutoff
-- Expanded state: `display: flex` + `overflow-y: auto` (scrollable)
-- `--popser-width` variable for toast width (default 356px)
-- `--popser-visible-count` variable for collapsed visibility cutoff
-- Transition timing: 400ms (matching Sonner) for collapsed transforms
 
 ---
 
@@ -362,9 +355,10 @@ Toast.createToastManager() (Base UI singleton)
 | `cancelButton` | `classNames.cancelButton` | `classNames.cancelButton` |
 | `closeButton` | `classNames.closeButton` | `classNames.closeButton` |
 | `actions` | `classNames.actions` | Not available |
+| `arrow` | `classNames.arrow` | Not available |
 | `default` | Per-type via `data-type` | `classNames.default` (buggy #744) |
 
-Popser: **11 slots**. Sonner: **6 slots** (and `default` is broken).
+Popser: **12 slots**. Sonner: **6 slots** (and `default` is broken).
 
 ---
 
@@ -418,34 +412,21 @@ Popser: **11 slots**. Sonner: **6 slots** (and `default` is broken).
 | #732 | Fix SVG accessibility | Same as above |
 | #666 | Update toast and change ID | `toast.update(id, opts)` |
 | #734 | `clearHistory` method | `toast.close()` closes all |
-
-### Features Requested (Not Yet in Popser)
-
-| # | Issue | Status |
-|---|---|---|
-| #697 | `pauseOnHover: false` flag | Deferred (Base UI limitation) |
-| #510 | Enhanced offset `{ x, y }` object | Use `mobileOffset` prop |
-| #464 | Per-state config in `toast.promise()` (actions, icons per state) | **Implemented v0.2** |
-| #681 | Abortable promise with AbortSignal | Not planned |
-| #671 | `enterFrom` direction prop | Via CSS `data-starting-style` |
-| #740 | Vibration for duplicate toasts | Not planned |
-| #674 | Persistent toasts via localStorage | Not planned |
-| #655 | Popover API support | Not planned |
-| #716 | Vanilla (non-React) support | Not planned (React-only) |
+| #464 | Per-state config in `toast.promise()` | Extended results with `{ title, description, timeout, icon, action }` |
 
 ### Additional Sonner Issues We Address (by Architecture)
 
 | # | Issue | Why Popser is Unaffected |
 |---|---|---|
-| #306 | ARIA live regions conditionally rendered — screen readers miss announcements | Base UI always-present ARIA live regions |
-| #357 | z-index behind Radix dialog, pointer events blocked | `Toast.Portal` with proper stacking context |
-| #591 | Tailwind v4 `classNames` overrides require `!important` | OKLCH tokens + headless primitives, no cascade conflicts |
-| #596 | Toasts not showing after v2.0 upgrade (style injection change) | CSS is separate opt-in file, not injected |
-| #322 | Double toast in React Strict Mode `useEffect` | Manager singleton queues independently of React lifecycle |
+| #306 | ARIA live regions conditionally rendered | Base UI always-present ARIA live regions |
+| #357 | z-index behind Radix dialog | `Toast.Portal` with proper stacking context |
+| #591 | Tailwind v4 `classNames` overrides require `!important` | OKLCH tokens + headless primitives |
+| #596 | Toasts not showing after v2.0 upgrade | CSS is separate opt-in file, not injected |
+| #322 | Double toast in React Strict Mode | Manager singleton queues independently of React lifecycle |
 | #479 | Multiple toasts all closing when last timer fires | Base UI manages individual toast timers |
-| #476 | Loading state blocks close button | Close button always functional, loading is visual only |
-| #450 | Server Actions error handling awkward | `toast.promise()` + `onAutoClose`/`onDismiss` callbacks |
-| #396 | Mobile offsets hardcoded to 16px | `mobileBreakpoint` prop + `--popser-offset` CSS variable |
+| #476 | Loading state blocks close button | Close button always functional |
+| #450 | Server Actions error handling awkward | `toast.promise()` + callbacks |
+| #396 | Mobile offsets hardcoded to 16px | `mobileBreakpoint` prop + `mobileOffset` prop |
 
 ---
 
@@ -462,21 +443,21 @@ Popser: **11 slots**. Sonner: **6 slots** (and `default` is broken).
 9. **JS-driven expansion** -- debounced hover with 100ms timeout, prevents flicker loops
 10. **ARIA-first accessibility** -- F6 nav, priority system, assertive announcements
 11. **Stable test selectors** -- `data-popser-*` on every element
-12. **11 classNames slots** -- vs Sonner's 6 (one broken)
+12. **12 classNames slots** -- vs Sonner's 6 (one broken)
 13. **No hydration errors** -- proper portal rendering
 14. **shadcn registry** -- `npx shadcn add @vcode-sh/popser`
-15. **Clean architecture** -- Base UI primitives, thin wrapper, no state hacks
+15. **Anchored toasts** -- pin to elements, mouse events, or coordinates with arrow support
+16. **Clean architecture** -- Base UI primitives, thin wrapper, no state hacks
 
 ## Popser Cons
 
 1. **Peer dependency on `@base-ui/react`** -- additional install
 2. **Larger install footprint** -- Base UI adds to node_modules
 3. **Newer library** -- less community adoption than Sonner
-4. **New library** -- no production track record, no community yet
-5. **No vanilla JS support** -- React-only
-6. **No `invert` prop** -- intentional (use `theme` instead)
-7. **IDs are strings only** -- Base UI constraint (sonner allows numbers)
-8. **No multiple Toaster instances** -- single manager pattern
+4. **No vanilla JS support** -- React-only
+5. **No `invert` prop** -- intentional (use `theme` instead)
+6. **IDs are strings only** -- Base UI constraint (sonner allows numbers)
+7. **No multiple Toaster instances** -- single manager pattern
 
 ---
 

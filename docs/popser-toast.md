@@ -1,6 +1,6 @@
 # Popser vs Base UI Toast
 
-> Comparative analysis. Popser wraps Base UI Toast primitives into a production-ready imperative API with Sonner-compatible DX.
+Popser wraps Base UI Toast primitives into a production-ready imperative API with Sonner-compatible DX. This doc maps what comes from Base UI, what popser adds, and where the boundaries are.
 
 ---
 
@@ -11,16 +11,16 @@
 | Type | Library (npm package) | Primitive components (part of @base-ui/react) |
 | API style | Imperative (`toast.success()`) | Declarative (React components + hooks) |
 | Ready to use | Yes -- import and call | No -- requires assembly |
-| Built-in icons | 4 SVGs + CSS spinner | None |
+| Built-in icons | 5 SVGs + CSS spinner | None |
 | Built-in styles | Opt-in CSS file | None |
 | shadcn/ui registry | Yes | No |
 | Close button | Built-in with 3 modes | Bare `<Toast.Close>` |
 | Action buttons | `{ label, onClick }` API | `actionProps` config object |
-| close all | `toast.close()` | Manual iteration or PR #3979 |
+| Close all | `toast.close()` | Manual iteration or PR #3979 |
 | `update()` | `toast.update(id, opts)` | `manager.update(id, opts)` |
 | Promise toasts | `toast.promise()` | `manager.promise()` |
 | Priority system | `priority: "high"` | `priority: "high"` |
-| Anchored toasts | Planned v0.2 | `Toast.Positioner` + `Toast.Arrow` (stable since v1.0.0) |
+| Anchored toasts | `anchor` prop with full positioning options | `Toast.Positioner` + `Toast.Arrow` |
 
 ---
 
@@ -33,6 +33,7 @@ Popser                  →  Base UI
 ─────────────────────────────────────
 <Toaster>               →  <Toast.Provider> + <Toast.Portal> + <Toast.Viewport>
 <PopserToastRoot>       →  <Toast.Root> + <Toast.Content>
+  (anchored)            →  + <Toast.Positioner> + <Toast.Arrow>
 <Toast.Title>           →  <Toast.Title>
 <Toast.Description>     →  <Toast.Description>
 <ToastCloseButton>      →  <Toast.Close>
@@ -45,7 +46,7 @@ getManager()            →  Toast.createToastManager()
 useToaster()            →  Toast.useToastManager()
 ```
 
-Popser adds: imperative API, built-in icons, CSS tokens, classNames, close button modes, mobile responsive, shadcn integration, and the `data-popser-*` attribute system.
+Popser adds: imperative API, built-in icons, CSS tokens, classNames, close button modes, mobile responsive, anchored toast configuration, shadcn integration, and the `data-popser-*` attribute system.
 
 ---
 
@@ -64,6 +65,8 @@ Popser adds: imperative API, built-in icons, CSS tokens, classNames, close butto
 | `Toast.Viewport` | ARIA landmark region, F6 keyboard target |
 | `Toast.Root` | Individual toast wrapper, swipe handling, transitions |
 | `Toast.Content` | Inner container, `data-behind` for stacking |
+| `Toast.Positioner` | Floating UI anchor positioning for anchored toasts |
+| `Toast.Arrow` | Arrow element pointing at anchor |
 | `Toast.Title` | Semantic `<h2>`, ARIA announcement text |
 | `Toast.Description` | Semantic `<p>`, ARIA announcement text |
 | `Toast.Close` | Dismiss button, properly removes from store |
@@ -143,7 +146,7 @@ toast.success("Photo uploaded", {
 
 Base UI renders no icons. You must provide everything.
 
-Popser includes 4 inline SVGs (success, error, info, warning) + a CSS spinner (loading). Zero external dependencies. All use `currentColor` for theming.
+Popser includes 5 inline SVGs (success, error, info, warning, close) + a CSS spinner (loading). Zero external dependencies. All use `currentColor` for theming.
 
 Override chain: `toast.icon` > `Toaster.icons[type]` > built-in SVG > null.
 
@@ -154,8 +157,8 @@ Base UI ships zero CSS. You style from scratch.
 Popser ships two opt-in CSS files:
 
 ```ts
-import "@vcui/popser/styles";  // Full default styles (~9 KB)
-import "@vcui/popser/tokens";  // Just CSS custom properties (~2 KB)
+import "@vcui/popser/styles";  // Full default styles
+import "@vcui/popser/tokens";  // Just CSS custom properties
 ```
 
 OKLCH color space. Light + dark themes. Rich color variants for all 5 types. Loading spinner animation. Mobile responsive. Position variants. Enter/exit transitions.
@@ -180,11 +183,12 @@ Popser adds a `classNames` prop on `<Toaster>` that cascades to all toast elemen
     header: "flex gap-3",
     content: "flex flex-col",
     actions: "flex gap-2 mt-3",
+    arrow: "fill-popover",
   }}
 />
 ```
 
-11 named slots. Applied globally. Per-toast `className` merges with global.
+12 named slots. Applied globally. Per-toast `className` merges with global.
 
 ### 5. Close Button Component
 
@@ -194,7 +198,7 @@ Popser wraps it into `<ToastCloseButton>` with:
 - Built-in X icon (stroke SVG, 14x14)
 - Three modes: `"always"` | `"hover"` | `"never"`
 - Hover mode: hidden by default, visible on toast hover/focus
-- Mobile: hover-mode buttons always visible (no hover on touch)
+- Mobile: hover-mode buttons are always visible (no hover on touch)
 - `aria-label="Close notification"`
 - Custom icon override via `icons.close`
 
@@ -222,7 +226,30 @@ toast.error("Deleted", {
 
 Cancel button wraps `Toast.Close` (auto-dismisses).
 
-### 7. Data Attributes System
+### 7. Anchored Toast Configuration
+
+Base UI provides `Toast.Positioner` and `Toast.Arrow` as raw components that need manual wiring.
+
+Popser wraps this into a declarative `anchor` prop:
+
+```ts
+toast.success("Copied!", {
+  anchor: buttonRef.current,  // Element, MouseEvent, or {x, y}
+  anchorSide: "top",
+  anchorAlign: "center",
+  anchorOffset: 8,
+  arrow: true,
+  arrowPadding: 5,
+  anchorCollisionBoundary: "clipping-ancestors",
+  anchorCollisionPadding: 5,
+  anchorPositionMethod: "absolute",
+  anchorSticky: false,
+});
+```
+
+For `MouseEvent` and `{x, y}` anchors, popser creates a temporary fixed-position element at those coordinates and cleans it up on toast close. Only one anchored toast is visible at a time.
+
+### 8. Data Attributes System
 
 Base UI provides `data-type`, `data-starting-style`, etc.
 
@@ -242,38 +269,38 @@ Popser adds a parallel `data-popser-*` system for stable CSS targeting:
 | `data-popser-actions` | Actions container | When present |
 | `data-popser-action` | Action button | When present |
 | `data-popser-cancel` | Cancel button | When present |
+| `data-popser-arrow` | Anchor arrow | When anchored + arrow |
 | `data-popser-spinner` | Loading spinner | When loading |
 | `data-popser-spinner-bar` | Spinner bar (x12) | When loading |
 | `data-position` | Viewport | Yes |
 | `data-theme` | Viewport | Yes |
 | `data-rich-colors` | Viewport | When enabled |
-| `data-expanded` | Viewport | When expanded (hover or prop) |
+| `data-expanded` | Viewport | When expanded |
 | `data-mobile` | Viewport | When below mobileBreakpoint |
 | `data-close-button` | Close button | Yes (mode value) |
+| `data-anchored` | Toast root | When anchored |
 
-### 8. Mobile Responsive
+### 9. Mobile Responsive
 
 Base UI provides no mobile handling.
 
 Popser detects mobile via JS `window.matchMedia` and sets a `data-mobile` attribute on the viewport:
 - `mobileBreakpoint` prop (default: 600px) drives `matchMedia` listener
+- `mobileOffset` prop for separate mobile offset
 - `data-mobile` attribute enables mobile CSS: full-width toasts, bottom positioning, always-visible close buttons
 - Toast width: `calc(100vw - 2 * var(--popser-offset, 16px))`
-- This approach (JS + data attribute) allows the breakpoint to be configurable at runtime, unlike CSS `@media` which requires a compile-time value
 
-### 9. Hover-to-Expand with Debounce
+### 10. Hover-to-Expand with Debounce
 
 Base UI provides `data-expanded` attribute but relies on CSS `:hover` or manual state.
 
 Popser implements JS-driven expansion in `<ToasterContent>`:
 - `isHovering` React state with `handleMouseEnter`/`handleMouseLeave` callbacks
 - 100ms debounce timeout on `mouseLeave` to prevent flicker when moving between toasts
-- Mouse handlers attached to individual `<Toast.Root>` elements (via `onMouseEnter`/`onMouseLeave` passthrough)
-- `mouseLeave` on the viewport as fallback when cursor exits the stack entirely
+- Mouse handlers attached to individual `<Toast.Root>` elements
 - `isExpanded = expand || isHovering` drives `data-expanded` on viewport
-- This JS approach avoids CSS `:has()` feedback loops where layout changes cause mouseLeave→collapse→mouseEnter→expand cycles
 
-### 10. Collapsed Stacking CSS
+### 11. Collapsed Stacking CSS
 
 Base UI provides `--toast-index` and `--toast-frontmost-height` but no default stacking styles.
 
@@ -282,12 +309,10 @@ Popser implements a full collapsed card stack:
 - `z-index: calc(100 - var(--toast-index, 0))` for front-to-back layering
 - `height: var(--toast-frontmost-height, auto)` + `overflow: hidden` for uniform card height
 - `transform: translateY(-index * gap) scale(1 - index * 0.05)` for peek + shrink effect
-- `opacity: clamp(0, visibleCount - index, 1) * (1 - index * 0.1)` for fade + visibility cutoff
 - Content of non-front toasts hidden with `opacity: 0`
-- Expanded state: viewport switches to `display: flex` + `column-reverse` with `overflow-y: auto`, toasts become `position: relative` flow items
-- Transitions only on collapsed mode (400ms) to avoid jarring layout shift during expand/collapse
+- Expanded state: viewport switches to `display: flex` + `column-reverse` with `overflow-y: auto`
 
-### 11. shadcn Registry
+### 12. shadcn Registry
 
 Base UI has no registry integration.
 
@@ -296,7 +321,7 @@ Popser ships as `npx shadcn add @vcode-sh/popser`:
 - CSS variable bridge to shadcn design tokens
 - Drop-in replacement for shadcn's sonner component
 
-### 12. Rich Colors
+### 13. Rich Colors
 
 Base UI sets `data-type` but ships no color system.
 
@@ -306,8 +331,6 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 ## Base UI Issues We Address
 
-### Base UI Issues We Address
-
 | # | Issue | Status | Popser Solution |
 |---|---|---|---|
 | #2809 | `Toast.Description` doesn't render with `render` prop | Open | We use standard `children`, not `render` prop for Description |
@@ -315,9 +338,7 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 | #3437 | Type augmentation needed for custom types | Open | `type?: PopserType \| (string & {})` allows any string while providing autocomplete |
 | #3952 | Module augmentation for type extension | Open | Same solution -- union type with string escape hatch |
 | #3979 | Close all toasts | Open | `toast.close()` without args iterates `activeToasts` Set |
-| #2287 | Toast error with react-router v7 SSR | **Fixed** in Base UI | No action needed — resolved upstream |
-| #2291 | `toast.promise` ignores `success.timeout` / `error.timeout` | **Fixed** in Base UI | No action needed — resolved upstream (PR #2294) |
-| #3026 | Anchor toast to an element | **Shipped** as `Toast.Positioner` | Planned for Popser v0.2 |
+| #3026 | Anchor toast to an element | **Shipped** | Implemented via `anchor` prop with full positioning options |
 
 ### Merged PRs We Benefit From
 
@@ -331,7 +352,7 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 | #3564 | Fix timers not rescheduled on update | `toast.update()` resets timeout |
 | #3443 | Fix `flushSync` dev error | Clean React 19 compatibility |
 | #3392 | Fix multiple swipe directions on same axis | Multi-direction swipe works |
-| #3096 | Anchored toast support (`Toast.Positioner`) | Foundation for v0.2 anchored toasts |
+| #3096 | Anchored toast support (`Toast.Positioner`) | Foundation for anchored toasts |
 | #2929 | `ReactNode` for title/description | Rich content in toasts |
 | #2742 | Variable height stacking | Mixed-height toasts stack correctly |
 | #2770 | Reduce stickiness of expanded state | Better hover expand/collapse |
@@ -359,8 +380,8 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 |---|---|---|
 | `<Toaster>` | Provider, Portal, Viewport | `limit`, `timeout`, manager injection, data attributes, CSS vars |
 | `<ToasterContent>` | Viewport (renders inside Provider) | `isHovering` + debounce, `isMobile` via matchMedia, mouse handlers |
-| `<PopserToastRoot>` | Root, Content | classNames merging, data-popser attributes, mouse handler passthrough, typed `ToastObject<PopserToastData>` |
-| `<ToastIcon>` | None | 4 SVGs, spinner, icon override chain |
+| `<PopserToastRoot>` | Root, Content, Positioner, Arrow | classNames merging, data-popser attributes, anchor configuration, mouse handler passthrough |
+| `<ToastIcon>` | None | 5 SVGs, spinner, icon override chain |
 | `<ToastActions>` | Action, Close | `{ label, onClick }` API, cancel auto-dismisses |
 | `<ToastCloseButton>` | Close | 3 visibility modes, built-in icon, aria-label |
 | `useToaster()` | `useToastManager()` | Thin re-export |
@@ -368,16 +389,11 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 ---
 
-## What Base UI Provides That We Don't Expose (Yet)
+## What Base UI Provides That We Don't Expose
 
 | Feature | Base UI | Popser Status |
 |---|---|---|
-| `Toast.Positioner` | Anchor to DOM element (stable since v1.0.0) | Planned v0.2 |
-| `Toast.Arrow` | Arrow pointing at anchor (stable since v1.0.0) | Planned v0.2 |
-| `render` prop | Custom element rendering | Planned v0.2 (for `toast.custom()`) |
-| `collisionAvoidance` | Flip/shift strategies (via Floating UI) | Planned v0.2 (via Positioner) |
-| `positionMethod` | `"absolute"` \| `"fixed"` | Planned v0.2 |
-| `disableAnchorTracking` | Stop following anchor (renamed from `trackAnchor` in beta.5) | Planned v0.2 |
+| `render` prop | Custom element rendering | Not exposed (use `toast.custom()` instead) |
 | `data-limited` | Alternate exit animation | CSS available, not styled yet |
 | `data-swipe-direction` on exit | Direction-specific exit | CSS available, not styled yet |
 
@@ -387,20 +403,21 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 
 1. **Zero assembly** -- import, render `<Toaster>`, call `toast()`. Done.
 2. **Imperative API** -- works outside React components, event handlers, async code
-3. **Built-in icons** -- 4 SVGs + spinner, zero deps, full override
+3. **Built-in icons** -- 5 SVGs + spinner, zero deps, full override
 4. **Built-in CSS** -- OKLCH tokens, light/dark, rich colors, responsive, animations
 5. **Sonner-compatible DX** -- familiar API for millions of developers
-6. **classNames system** -- 11 named slots, cascading from Toaster
+6. **classNames system** -- 12 named slots, cascading from Toaster
 7. **Close button modes** -- 3 modes with mobile awareness
 8. **Stable selectors** -- `data-popser-*` on every element
 9. **shadcn registry** -- one-command install
 10. **Mobile responsive** -- built-in, configurable breakpoint
 11. **Rich colors** -- type-specific color tokens, opt-in
+12. **Anchored toasts** -- declarative anchor prop wrapping Positioner + Arrow
 
 ## Popser Cons (vs Raw Base UI)
 
 1. **Opinionated DOM structure** -- fixed layout (icon + text + close in header, actions below)
-2. **Less flexible rendering** -- no `render` prop access (yet)
+2. **Less flexible rendering** -- no `render` prop access (use `toast.custom()` for full control)
 3. **String IDs only** -- Base UI constraint passed through
 4. **Single manager** -- one toast stack, not multiple
 5. **Fixed component hierarchy** -- can't rearrange toast internals
@@ -411,7 +428,6 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 ## When to Use Base UI Toast Directly
 
 - You need fully custom toast rendering (no default structure)
-- You want anchored toasts now (v0.2 will add this)
 - You need multiple independent toast stacks
 - You're already building a design system and want maximum control
 - You don't want any imperative API pattern
@@ -424,6 +440,7 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 - You're using shadcn/ui
 - You need `toast.success()` callable from anywhere
 - You want production-ready out of the box
+- You want anchored toasts with a simple API
 
 ---
 
@@ -457,6 +474,8 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 │  │    └── Toast.Portal                       │       │
 │  │          └── Toast.Viewport               │       │
 │  │                └── Toast.Root (per toast)  │       │
+│  │                      ├── Toast.Positioner │       │
+│  │                      │     └── Toast.Arrow│       │
 │  │                      └── Toast.Content    │       │
 │  │                            ├── Toast.Title│       │
 │  │                            ├── Toast.Description  │
@@ -468,10 +487,11 @@ Popser ships full rich color tokens for all 5 types (success, error, info, warni
 │  ┌──────────────────────────────────────────┐       │
 │  │  Popser Additions                         │       │
 │  │                                           │       │
-│  │  toast-icon.tsx    (4 SVGs + spinner)     │       │
+│  │  toast-icon.tsx    (5 SVGs + spinner)     │       │
 │  │  toast-close.tsx   (3 modes)              │       │
 │  │  toast-action.tsx  ({ label, onClick })   │       │
 │  │  toast-root.tsx    (assembly + classNames) │       │
+│  │  anchor-resolver   (Element/Event/{x,y})  │       │
 │  │  styles/           (OKLCH tokens + CSS)   │       │
 │  └──────────────────────────────────────────┘       │
 └─────────────────────────────────────────────────────┘

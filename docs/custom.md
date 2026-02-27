@@ -1,0 +1,107 @@
+# Custom Toasts
+
+`toast.custom()` lets you render arbitrary JSX inside a toast, bypassing the default layout (icon, title, description, actions). You get the toast root wrapper with enter/exit animations. Everything inside is yours.
+
+## Usage
+
+```ts
+import { toast } from "@vcui/popser";
+
+toast.custom((id) => (
+  <div style={{ display: "flex", gap: 12, alignItems: "center" }}>
+    <img src="/avatar.png" width={40} height={40} />
+    <div>
+      <strong>New message</strong>
+      <p>Hey, are you coming to the meeting?</p>
+    </div>
+    <button onClick={() => toast.close(id)}>Dismiss</button>
+  </div>
+));
+```
+
+The render function receives the toast `id` as its argument. Use it to close the toast from inside your custom layout.
+
+## What You Get
+
+Custom toasts still get:
+
+- The toast root wrapper (`data-popser-root`)
+- Enter/exit animations
+- Swipe-to-dismiss (unless `dismissible: false`)
+- Proper stacking in the toast viewport
+- `data-popser-id` for testing
+- Anchor positioning (if `anchor` is set)
+- Arrow (if `arrow: true` and `anchor` is set)
+
+## What You Don't Get
+
+Custom toasts skip the entire default layout. No:
+
+- Icon
+- Title/description slots
+- Action/cancel buttons
+- Close button
+- Content wrapper
+
+You render all of that yourself if you want it.
+
+## Options
+
+`toast.custom()` accepts the same options as other toast methods, minus the content-related ones:
+
+```ts
+toast.custom(
+  (id) => <MyComponent id={id} />,
+  {
+    id: "custom-toast",
+    timeout: 5000,
+    dismissible: true,
+    deduplicate: true,
+    // anchor options work too
+    anchor: element,
+    anchorSide: "top",
+    arrow: true,
+    // callbacks
+    onClose: (id) => console.log("closed", id),
+    onRemove: () => console.log("removed from DOM"),
+    // data
+    data: { source: "chat" },
+  }
+);
+```
+
+## Styling
+
+Custom toasts render with `data-type="custom"` on the root:
+
+```css
+[data-popser-root][data-type="custom"] {
+  /* your custom toast styles */
+}
+```
+
+The root still gets all standard data attributes (`data-popser-id`, `data-rich-colors`, `data-anchored`, etc.) so your CSS selectors work the same way.
+
+## Example: Notification Card
+
+```tsx
+toast.custom((id) => (
+  <div className="flex items-center gap-3 p-4">
+    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
+      <BellIcon className="h-5 w-5 text-blue-600" />
+    </div>
+    <div className="flex-1 min-w-0">
+      <p className="font-medium text-sm">Deployment complete</p>
+      <p className="text-xs text-muted-foreground truncate">
+        Production build deployed to vercel.app
+      </p>
+    </div>
+    <button
+      onClick={() => toast.close(id)}
+      className="text-muted-foreground hover:text-foreground"
+    >
+      <XIcon className="h-4 w-4" />
+    </button>
+  </div>
+), { timeout: 8000 });
+```

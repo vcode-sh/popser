@@ -1,0 +1,174 @@
+# Anchored Toasts
+
+Pin a toast to a DOM element, mouse event, or arbitrary coordinates. Built on Floating UI positioning via Base UI. Think tooltips but for notifications.
+
+Only one anchored toast is visible at a time. Creating a new anchored toast closes the previous one.
+
+## Basic Usage
+
+```ts
+import { toast } from "@vcui/popser";
+
+// Anchor to an element
+toast.success("Copied!", {
+  anchor: buttonRef.current,
+  timeout: 2000,
+});
+
+// Anchor to a click event
+function handleClick(event: React.MouseEvent) {
+  toast.info("Context menu", { anchor: event.nativeEvent });
+}
+
+// Anchor to coordinates
+toast.warning("Here", { anchor: { x: 200, y: 300 } });
+```
+
+## Anchor Types
+
+The `anchor` prop accepts:
+
+| Type | Description |
+|------|-------------|
+| `Element` | DOM element (ref, querySelector, etc.) |
+| `MouseEvent` | Position at click coordinates |
+| `{ x: number, y: number }` | Arbitrary screen coordinates |
+| `null` | No anchoring (regular viewport toast) |
+
+For `MouseEvent` and `{x, y}`, popser creates a temporary fixed-position element at those coordinates and cleans it up when the toast closes.
+
+## Positioning
+
+Control where the toast appears relative to the anchor:
+
+```ts
+toast.success("Saved", {
+  anchor: element,
+  anchorSide: "top",        // which side of the anchor
+  anchorAlign: "center",    // alignment along that side
+  anchorOffset: 12,         // distance from anchor (px)
+});
+```
+
+### Side
+
+| Value | Description |
+|-------|-------------|
+| `"top"` | Above the anchor |
+| `"bottom"` | Below the anchor (default) |
+| `"left"` | Left of the anchor |
+| `"right"` | Right of the anchor |
+| `"inline-start"` | Logical inline start |
+| `"inline-end"` | Logical inline end |
+
+### Alignment
+
+| Value | Description |
+|-------|-------------|
+| `"start"` | Align to start edge |
+| `"center"` | Center aligned (default) |
+| `"end"` | Align to end edge |
+
+### Offset
+
+```ts
+{
+  anchorOffset: 8,         // Distance from anchor (default: 8px)
+  anchorAlignOffset: 0,    // Offset along alignment axis (default: 0)
+}
+```
+
+## Arrow
+
+Show an arrow pointing at the anchor:
+
+```ts
+toast.success("Copied!", {
+  anchor: buttonRef.current,
+  anchorSide: "top",
+  arrow: true,
+  arrowPadding: 5,  // padding from arrow to edge (default: 5)
+});
+```
+
+The arrow inherits toast colors and renders with `data-popser-arrow` and `data-side` attributes for styling.
+
+## Collision Handling
+
+Toasts automatically flip or shift to stay within the viewport:
+
+```ts
+{
+  anchorCollisionBoundary: "clipping-ancestors",  // default
+  anchorCollisionPadding: 5,                       // padding from boundary (default: 5px)
+}
+```
+
+You can pass a specific element or array of elements as the collision boundary.
+
+## Position Method
+
+```ts
+{
+  anchorPositionMethod: "absolute",  // default
+  // or
+  anchorPositionMethod: "fixed",
+}
+```
+
+`"absolute"` positions relative to the nearest positioned ancestor. `"fixed"` positions relative to the viewport. Use `"fixed"` if the anchor is inside a scrollable container and you want the toast to stay in place.
+
+## Sticky
+
+Keep the toast visible even when the anchor scrolls out of view:
+
+```ts
+{
+  anchorSticky: true,  // default: false
+}
+```
+
+## Full Example
+
+```tsx
+function CopyButton() {
+  const ref = useRef<HTMLButtonElement>(null);
+
+  async function handleCopy() {
+    await navigator.clipboard.writeText("copied text");
+    toast.success("Copied to clipboard", {
+      anchor: ref.current,
+      anchorSide: "top",
+      anchorAlign: "center",
+      anchorOffset: 8,
+      arrow: true,
+      timeout: 2000,
+      dismissible: false,
+    });
+  }
+
+  return (
+    <button ref={ref} onClick={handleCopy}>
+      Copy
+    </button>
+  );
+}
+```
+
+## Data Attributes
+
+Anchored toasts get `data-anchored` on the root element:
+
+```css
+[data-popser-root][data-anchored] {
+  /* anchored toast styles */
+}
+
+[data-popser-arrow] {
+  /* arrow element */
+}
+
+[data-popser-arrow][data-side="top"] {
+  /* arrow when toast is above anchor */
+}
+```

@@ -1,13 +1,18 @@
 # popser
 
-Toast notifications for React. Built on Base UI. Sonner-compatible API.
-No `!important`. No memory leaks. No hardcoded breakpoints.
+[![npm version](https://img.shields.io/npm/v/@vcui/popser)](https://www.npmjs.com/package/@vcui/popser)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
+[![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6)](https://www.typescriptlang.org/)
+
+Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives. Sonner-compatible API. No `!important`. No memory leaks. No hardcoded breakpoints. Your styles actually win for once.
 
 ## Install
 
 ```bash
 npm install @vcui/popser @base-ui/react
 ```
+
+Peer deps: `react` (18 or 19), `react-dom`, `@base-ui/react` (^1.2.0). You probably have the first two already.
 
 ## Quick Start
 
@@ -25,18 +30,14 @@ function App() {
 }
 ```
 
-That's it. No Provider wrapper. No theme configuration. It just works.
+No Provider wrapper. No theme config. No 47-step Medium article. It just works.
 
-## API
+## Toast API
 
-### `toast()`
-
-Imperative API for creating and managing toasts. Every method returns the toast ID.
+Every method returns the toast ID. Use it to update, close, or track toasts.
 
 ```ts
 toast("Hello world");
-toast("With options", { description: "More detail here" });
-
 toast.success("Saved");
 toast.error("Something broke");
 toast.info("Heads up");
@@ -44,188 +45,90 @@ toast.warning("Careful");
 toast.loading("Working...");
 ```
 
-#### Promise toasts
+### Promise toasts
 
-Automatically transitions through loading, success, and error states.
+Transitions through loading → success → error automatically.
 
 ```ts
 toast.promise(fetchData(), {
-  loading: "Fetching data...",
-  success: "Data loaded",
-  error: "Failed to fetch",
-});
-
-// Dynamic messages based on the result
-toast.promise(saveUser(data), {
-  loading: "Saving...",
-  success: (user) => `Saved ${user.name}`,
+  loading: "Fetching...",
+  success: (data) => `Loaded ${data.count} items`,
   error: (err) => `Failed: ${err.message}`,
 });
 ```
 
-#### Promise with JSX and conditional skip
+Return `undefined` from a handler to dismiss silently. Return JSX if you're feeling fancy. Full details in **[docs/api.md](docs/api.md)**.
 
-Success and error handlers accept `ReactNode` — not just strings:
-
-```ts
-toast.promise(saveUser(data), {
-  loading: "Saving...",
-  success: (user) => <span>Saved <strong>{user.name}</strong></span>,
-  error: (err) => `Failed: ${err.message}`,
-});
-```
-
-Return `undefined` from a callback to dismiss the toast silently:
-
-```ts
-toast.promise(fetchData(), {
-  loading: "Loading...",
-  success: (data) => data.silent ? undefined : "Done!",
-  error: (err) => err.name === "AbortError" ? undefined : `Error: ${err.message}`,
-});
-```
-
-#### Close and update
+### Update and close
 
 ```ts
 const id = toast.loading("Uploading...");
-
-// Update in-place
 toast.update(id, { title: "Almost done...", description: "95%" });
-
-// Close a specific toast
-toast.close(id);
-
-// Close all toasts
-toast.close();
+toast.close(id);   // close one
+toast.close();     // close all
 ```
 
-#### Deduplication
+### Custom toasts
 
-Prevent duplicate toasts with the same title:
+Skip the default layout entirely. Render whatever you want.
+
+```ts
+toast.custom((id) => (
+  <div>
+    Your markup. Your rules.
+    <button onClick={() => toast.close(id)}>Dismiss</button>
+  </div>
+));
+```
+
+### Anchored toasts
+
+Pin a toast to a button, element, or coordinate. Think tooltips but with attitude.
+
+```ts
+toast.success("Copied!", {
+  anchor: buttonRef.current,
+  anchorSide: "top",
+  arrow: true,
+  timeout: 2000,
+});
+```
+
+Full anchor positioning docs: **[docs/anchored.md](docs/anchored.md)**
+
+### Deduplication
 
 ```ts
 toast.error("Connection lost", { deduplicate: true });
-toast.error("Connection lost", { deduplicate: true }); // no-op, returns existing ID
+toast.error("Connection lost", { deduplicate: true }); // no-op
 ```
 
-Once the first toast is dismissed, the same title can create a new one.
+## Toaster
 
-#### `PopserOptions`
-
-```ts
-{
-  id?: string;                  // Custom ID (deduplication, updates)
-  deduplicate?: boolean;          // Prevent duplicate toasts with same title
-  description?: ReactNode;      // Secondary text below the title
-  timeout?: number;             // Auto-dismiss in ms. 0 = persistent
-  priority?: "low" | "high";   // ARIA live region priority
-  icon?: ReactNode | false;    // Custom icon, or false to hide
-  action?: {                   // Action button
-    label: ReactNode;
-    onClick?: (e: MouseEvent) => void;
-  };
-  cancel?: {                   // Cancel button (renders as Toast.Close)
-    label: ReactNode;
-    onClick?: (e: MouseEvent) => void;
-  };
-  onClose?: () => void;        // Called when toast starts closing
-  onRemove?: () => void;       // Called when toast is removed from DOM
-  className?: string;
-  style?: CSSProperties;
-  data?: Record<string, unknown>;
-}
-```
-
-### `<Toaster>`
-
-Drop it anywhere in your tree. One instance is all you need.
+Drop it anywhere. One instance. Configure once.
 
 ```tsx
 <Toaster
   position="bottom-right"
   limit={3}
-  timeout={5000}
+  timeout={4000}
   closeButton="hover"
   richColors
   theme="system"
 />
 ```
 
-#### `ToasterProps`
-
-| Prop | Type | Default | Description |
-|------|------|---------|-------------|
-| `position` | `"top-left"` \| `"top-center"` \| `"top-right"` \| `"bottom-left"` \| `"bottom-center"` \| `"bottom-right"` | `"bottom-right"` | Where toasts appear |
-| `limit` | `number` | `3` | Max visible toasts |
-| `timeout` | `number` | `5000` | Auto-dismiss in ms |
-| `closeButton` | `"always"` \| `"hover"` \| `"never"` | `"hover"` | Close button visibility |
-| `expand` | `boolean` | `false` | Expand stacked toasts |
-| `richColors` | `boolean` | `false` | Colored backgrounds per toast type |
-| `theme` | `"light"` \| `"dark"` \| `"system"` | `"system"` | Color scheme |
-| `offset` | `number \| string` | `16` | Distance from viewport edge |
-| `gap` | `number` | `8` | Space between toasts |
-| `mobileBreakpoint` | `number` | `600` | Width (px) for mobile layout |
-| `swipeDirection` | `SwipeDirection \| SwipeDirection[]` | `["down", "right"]` | Swipe-to-dismiss direction(s) |
-| `icons` | `PopserIcons` | Built-in SVGs | Override icons per toast type |
-| `classNames` | `PopserClassNames` | -- | Class names for every slot |
-| `style` | `CSSProperties` | -- | Inline styles on the viewport |
-| `unstyled` | `boolean` | `false` | Strip all default styles |
-
-#### `PopserClassNames`
-
-Target every part of the toast:
-
-```ts
-{
-  viewport?: string;
-  root?: string;
-  content?: string;
-  header?: string;
-  title?: string;
-  description?: string;
-  icon?: string;
-  actions?: string;
-  actionButton?: string;
-  cancelButton?: string;
-  closeButton?: string;
-}
-```
-
-### `useToaster()`
-
-React hook that returns the Base UI toast manager context. Use it when you need direct access to the toast list or manager methods inside a component.
-
-```tsx
-import { useToaster } from "@vcui/popser";
-
-function ToastCount() {
-  const { toasts } = useToaster();
-  return <span>{toasts.length} active</span>;
-}
-```
-
-Must be rendered inside a `<Toaster>` (which provides the Base UI `Toast.Provider`).
+All props: **[docs/toaster.md](docs/toaster.md)**
 
 ## Styling
 
-### Default styles
-
-Import the built-in stylesheet for a working setup out of the box:
+Import the defaults and override what you want:
 
 ```ts
 import "@vcui/popser/styles";
 ```
 
-This includes layout, animations, and light/dark token defaults. You can also import tokens separately:
-
-```ts
-import "@vcui/popser/tokens";
-```
-
-### CSS custom properties
-
-All visual tokens use `--popser-*` custom properties. Override them to match your design system:
+Everything is CSS custom properties. Override them, don't fight them:
 
 ```css
 :root {
@@ -233,92 +136,59 @@ All visual tokens use `--popser-*` custom properties. Override them to match you
   --popser-fg: hsl(0 0% 9%);
   --popser-border: hsl(0 0% 90%);
   --popser-radius: 8px;
-  --popser-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-  --popser-offset: 16px;
-  --popser-gap: 8px;
 }
 ```
 
-Rich color tokens follow the pattern `--popser-{type}-bg`, `--popser-{type}-border`, `--popser-{type}-fg` for each toast type (success, error, info, warning, loading).
+Works with Tailwind, CSS modules, or raw CSS. Pass `classNames` to target every slot. Or go `unstyled` and build from scratch with `data-popser-*` attributes.
 
-### Dark mode
-
-Dark tokens activate automatically via `[data-theme="dark"]` or `.dark` on any ancestor. Or set `theme="dark"` on `<Toaster>`:
-
-```tsx
-<Toaster theme="dark" />
-```
-
-### Tailwind / classNames
-
-Pass class names to any slot. Works with Tailwind, CSS modules, or any class-based system:
-
-```tsx
-<Toaster
-  classNames={{
-    root: "rounded-lg border shadow-lg",
-    title: "font-semibold text-sm",
-    description: "text-muted-foreground text-xs",
-    actionButton: "bg-primary text-primary-foreground",
-  }}
-/>
-```
-
-Per-toast class names work too:
-
-```ts
-toast.success("Saved", { className: "border-green-500" });
-```
-
-### Unstyled mode
-
-Strip all default styles and build from scratch:
-
-```tsx
-<Toaster unstyled />
-```
-
-Every element exposes `data-popser-*` attributes for targeting:
-
-```css
-[data-popser-viewport] { /* viewport */ }
-[data-popser-root] { /* individual toast */ }
-[data-popser-root][data-popser-id="my-id"] { /* target by toast ID */ }
-[data-popser-content] { /* content wrapper */ }
-[data-popser-actions] { /* action bar */ }
-[data-popser-close] { /* close button */ }
-```
-
-### Rich colors
-
-Opt in to colored backgrounds that match the toast type:
-
-```tsx
-<Toaster richColors />
-```
-
-Success toasts get green backgrounds, errors get red, and so on. All driven by CSS custom properties, so you can override any color.
+Full styling guide: **[docs/styling.md](docs/styling.md)**
 
 ## shadcn
-
-Add popser to your shadcn project via the registry:
 
 ```bash
 npx shadcn add @vcode-sh/popser
 ```
 
+Details: **[docs/shadcn.md](docs/shadcn.md)**
+
+## E2E Testing
+
+Every toast renders `data-popser-id` in the DOM. Select by ID in Playwright or Cypress without praying to the selector gods.
+
+```ts
+await page.locator('[data-popser-id="my-toast"]').waitFor();
+```
+
+Full data attributes reference: **[docs/testing.md](docs/testing.md)**
+
 ## Why popser?
 
-Built on [Base UI](https://base-ui.com) Toast primitives instead of rolling custom DOM.
+Sonner is great. I used it for years. Then I needed to style a toast without `!important` and the whole thing fell apart.
 
-- **No `!important` overrides.** Base UI renders headless primitives. Your styles always win.
-- **No memory leaks.** Singleton toast manager with proper cleanup. Toasts are tracked and removed.
-- **No hardcoded breakpoints.** Mobile breakpoint is a prop. Responsive behavior is CSS-driven.
-- **E2E test friendly.** Every toast renders `data-popser-id` in the DOM. Select by ID in Playwright or Cypress.
-- **Accessible by default.** ARIA live regions with configurable priority. F6 keyboard navigation to the toast viewport.
-- **Sonner-compatible API.** Same `toast.success()` / `toast.error()` / `toast.promise()` interface. Drop-in replacement.
-- **Tiny footprint.** Zero icon dependencies. Five inline SVGs and a CSS spinner.
+popser is built on [Base UI](https://base-ui.com) Toast primitives — headless, accessible, no opinion about your CSS. The API is Sonner-compatible so you can swap without rewriting anything. But under the hood, it's proper headless UI with ARIA live regions, F6 keyboard navigation, and styles that don't need `!important` to override.
+
+- **Headless primitives.** Base UI renders the structure. You own the styles.
+- **Sonner-compatible.** Same `toast.success()` / `toast.promise()` interface. Drop-in.
+- **No memory leaks.** Singleton manager with tracked cleanup. Toasts don't ghost you.
+- **No hardcoded breakpoints.** Mobile breakpoint is a prop. CSS-driven responsiveness.
+- **Accessible.** ARIA live regions, priority system, keyboard navigation.
+- **E2E ready.** `data-popser-id` on every toast root. Stable selectors out of the box.
+- **Tiny.** Five inline SVGs and a CSS spinner. Zero icon dependencies.
+- **Anchored toasts.** Pin toasts to elements with Floating UI positioning. Arrow included.
+
+## Documentation
+
+- **[Toast API](docs/api.md)** — all methods, options, deduplication, callbacks
+- **[Toaster Component](docs/toaster.md)** — props, positioning, theme, mobile
+- **[Styling](docs/styling.md)** — CSS variables, classNames, Tailwind, dark mode, unstyled
+- **[Promise Toasts](docs/promise.md)** — loading states, JSX results, conditional skip, finally
+- **[Anchored Toasts](docs/anchored.md)** — element anchoring, coordinates, arrow, positioning
+- **[Custom Toasts](docs/custom.md)** — custom render functions, bypassing default layout
+- **[shadcn Integration](docs/shadcn.md)** — registry install, next-themes, configuration
+- **[Testing](docs/testing.md)** — data attributes, Playwright, Cypress, useToaster hook
+- **[Popser vs Sonner](docs/popser-sonner.md)** — feature comparison, migration guide, issue tracker
+- **[Popser vs Base UI Toast](docs/popser-toast.md)** — architecture, component mapping, what we add
 
 ## License
 
-MIT
+MIT - [Vibe Code](https://vcode.sh)
