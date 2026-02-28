@@ -68,44 +68,61 @@
 }
 
 /* ─── Per-toast entry direction overrides (data-enter-from) ────────── */
+/* Specificity must beat position-based defaults (0,5,0) above */
 
-[data-popser-root][data-enter-from="left"][data-starting-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="left"][data-starting-style] {
   transform: translateX(-100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="left"][data-ending-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="left"][data-ending-style] {
   transform: translateX(-100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="right"][data-starting-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="right"][data-starting-style] {
   transform: translateX(100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="right"][data-ending-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="right"][data-ending-style] {
   transform: translateX(100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="top"][data-starting-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="top"][data-starting-style] {
   transform: translateY(-100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="top"][data-ending-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="top"][data-ending-style] {
   transform: translateY(-100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="bottom"][data-starting-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="bottom"][data-starting-style] {
   transform: translateY(100%) scale(0.95);
 }
 
-[data-popser-root][data-enter-from="bottom"][data-ending-style] {
-  opacity: 0;
+[data-popser-viewport]
+  [data-popser-root]:not(
+    [data-anchored]
+  )[data-enter-from="bottom"][data-ending-style] {
   transform: translateY(100%) scale(0.95);
 }
 

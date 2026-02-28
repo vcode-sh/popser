@@ -2,10 +2,17 @@
 
 [data-popser-viewport] {
   position: fixed;
+  inset: auto;
   z-index: 9999;
   box-sizing: border-box;
   width: var(--popser-width, 356px);
+  padding: 0;
+  margin: 0;
+  overflow: visible;
   pointer-events: none;
+  background: transparent;
+  /* Reset popover UA defaults (border, background, inset, margin, padding, overflow) */
+  border: none;
   /* Collapsed: toasts are absolutely positioned inside this anchor point */
   /* Offset is applied via inset values in position variants below */
 }
