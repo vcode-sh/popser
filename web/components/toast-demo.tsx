@@ -2,6 +2,7 @@
 
 import { Toaster, toast } from "@vcui/popser";
 import "@vcui/popser/styles";
+import { useTheme } from "next-themes";
 import { useRef } from "react";
 
 const btn =
@@ -9,6 +10,7 @@ const btn =
 
 export function ToastDemo() {
   const anchorRef = useRef<HTMLButtonElement>(null);
+  const { resolvedTheme } = useTheme();
 
   return (
     <div className="flex flex-col gap-6">
@@ -122,7 +124,10 @@ export function ToastDemo() {
         </button>
       </div>
 
-      <Toaster position="bottom-right" />
+      <Toaster
+        position="bottom-right"
+        theme={resolvedTheme === "dark" ? "dark" : "light"}
+      />
     </div>
   );
 }

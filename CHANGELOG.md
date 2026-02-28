@@ -6,6 +6,43 @@ The format tries to be useful. No "chore: bump deps" padding. If it didn't chang
 
 ---
 
+## [1.1.0] - 2026-02-28
+
+The diet patch. Same features, half the calories.
+
+### The numbers
+
+JS bundle:
+
+| | Raw | Gzipped |
+|---|---|---|
+| 1.0.0 | 29.0 KB | 6.6 KB |
+| 1.1.0 | 13.4 KB | 4.8 KB |
+| | **-54%** | **-27%** |
+
+CSS bundle (via `@vcui/popser/styles/min`):
+
+| | Raw | Gzipped |
+|---|---|---|
+| 1.0.0 | 24.9 KB | 5.4 KB |
+| 1.1.0 | 14.3 KB | 2.6 KB |
+| | **-43%** | **-52%** |
+
+Total: 7.4 KB gzipped. Sonner ships ~17 KB. We're less than half.
+
+### Added
+- `@vcui/popser/styles/min` export: single inlined, minified CSS file. No more 7 HTTP requests for CDN users. Modular imports (`@vcui/popser/styles`) still available.
+
+### Changed
+- JS minification enabled in tsup. The dist was shipping formatted, readable JavaScript. Lovely for education. Terrible for bandwidth.
+- Promise handler deduplication: `successHandler` and `errorHandler` in `toast.promise()` were near-identical ~100-line blocks. Extracted into shared `buildPromiseHandler()` factory.
+- Spinner bars array hoisted to module scope. No more per-render allocation for 12 static `<div>` elements.
+
+### Removed
+- Dead constants: `DEFAULT_EXPAND`, `DEFAULT_RICH_COLORS`, `DEFAULT_THEME`. Exported but never imported anywhere. tsup tree-shook them anyway, but dead code in source is still dead code.
+
+---
+
 ## [1.0.0] - 2026-02-27
 
 The "we're not prefixing everything with 0. anymore" release. Same library, bigger number, calmer energy.

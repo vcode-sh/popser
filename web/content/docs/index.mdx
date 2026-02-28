@@ -49,6 +49,8 @@ No Provider. No context wrapper. No five-layer-deep component tree. Just one com
 
 Import `toast`. Call it. Event handlers, server actions, `useEffect`, the toilet — wherever. No hooks. No ceremony.
 
+<TypesDemo />
+
 ```ts
 import { toast } from "@vcui/popser";
 
@@ -60,6 +62,8 @@ toast.warning("Careful");
 ```
 
 Every method spits back the toast ID. Keep it if you want to update or close things later.
+
+<UpdateDemo />
 
 ```ts
 const id = toast.loading("Uploading...");

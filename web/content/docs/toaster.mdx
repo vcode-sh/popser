@@ -20,6 +20,8 @@ function App() {
 
 No Provider. No context. Toaster handles all that internally because you've got better things to do.
 
+<TypesDemo />
+
 ## Props
 
 ### Layout
@@ -108,6 +110,16 @@ Toasts collapse into a stack by default. Hover to expand. Hate the stack? Spread
 ```
 
 Stack state lives on `data-expanded`. Mouse leave has a 100ms debounce because without it, every accidental pixel causes a seizure.
+
+## Rich colours
+
+Coloured backgrounds per type. One prop.
+
+<RichColorsDemo />
+
+```tsx
+<Toaster richColors />
+```
 
 ## Close button
 
