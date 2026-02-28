@@ -1,0 +1,67 @@
+---
+title: Changelog
+description: What changed, when, and why you should care.
+---
+
+## 1.1.0
+
+The diet patch. Same features, half the calories.
+
+### The numbers
+
+JS bundle:
+
+| | Raw | Gzipped |
+|---|---|---|
+| 1.0.0 | 29.0 KB | 6.6 KB |
+| 1.1.0 | 13.4 KB | 4.8 KB |
+| | **-54%** | **-27%** |
+
+CSS bundle (via `@vcui/popser/styles/min`):
+
+| | Raw | Gzipped |
+|---|---|---|
+| 1.0.0 | 24.9 KB | 5.4 KB |
+| 1.1.0 | 14.3 KB | 2.6 KB |
+| | **-43%** | **-52%** |
+
+**Total: 7.4 KB gzipped.** Sonner ships ~17 KB. We're less than half.
+
+### What actually happened
+
+**JS minification** — the dist was shipping formatted, readable JavaScript. Lovely for education. Terrible for your users' bandwidth. Added `minify: true` to tsup. Problem solved.
+
+**Flat CSS bundle** — `@vcui/popser/styles` uses `@import` directives pointing to 6 sibling files. Fine if your bundler resolves CSS imports. Not fine if you're using a `<link>` tag like it's 2014. New `@vcui/popser/styles/min` export inlines everything into one minified file.
+
+```ts
+// Still works, still modular
+import "@vcui/popser/styles";
+
+// New: single file, minified, no @imports
+import "@vcui/popser/styles/min";
+```
+
+**Promise handler dedup** — `toast.promise()` had near-identical `successHandler` and `errorHandler` blocks. ~100 lines of copy-paste. Extracted into `buildPromiseHandler()`. Same behaviour, fewer lines, easier to maintain.
+
+**Dead code cleanup** — three constants (`DEFAULT_EXPAND`, `DEFAULT_RICH_COLORS`, `DEFAULT_THEME`) were exported but never imported anywhere. tsup tree-shook them from the dist anyway, but dead code in source is still dead code. Removed.
+
+**Spinner hoist** — the loading spinner creates 12 `<div>` elements. Previously allocated a new array on every render. Now hoisted to module scope. The React reconciler thanks us.
+
+### No breaking changes
+
+Everything from 1.0.0 works exactly the same. The `@vcui/popser/styles` import is unchanged. The new `@vcui/popser/styles/min` is purely additive.
+
+---
+
+## 1.0.0
+
+The first one. Toast notifications for React, built on Base UI primitives.
+
+- Sonner-compatible imperative API (`toast()`, `.success()`, `.error()`, `.promise()`, etc.)
+- Zero runtime dependencies beyond React and Base UI
+- Content-based deduplication
+- Anchored toasts (pin to elements, clicks, coordinates)
+- Custom JSX toasts
+- CSS custom properties theming
+- `data-popser-id` on every toast for e2e testing
+- ARIA live regions and F6 keyboard navigation
