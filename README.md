@@ -4,7 +4,9 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6)](https://www.typescriptlang.org/)
 
-Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives. Sonner-compatible API. No `!important`. No memory leaks. No hardcoded breakpoints. Your styles actually win for once.
+Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives — the headless component era that started in 2026. Sonner-compatible API. **7.4 KB gzipped total.** No `!important`. No memory leaks. Your styles actually win for once.
+
+**[Documentation](https://popser.vcui.dev/docs)** · **[Why I built this](https://popser.vcui.dev/why)** · **[Why Base UI](https://popser.vcui.dev/why-base-ui)** · **[Changelog](https://popser.vcui.dev/docs/changelog)**
 
 ## Install
 
@@ -125,7 +127,8 @@ All props: **[docs/toaster.md](docs/toaster.md)**
 Import the defaults and override what you want:
 
 ```ts
-import "@vcui/popser/styles";
+import "@vcui/popser/styles";       // modular (7 files via @import)
+import "@vcui/popser/styles/min";   // flat, minified, single file — 2.6 KB gzipped
 ```
 
 Everything is CSS custom properties. Override them, don't fight them:
@@ -161,11 +164,23 @@ await page.locator('[data-popser-id="my-toast"]').waitFor();
 
 Full data attributes reference: **[docs/testing.md](docs/testing.md)**
 
+## Bundle Size
+
+| | Raw | Gzipped |
+|---|---|---|
+| JS (ESM) | 13.4 KB | 4.8 KB |
+| CSS (`styles/min`) | 14.3 KB | 2.6 KB |
+| **Total** | **27.7 KB** | **7.4 KB** |
+
+Sonner ships ~17 KB gzipped with CSS bundled inside the JavaScript. Popser is less than half that, and the CSS is a separate opt-in file your bundler can tree-shake.
+
 ## Why popser?
 
 Sonner is great. I used it for years. Then I needed to style a toast without `!important` and the whole thing fell apart.
 
-popser is built on [Base UI](https://base-ui.com) Toast primitives — headless, accessible, no opinion about your CSS. The API is Sonner-compatible so you can swap without rewriting anything. But under the hood, it's proper headless UI with ARIA live regions, F6 keyboard navigation, and styles that don't need `!important` to override.
+popser is built on [Base UI](https://base-ui.com) Toast primitives — the headless component library built by the teams behind Radix, Floating UI, and MUI. Base UI is where React component architecture is heading in 2026, and popser is the first toast library built on top of it.
+
+The API is Sonner-compatible so you can swap without rewriting anything. But under the hood, it's proper headless UI with ARIA live regions, F6 keyboard navigation, and styles that don't need `!important` to override.
 
 - **Headless primitives.** Base UI renders the structure. You own the styles.
 - **Sonner-compatible.** Same `toast.success()` / `toast.promise()` interface. Drop-in.
@@ -173,8 +188,10 @@ popser is built on [Base UI](https://base-ui.com) Toast primitives — headless,
 - **No hardcoded breakpoints.** Mobile breakpoint is a prop. CSS-driven responsiveness.
 - **Accessible.** ARIA live regions, priority system, keyboard navigation.
 - **E2E ready.** `data-popser-id` on every toast root. Stable selectors out of the box.
-- **Tiny.** Five inline SVGs and a CSS spinner. Zero icon dependencies.
+- **Tiny.** 7.4 KB gzipped total. Five inline SVGs and a CSS spinner. Zero icon dependencies.
 - **Anchored toasts.** Pin toasts to elements with Floating UI positioning. Arrow included.
+
+Read the full story: **[Why I built this](https://popser.vcui.dev/why)** · **[Why Base UI, not Radix](https://popser.vcui.dev/why-base-ui)**
 
 ## Documentation
 
@@ -188,6 +205,13 @@ popser is built on [Base UI](https://base-ui.com) Toast primitives — headless,
 - **[Testing](docs/testing.md)** — data attributes, Playwright, Cypress, useToaster hook
 - **[Popser vs Sonner](docs/popser-sonner.md)** — feature comparison, migration guide, issue tracker
 - **[Popser vs Base UI Toast](docs/popser-toast.md)** — architecture, component mapping, what we add
+- **[Changelog](CHANGELOG.md)** — what changed, when, and why
+
+Or just read them on the website: **[popser.vcui.dev/docs](https://popser.vcui.dev/docs)**
+
+## Contributing
+
+Contributions welcome. Bug fixes, features, docs, tests — all of it. Check **[CONTRIBUTING.md](CONTRIBUTING.md)** for the setup and ground rules, or read **[popser.vcui.dev/collaborate](https://popser.vcui.dev/collaborate)** for the longer version.
 
 ## License
 

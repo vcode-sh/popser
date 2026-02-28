@@ -21,6 +21,10 @@ export function baseOptions(): BaseLayoutProps {
         url: "/why-base-ui",
       },
       {
+        text: "Collaborate",
+        url: "/collaborate",
+      },
+      {
         text: "Documentation",
         url: "/docs",
         active: "nested-url",
