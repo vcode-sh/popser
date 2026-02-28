@@ -46,8 +46,23 @@ export async function generateMetadata(
     notFound();
   }
 
+  const slugPath = params.slug?.join("/") ?? "";
+  const ogImage = `/docs/og/${slugPath}`;
+
   return {
     title: page.data.title,
     description: page.data.description,
+    openGraph: {
+      title: page.data.title,
+      description: page.data.description,
+      type: "article",
+      images: [{ url: ogImage, width: 1200, height: 630 }],
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: page.data.title,
+      description: page.data.description,
+      images: [ogImage],
+    },
   };
 }
