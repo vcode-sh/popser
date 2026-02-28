@@ -411,7 +411,7 @@ describe("Integration tests", () => {
   });
 
   describe("toast.update()", () => {
-    it("updates a toast title in the DOM", () => {
+    it("updates a toast title in the DOM", async () => {
       act(() => {
         root.render(<Toaster />);
       });
@@ -424,7 +424,7 @@ describe("Integration tests", () => {
         "Original"
       );
 
-      act(() => {
+      await act(async () => {
         toast.update(id!, { title: "Updated" });
       });
 
@@ -433,7 +433,7 @@ describe("Integration tests", () => {
       );
     });
 
-    it("updates a toast type from loading to success", () => {
+    it("updates a toast type from loading to success", async () => {
       act(() => {
         root.render(<Toaster />);
       });
@@ -446,7 +446,7 @@ describe("Integration tests", () => {
         document.querySelector("[data-popser-root]")?.getAttribute("data-type")
       ).toBe("loading");
 
-      act(() => {
+      await act(async () => {
         toast.update(id!, { type: "success", title: "Done!" });
       });
 

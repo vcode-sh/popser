@@ -728,6 +728,123 @@ export function ToastOptionsDemo() {
   );
 }
 
+export function EntryDirectionDemo() {
+  return (
+    <DemoBox>
+      <DemoButton onClick={() => toast("Slide left", { enterFrom: "left" })}>
+        Left
+      </DemoButton>
+      <DemoButton onClick={() => toast("Slide right", { enterFrom: "right" })}>
+        Right
+      </DemoButton>
+      <DemoButton onClick={() => toast("Slide top", { enterFrom: "top" })}>
+        Top
+      </DemoButton>
+      <DemoButton
+        onClick={() => toast("Slide bottom", { enterFrom: "bottom" })}
+      >
+        Bottom
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function CloseButtonPositionDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() =>
+          toast("Header close button", {
+            closeButtonPosition: "header",
+            timeout: 6000,
+          })
+        }
+      >
+        Header (default)
+      </DemoButton>
+      <DemoButton
+        onClick={() =>
+          toast("Corner close button", {
+            closeButtonPosition: "corner",
+            timeout: 6000,
+          })
+        }
+      >
+        Corner
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function ExpandedLimitDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() => {
+          for (let i = 1; i <= 6; i++) {
+            toast(`Toast ${i} of 6`, { timeout: 8000 });
+          }
+        }}
+      >
+        Fire 6 toasts
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function AbortSignalDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() => {
+          const ctrl = new AbortController();
+          toast.promise(
+            new Promise<void>((resolve) => setTimeout(resolve, 5000)),
+            {
+              loading: "Uploading...",
+              success: "Uploaded!",
+              error: "Failed",
+              signal: ctrl.signal,
+              aborted: "Cancelled by user",
+            }
+          );
+          setTimeout(() => ctrl.abort(), 1500);
+        }}
+      >
+        Auto-cancel after 1.5s
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function HistoryDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() => {
+          toast("First");
+          toast.success("Second");
+          toast.info("Third");
+          setTimeout(() => {
+            const h = toast.getHistory();
+            toast.info(`History: ${h.length} entries`);
+          }, 500);
+        }}
+      >
+        Fire 3 + show history
+      </DemoButton>
+      <DemoButton
+        onClick={() => {
+          toast.clearHistory();
+          toast.info("History cleared");
+        }}
+      >
+        Clear history
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
 export function StyleDemo() {
   return (
     <DemoBox>

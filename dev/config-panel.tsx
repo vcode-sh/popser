@@ -21,6 +21,8 @@ const positions: PopserPosition[] = [
 ];
 const themes = ["light", "dark", "system"] as const;
 const closeModes = ["hover", "always", "never"] as const;
+const closePositions = ["header", "corner"] as const;
+const dirs = ["ltr", "rtl", "auto"] as const;
 const swipeDirs: PopserSwipeDirection[] = ["up", "down", "left", "right"];
 
 function buildCodePreview(config: ToasterConfig): string {
@@ -43,6 +45,16 @@ function buildCodePreview(config: ToasterConfig): string {
       : null,
     config.mobileBreakpoint !== 600
       ? `  mobileBreakpoint={${config.mobileBreakpoint}}`
+      : null,
+    config.closeButtonPosition !== "header"
+      ? `  closeButtonPosition="${config.closeButtonPosition}"`
+      : null,
+    config.dir ? `  dir="${config.dir}"` : null,
+    config.expandedLimit > 0
+      ? `  expandedLimit={${config.expandedLimit}}`
+      : null,
+    config.historyLength > 0
+      ? `  historyLength={${config.historyLength}}`
       : null,
     "/>",
   ]
@@ -132,6 +144,34 @@ export function ConfigPanel({
             </button>
           ))}
         </div>
+        <div style={dividerStyle} />
+        <div style={controlGroupStyle}>
+          <span style={controlLabelStyle}>Close Pos</span>
+          {closePositions.map((p) => (
+            <button
+              key={p}
+              onClick={() => update("closeButtonPosition", p)}
+              style={pillStyle(config.closeButtonPosition === p)}
+              type="button"
+            >
+              {p}
+            </button>
+          ))}
+        </div>
+        <div style={dividerStyle} />
+        <div style={controlGroupStyle}>
+          <span style={controlLabelStyle}>Dir</span>
+          {dirs.map((d) => (
+            <button
+              key={d}
+              onClick={() => update("dir", config.dir === d ? "" : d)}
+              style={pillStyle(config.dir === d)}
+              type="button"
+            >
+              {d}
+            </button>
+          ))}
+        </div>
       </div>
 
       {/* Row 2: Toggles + Swipe direction */}
@@ -178,6 +218,8 @@ export function ConfigPanel({
             ["gap", 0, 32, 2],
             ["timeout", 0, 30000, 500],
             ["mobileBreakpoint", 320, 1024, 20],
+            ["expandedLimit", 0, 20, 1],
+            ["historyLength", 0, 100, 10],
           ] as const
         ).map(([key, min, max, step]) => (
           <div key={key} style={controlGroupStyle}>

@@ -153,6 +153,8 @@ const ids = toast.getToasts(); // ["abc", "def"]
 
 Opt-in audit trail. Enable with `historyLength` on `<Toaster>`, then query whenever you fancy.
 
+<HistoryDemo />
+
 ```ts
 const history = toast.getHistory();
 // [{ id, title, type, createdAt, closedAt, closedBy }, ...]

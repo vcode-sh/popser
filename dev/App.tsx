@@ -15,6 +15,7 @@ import { StressSection } from "./sections/stress.js";
 import { StylingSection } from "./sections/styling.js";
 import { TypesSection } from "./sections/types.js";
 import { V02FeaturesSection } from "./sections/v02-features.js";
+import { V12FeaturesSection } from "./sections/v12-features.js";
 import {
   colors,
   containerStyle,
@@ -88,7 +89,7 @@ export function App() {
       <header style={headerStyle}>
         <div style={headerLeftStyle}>
           <span style={packageNameStyle}>popser</span>
-          <span style={versionBadgeStyle}>v0.4.0</span>
+          <span style={versionBadgeStyle}>v1.2.0</span>
           <span
             style={{ fontSize: 13, color: colors.textFaint, marginLeft: 4 }}
           >
@@ -121,6 +122,7 @@ export function App() {
       <BehaviorSection />
       <LifecycleSection />
       <V02FeaturesSection />
+      <V12FeaturesSection />
       <AnchoredSection />
       <StressSection />
 
@@ -128,8 +130,12 @@ export function App() {
       <Toaster
         ariaLabel={config.ariaLabel || undefined}
         closeButton={config.closeButton}
+        closeButtonPosition={config.closeButtonPosition}
+        dir={config.dir || undefined}
         expand={config.expand}
+        expandedLimit={config.expandedLimit || undefined}
         gap={config.gap}
+        historyLength={config.historyLength || undefined}
         icons={config.useCustomIcons ? customIcons : undefined}
         limit={config.limit}
         mobileBreakpoint={config.mobileBreakpoint}

@@ -119,6 +119,8 @@ Stack state lives on `data-expanded`. Mouse leave has a 100ms debounce because w
 
 Show more toasts when hovering than when collapsed. `limit` controls the collapsed count, `expandedLimit` controls the expanded count.
 
+<ExpandedLimitDemo />
+
 ```tsx
 <Toaster limit={3} expandedLimit={8} />
 ```
@@ -152,6 +154,8 @@ Three modes. Choose based on how much you trust your users.
 ### Position
 
 Where the close button lives. `"header"` puts it inline in the toast header. `"corner"` positions it absolute in the top-right corner.
+
+<CloseButtonPositionDemo />
 
 ```tsx
 <Toaster closeButtonPosition="corner" />
