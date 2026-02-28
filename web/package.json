@@ -13,7 +13,7 @@
   },
   "dependencies": {
     "@base-ui/react": "^1.2.0",
-    "@vcui/popser": "file:..",
+    "@vcui/popser": "^1.0.0",
     "fumadocs-core": "16.6.7",
     "fumadocs-mdx": "14.2.8",
     "fumadocs-ui": "16.6.7",
