@@ -1,6 +1,6 @@
 "use client";
 
-import { toast, Toaster } from "@vcui/popser";
+import { Toaster, toast } from "@vcui/popser";
 import "@vcui/popser/styles";
 
 const buttonStyle = {
@@ -25,48 +25,39 @@ export function ToastDemo() {
           justifyContent: "center",
         }}
       >
-        <button style={buttonStyle} onClick={() => toast("Hello world")}>
+        <button onClick={() => toast("Hello world")} style={buttonStyle}>
           Default
         </button>
-        <button
-          style={buttonStyle}
-          onClick={() => toast.success("Success!")}
-        >
+        <button onClick={() => toast.success("Success!")} style={buttonStyle}>
           Success
         </button>
         <button
-          style={buttonStyle}
           onClick={() => toast.error("Something broke")}
+          style={buttonStyle}
         >
           Error
         </button>
-        <button style={buttonStyle} onClick={() => toast.info("Heads up")}>
+        <button onClick={() => toast.info("Heads up")} style={buttonStyle}>
           Info
         </button>
         <button
-          style={buttonStyle}
           onClick={() => toast.warning("Careful now")}
+          style={buttonStyle}
         >
           Warning
         </button>
-        <button
-          style={buttonStyle}
-          onClick={() => toast.loading("Loading...")}
-        >
+        <button onClick={() => toast.loading("Loading...")} style={buttonStyle}>
           Loading
         </button>
         <button
-          style={buttonStyle}
           onClick={() => {
-            toast.promise(
-              new Promise((resolve) => setTimeout(resolve, 2000)),
-              {
-                loading: "Uploading...",
-                success: "Upload complete!",
-                error: "Upload failed",
-              },
-            );
+            toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+              loading: "Uploading...",
+              success: "Upload complete!",
+              error: "Upload failed",
+            });
           }}
+          style={buttonStyle}
         >
           Promise
         </button>

@@ -1,11 +1,11 @@
 "use client";
 
 import { toast } from "@vcui/popser";
-import { useRef, type ReactNode } from "react";
+import { type ReactNode, useRef } from "react";
 
 function DemoBox({ children }: { children: ReactNode }) {
   return (
-    <div className="not-prose my-4 rounded-xl border border-fd-border bg-fd-card/50 p-6 flex flex-wrap gap-2 justify-center">
+    <div className="not-prose my-4 flex flex-wrap justify-center gap-2 rounded-xl border border-fd-border bg-fd-card/50 p-6">
       {children}
     </div>
   );
@@ -22,7 +22,7 @@ function DemoButton({
   onClick: () => void;
 }) {
   return (
-    <button type="button" className={buttonClass} onClick={onClick}>
+    <button className={buttonClass} onClick={onClick} type="button">
       {children}
     </button>
   );
@@ -133,9 +133,7 @@ export function DedupDemo() {
   return (
     <DemoBox>
       <DemoButton
-        onClick={() =>
-          toast.error("Connection lost", { deduplicate: true })
-        }
+        onClick={() => toast.error("Connection lost", { deduplicate: true })}
       >
         Spam this button
       </DemoButton>
@@ -148,14 +146,11 @@ export function PromiseDemo() {
     <DemoBox>
       <DemoButton
         onClick={() => {
-          toast.promise(
-            new Promise((resolve) => setTimeout(resolve, 2000)),
-            {
-              loading: "Fetching data...",
-              success: "Data loaded",
-              error: "Failed to fetch",
-            },
-          );
+          toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+            loading: "Fetching data...",
+            success: "Data loaded",
+            error: "Failed to fetch",
+          });
         }}
       >
         Run promise
@@ -169,7 +164,7 @@ export function CustomDemo() {
     <DemoBox>
       <DemoButton
         onClick={() => {
-          toast.custom((id) => (
+          toast.custom((id: string) => (
             <div
               style={{
                 display: "flex",
@@ -202,7 +197,6 @@ export function CustomDemo() {
                 </p>
               </div>
               <button
-                type="button"
                 onClick={() => toast.close(id)}
                 style={{
                   background: "none",
@@ -212,6 +206,7 @@ export function CustomDemo() {
                   fontSize: 18,
                   padding: "0 4px",
                 }}
+                type="button"
               >
                 ✕
               </button>
@@ -228,19 +223,13 @@ export function CustomDemo() {
 export function RichColorsDemo() {
   return (
     <DemoBox>
-      <DemoButton
-        onClick={() => toast.success("Saved", { richColors: true })}
-      >
+      <DemoButton onClick={() => toast.success("Saved", { richColors: true })}>
         Success
       </DemoButton>
-      <DemoButton
-        onClick={() => toast.error("Failed", { richColors: true })}
-      >
+      <DemoButton onClick={() => toast.error("Failed", { richColors: true })}>
         Error
       </DemoButton>
-      <DemoButton
-        onClick={() => toast.info("Heads up", { richColors: true })}
-      >
+      <DemoButton onClick={() => toast.info("Heads up", { richColors: true })}>
         Info
       </DemoButton>
       <DemoButton
@@ -258,8 +247,6 @@ export function AnchoredDemo() {
   return (
     <DemoBox>
       <button
-        ref={ref}
-        type="button"
         className={buttonClass}
         onClick={() => {
           toast.success("Copied to clipboard", {
@@ -269,6 +256,8 @@ export function AnchoredDemo() {
             timeout: 2000,
           });
         }}
+        ref={ref}
+        type="button"
       >
         Anchored toast
       </button>
