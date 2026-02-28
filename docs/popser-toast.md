@@ -154,11 +154,12 @@ Override chain: `toast.icon` > `Toaster.icons[type]` > built-in SVG > null.
 
 Base UI ships zero CSS. You style from scratch.
 
-Popser ships two opt-in CSS files:
+Popser ships three opt-in CSS imports:
 
 ```ts
-import "@vcui/popser/styles";  // Full default styles
-import "@vcui/popser/tokens";  // Just CSS custom properties
+import "@vcui/popser/styles";      // Modular (7 files via @import)
+import "@vcui/popser/styles/min";  // Flat, minified, single file
+import "@vcui/popser/tokens";      // Just CSS custom properties
 ```
 
 OKLCH color space. Light + dark themes. Rich color variants for all 5 types. Loading spinner animation. Mobile responsive. Position variants. Enter/exit transitions.

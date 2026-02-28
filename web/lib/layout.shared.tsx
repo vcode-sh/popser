@@ -13,6 +13,14 @@ export function baseOptions(): BaseLayoutProps {
     },
     links: [
       {
+        text: "Why Popser",
+        url: "/why",
+      },
+      {
+        text: "Why Base UI",
+        url: "/why-base-ui",
+      },
+      {
         text: "Documentation",
         url: "/docs",
         active: "nested-url",

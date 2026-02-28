@@ -9,11 +9,11 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 1.0.0 | 2.x |
+| Version | 1.1.0 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
-| Bundle (ESM) | ~12.6 KB (unminified) | ~2-3 KB (minified+gzip) |
-| CSS | Opt-in file, OKLCH tokens | Bundled inline, HSL gray scale |
+| Bundle (ESM) | 13.4 KB raw / 4.8 KB gzip | 65.9 KB raw / ~13.5 KB gzip |
+| CSS | Opt-in file, OKLCH tokens, `styles/min` flat bundle | Bundled inline as JS side-effect, HSL gray scale |
 | Dependencies | `@base-ui/react` (peer) | Zero runtime deps |
 | shadcn/ui | Registry (`npx shadcn add @vcode-sh/popser`) | Official integration |
 | Anchored toasts | Full Floating UI positioning with arrow | Not available |
@@ -461,16 +461,28 @@ Popser: **12 slots**. Sonner: **6 slots** (and `default` is broken).
 
 ---
 
-## Bundle Size Context
+## Bundle Size
 
-Sonner is very small (~2-3 KB gzipped) because it's a single self-contained file with no dependencies. Popser's JS is ~12.6 KB (unminified ESM) but:
+| | Raw | Gzipped |
+|---|---|---|
+| **Popser JS** (ESM) | 13.4 KB | 4.8 KB |
+| **Popser CSS** (`styles/min`) | 14.3 KB | 2.6 KB |
+| **Popser total** | 27.7 KB | **7.4 KB** |
+| **Sonner JS** (ESM, CSS bundled in) | 65.9 KB | ~13.5 KB |
 
-1. `@base-ui/react` is tree-shakable -- only Toast primitives are included
-2. The CSS is a separate file (not bundled in JS)
-3. Icons are inline SVGs (no icon library dependency)
-4. Total shipped CSS: ~11 KB (tokens + styles)
+Popser ships less than half the gzipped weight of Sonner, and the CSS is a separate opt-in file — your bundler tree-shakes what it wants.
 
-For apps already using `@base-ui/react` (shadcn v2 direction), the marginal cost of popser is minimal.
+Two CSS import paths:
+
+```ts
+// Modular: 7 files linked via @import directives
+import "@vcui/popser/styles";
+
+// Flat: single inlined, minified file (no @imports)
+import "@vcui/popser/styles/min";
+```
+
+For apps already using `@base-ui/react` (shadcn v2 direction), the marginal cost of popser is minimal. `@base-ui/react` is tree-shakable — only Toast primitives are included.
 
 ---
 

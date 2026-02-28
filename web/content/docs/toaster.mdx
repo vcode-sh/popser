@@ -38,6 +38,8 @@ No Provider. No context. Toaster handles all that internally because you've got 
 
 ### Behaviour
 
+<TimeoutDemo />
+
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `timeout` | `number` | `4000` | Global auto-dismiss in ms |
@@ -64,13 +66,9 @@ No Provider. No context. Toaster handles all that internally because you've got 
 
 ## Positions
 
-Six spots. Pick your favourite corner. Or centre, if you enjoy blocking content.
+Six spots. Pick your favourite corner. Or centre, if you enjoy blocking content. Default is highlighted.
 
-```
-top-left       top-center       top-right
-
-bottom-left    bottom-center    bottom-right
-```
+<PositionDemo />
 
 ```tsx
 <Toaster position="top-center" />
@@ -103,7 +101,9 @@ No hardcoded media queries. Just a prop.
 
 ## Stack
 
-Toasts collapse into a stack by default. Hover to expand. Hate the stack? Spread everything out:
+Toasts collapse into a stack by default. Hover to expand. Hate the stack? Spread everything out.
+
+<ExpandDemo />
 
 ```tsx
 <Toaster expand />
@@ -125,6 +125,8 @@ Coloured backgrounds per type. One prop.
 
 Three modes. Choose based on how much you trust your users.
 
+<CloseButtonDemo />
+
 ```tsx
 <Toaster closeButton="always" />   {/* trust no one */}
 <Toaster closeButton="hover" />    {/* default — civilised */}
@@ -133,7 +135,9 @@ Three modes. Choose based on how much you trust your users.
 
 ## Custom icons
 
-Don't like the built-in SVGs? Swap any or all:
+Don't like the built-in SVGs? Swap any or all. Emoji, custom components, `false` to kill them entirely.
+
+<IconDemo />
 
 ```tsx
 <Toaster
@@ -148,11 +152,13 @@ Don't like the built-in SVGs? Swap any or all:
 />
 ```
 
-Built-in icons use `currentColor` so they inherit your text colour. Quite civilised.
+Built-in icons use `currentColor` so they inherit your text colour. Per-toast override via `icon` prop.
 
 ## Default toast options
 
 Apply options to every toast globally. Per-toast options still override, because specificity matters.
+
+<ToastOptionsDemo />
 
 ```tsx
 <Toaster
@@ -198,7 +204,9 @@ Merges across three levels. Nothing replaced, everything concatenated:
 
 ## Swipe direction
 
-Control which way dismisses:
+Control which way dismisses. Default is right and down.
+
+<SwipeDemo />
 
 ```tsx
 <Toaster swipeDirection="right" />

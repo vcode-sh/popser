@@ -582,6 +582,147 @@ export function CustomAnchoredDemo() {
   );
 }
 
+export function ExpandDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() => {
+          toast("First toast");
+          toast.success("Second toast");
+          toast.info("Third toast");
+          toast.warning("Fourth toast — hover the stack");
+        }}
+      >
+        Stack 'em up
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function TimeoutDemo() {
+  return (
+    <DemoBox>
+      <DemoButton onClick={() => toast("Blink and miss it", { timeout: 1000 })}>
+        1 second
+      </DemoButton>
+      <DemoButton onClick={() => toast("Standard", { timeout: 4000 })}>
+        4 seconds
+      </DemoButton>
+      <DemoButton onClick={() => toast("I live here now", { timeout: 0 })}>
+        Forever
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function CloseButtonDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() =>
+          toast("Hover me to see the close button", { timeout: 6000 })
+        }
+      >
+        Hover close (default)
+      </DemoButton>
+      <DemoButton
+        onClick={() =>
+          toast("Can't dismiss this one", {
+            dismissible: false,
+            timeout: 3000,
+          })
+        }
+      >
+        Not dismissible
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function PositionDemo() {
+  return (
+    <DemoBox>
+      <div className="grid w-full max-w-sm grid-cols-3 grid-rows-2 gap-2 rounded-lg border border-dashed border-fd-border p-4"
+        style={{ height: 140 }}
+      >
+        {([
+          "top-left",
+          "top-center",
+          "top-right",
+          "bottom-left",
+          "bottom-center",
+          "bottom-right",
+        ] as const).map((pos) => (
+          <div
+            key={pos}
+            className={`flex items-center rounded-md px-2 py-1 text-xs font-mono ${
+              pos === "bottom-right"
+                ? "border border-purple-500/50 bg-purple-500/10 text-purple-500 font-semibold"
+                : "text-fd-muted-foreground"
+            } ${
+              pos.includes("left")
+                ? "justify-start"
+                : pos.includes("center")
+                  ? "justify-center"
+                  : "justify-end"
+            }`}
+          >
+            {pos}
+          </div>
+        ))}
+      </div>
+    </DemoBox>
+  );
+}
+
+export function SwipeDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() =>
+          toast("Swipe me right or down to dismiss", { timeout: 10000 })
+        }
+      >
+        Try swiping
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function IconDemo() {
+  return (
+    <DemoBox>
+      <DemoButton onClick={() => toast.success("Deployed", { icon: "🚀" })}>
+        Rocket
+      </DemoButton>
+      <DemoButton onClick={() => toast("Thinking...", { icon: "🧠" })}>
+        Brain
+      </DemoButton>
+      <DemoButton onClick={() => toast.error("Oops", { icon: false })}>
+        No icon
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
+export function ToastOptionsDemo() {
+  return (
+    <DemoBox>
+      <DemoButton
+        onClick={() =>
+          toast.success("Global defaults applied", {
+            richColors: true,
+            timeout: 8000,
+            description: "8s timeout, rich colours, description",
+          })
+        }
+      >
+        With defaults
+      </DemoButton>
+    </DemoBox>
+  );
+}
+
 export function StyleDemo() {
   return (
     <DemoBox>
