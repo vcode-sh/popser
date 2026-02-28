@@ -482,12 +482,12 @@ Popser: **12 element slots**. Sonner has fewer element-targeting slots and mixes
 
 | | Raw | Gzipped |
 |---|---|---|
-| **Popser JS** (ESM) | 13.4 KB | 4.8 KB |
-| **Popser CSS** (`styles/min`) | 14.3 KB | 2.6 KB |
-| **Popser total** | 27.7 KB | **7.4 KB** |
+| **Popser JS** (ESM) | 15.7 KB | 5.6 KB |
+| **Popser CSS** (`styles/min`) | 16.6 KB | 2.7 KB |
+| **Popser total** | 32.3 KB | **8.3 KB** |
 | **Sonner JS** (ESM, CSS bundled in) | 65.9 KB | ~13.5 KB |
 
-Popser ships less than half the gzipped weight of Sonner, and the CSS is a separate opt-in file — your bundler tree-shakes what it wants.
+Popser ships about half the gzipped weight of Sonner, and the CSS is a separate opt-in file — your bundler tree-shakes what it wants.
 
 Two CSS import paths:
 

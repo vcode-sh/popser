@@ -106,7 +106,7 @@ export default function CollaboratePage() {
           <p>
             I built popser because I needed toast notifications that don&apos;t
             fight me on styling, leak memory, or require a PhD in CSS
-            specificity. It works. It&apos;s tested. It ships at 7.4 KB gzipped.
+            specificity. It works. It&apos;s tested. It ships at 8.3 KB gzipped.
           </p>
           <p>
             But one person building a component library is a bottleneck, not a
@@ -269,7 +269,7 @@ export default function CollaboratePage() {
               <tr>
                 <td className="px-5 py-3 font-medium">Bundle</td>
                 <td className="px-5 py-3 text-fd-muted-foreground">
-                  7.4 KB gzipped (JS + CSS)
+                  8.3 KB gzipped (JS + CSS)
                 </td>
               </tr>
               <tr>

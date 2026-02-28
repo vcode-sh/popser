@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6)](https://www.typescriptlang.org/)
 
-Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives — headless components done right. Sonner-compatible API. **7.4 KB gzipped total.** No `!important`. No memory leaks. Your styles actually win for once.
+Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives — headless components done right. Sonner-compatible API. **8.3 KB gzipped total.** No `!important`. No memory leaks. Your styles actually win for once.
 
 **[Documentation](https://popser.vcui.dev/docs)** · **[Why I built this](https://popser.vcui.dev/why)** · **[Why Base UI](https://popser.vcui.dev/why-base-ui)** · **[Changelog](https://popser.vcui.dev/docs/changelog)**
 
@@ -128,7 +128,7 @@ Import the defaults and override what you want:
 
 ```ts
 import "@vcui/popser/styles";       // modular (6 files via @import)
-import "@vcui/popser/styles/min";   // flat, minified, single file — 2.6 KB gzipped
+import "@vcui/popser/styles/min";   // flat, minified, single file — 2.7 KB gzipped
 ```
 
 Everything is CSS custom properties. Override them, don't fight them:
@@ -168,11 +168,11 @@ Full data attributes reference: **[docs/testing.md](docs/testing.md)**
 
 | | Raw | Gzipped |
 |---|---|---|
-| JS (ESM) | 13.4 KB | 4.8 KB |
-| CSS (`styles/min`) | 14.3 KB | 2.6 KB |
-| **Total** | **27.7 KB** | **7.4 KB** |
+| JS (ESM) | 15.7 KB | 5.6 KB |
+| CSS (`styles/min`) | 16.6 KB | 2.7 KB |
+| **Total** | **32.3 KB** | **8.3 KB** |
 
-Sonner ships ~17 KB gzipped with CSS bundled inside the JavaScript. Popser is less than half that, and the CSS is a separate opt-in file your bundler can tree-shake.
+Sonner ships ~17 KB gzipped with CSS bundled inside the JavaScript. Popser is about half that, and the CSS is a separate opt-in file your bundler can tree-shake.
 
 ## Why popser?
 
@@ -188,7 +188,7 @@ The API is Sonner-compatible so you can swap without rewriting anything. But und
 - **No hardcoded breakpoints.** Mobile breakpoint is a prop. CSS-driven responsiveness.
 - **Accessible.** ARIA live regions, priority system, keyboard navigation.
 - **E2E ready.** `data-popser-id` on every toast root. Stable selectors out of the box.
-- **Tiny.** 7.4 KB gzipped total. Five inline SVGs and a CSS spinner. Zero icon dependencies.
+- **Tiny.** 8.3 KB gzipped total. Five inline SVGs and a CSS spinner. Zero icon dependencies.
 - **Anchored toasts.** Pin toasts to elements with Floating UI positioning. Arrow included.
 
 Read the full story: **[Why I built this](https://popser.vcui.dev/why)** · **[Why Base UI, not Radix](https://popser.vcui.dev/why-base-ui)**

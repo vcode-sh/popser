@@ -98,9 +98,9 @@ const comparisonRows: {
   popser: ReactNode;
   sonner: ReactNode;
 }[] = [
-  { label: "JS (gzipped)", popser: "4.8 KB", sonner: "~13.5 KB" },
-  { label: "CSS (gzipped)", popser: "2.6 KB", sonner: "Included in JS import" },
-  { label: "Total", popser: "7.4 KB", sonner: "~17 KB" },
+  { label: "JS (gzipped)", popser: "5.6 KB", sonner: "~13.5 KB" },
+  { label: "CSS (gzipped)", popser: "2.7 KB", sonner: "Included in JS import" },
+  { label: "Total", popser: "8.3 KB", sonner: "~17 KB" },
   { label: "Memory leaks", popser: "None", sonner: null },
   {
     label: "!important required",
