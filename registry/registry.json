@@ -1,7 +1,7 @@
 {
   "$schema": "https://ui.shadcn.com/schema/registry.json",
   "name": "vcode-sh",
-  "homepage": "https://github.com/vcode-sh/popser",
+  "homepage": "https://popser.vcui.dev",
   "items": [
     {
       "name": "popser",

@@ -157,7 +157,7 @@ Base UI ships zero CSS. You style from scratch.
 Popser ships three opt-in CSS imports:
 
 ```ts
-import "@vcui/popser/styles";      // Modular (7 files via @import)
+import "@vcui/popser/styles";      // Modular (6 files via @import)
 import "@vcui/popser/styles/min";  // Flat, minified, single file
 import "@vcui/popser/tokens";      // Just CSS custom properties
 ```

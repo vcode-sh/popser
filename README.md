@@ -4,7 +4,7 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://opensource.org/licenses/MIT)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.9+-3178c6)](https://www.typescriptlang.org/)
 
-Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives — the headless component era that started in 2026. Sonner-compatible API. **7.4 KB gzipped total.** No `!important`. No memory leaks. Your styles actually win for once.
+Toast notifications for React. Built on [Base UI](https://base-ui.com) Toast primitives — headless components done right. Sonner-compatible API. **7.4 KB gzipped total.** No `!important`. No memory leaks. Your styles actually win for once.
 
 **[Documentation](https://popser.vcui.dev/docs)** · **[Why I built this](https://popser.vcui.dev/why)** · **[Why Base UI](https://popser.vcui.dev/why-base-ui)** · **[Changelog](https://popser.vcui.dev/docs/changelog)**
 
@@ -127,7 +127,7 @@ All props: **[docs/toaster.md](docs/toaster.md)**
 Import the defaults and override what you want:
 
 ```ts
-import "@vcui/popser/styles";       // modular (7 files via @import)
+import "@vcui/popser/styles";       // modular (6 files via @import)
 import "@vcui/popser/styles/min";   // flat, minified, single file — 2.6 KB gzipped
 ```
 

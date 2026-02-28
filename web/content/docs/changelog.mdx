@@ -3,6 +3,30 @@ title: Changelog
 description: What changed, when, and why you should care.
 ---
 
+## 1.1.2
+
+The shadcn registry actually works now. Also fixed some docs that were lying about import names.
+
+### Added
+
+- shadcn registry served from the docs site. Direct install: `npx shadcn add https://popser.vcui.dev/r/popser.json`.
+- Namespace install: configure `@vcode-sh` in your `components.json`, then `npx shadcn add @vcode-sh/popser`.
+
+### Fixed
+
+- shadcn docs referenced `<Popser>` but the registry component exports `<Toaster>`. Fixed everywhere.
+- README CSS examples used HSL values. The token system is OKLCH. Now they match.
+
+### Changed
+
+- Registry homepage updated from GitHub to popser.vcui.dev.
+
+### No code changes
+
+Zero changes to `src/`. Same build output as 1.1.0.
+
+---
+
 ## 1.1.1
 
 The paperwork patch. No code changed. The docs got a promotion.

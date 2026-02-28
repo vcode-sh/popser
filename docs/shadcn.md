@@ -3,10 +3,28 @@
 Add popser to your shadcn project with one command:
 
 ```bash
-npx shadcn add @vcode-sh/popser
+npx shadcn add https://popser.vcui.dev/r/popser.json
 ```
 
 This installs `@vcui/popser`, adds a wrapper component, and configures CSS imports.
+
+### Using a namespace
+
+Add the registry to your `components.json`:
+
+```json
+{
+  "registries": {
+    "@vcode-sh": "https://popser.vcui.dev/r/{name}.json"
+  }
+}
+```
+
+Then install with:
+
+```bash
+npx shadcn add @vcode-sh/popser
+```
 
 ## What You Get
 
@@ -23,13 +41,13 @@ After installing via the registry:
 
 ```tsx
 import { toast } from "@vcui/popser";
-import { Popser } from "@/components/ui/popser";
+import { Toaster } from "@/components/ui/popser";
 
 export default function Layout({ children }) {
   return (
     <>
       {children}
-      <Popser />
+      <Toaster />
     </>
   );
 }
@@ -43,7 +61,7 @@ toast.success("Saved");
 Pass any `ToasterProps` to the wrapper:
 
 ```tsx
-<Popser
+<Toaster
   position="top-center"
   limit={5}
   timeout={3000}
@@ -58,7 +76,7 @@ The wrapper reads `resolvedTheme` from `next-themes` and passes it to popser's `
 If you're not using `next-themes`, pass `theme` manually:
 
 ```tsx
-<Popser theme="dark" />
+<Toaster theme="dark" />
 ```
 
 ## Styling

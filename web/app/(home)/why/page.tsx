@@ -75,7 +75,7 @@ const features = [
   },
   {
     label: "Built-in icons",
-    detail: "5 inline SVGs + CSS spinner. 40 lines. Zero icon library tax.",
+    detail: "5 inline SVGs + CSS spinner. Zero icon library tax.",
   },
   {
     label: "Opt-in CSS",
@@ -84,7 +84,7 @@ const features = [
   },
   {
     label: "12 classNames slots",
-    detail: "Sonner has 6. Every element is targetable.",
+    detail: "Every toast element is targetable. Sonner only targets a handful.",
   },
   {
     label: "E2E ready",
@@ -99,7 +99,7 @@ const comparisonRows: {
   sonner: ReactNode;
 }[] = [
   { label: "JS (gzipped)", popser: "4.8 KB", sonner: "~13.5 KB" },
-  { label: "CSS (gzipped)", popser: "2.6 KB", sonner: "Bundled in JS" },
+  { label: "CSS (gzipped)", popser: "2.6 KB", sonner: "Included in JS import" },
   { label: "Total", popser: "7.4 KB", sonner: "~17 KB" },
   { label: "Memory leaks", popser: "None", sonner: null },
   {
@@ -109,7 +109,7 @@ const comparisonRows: {
   },
   { label: "Open issues", popser: "Few", sonner: "44" },
   { label: "Anchored toasts", popser: "Full Floating UI", sonner: "None" },
-  { label: "update() API", popser: "Partial updates", sonner: "None" },
+  { label: "update() API", popser: "Partial updates", sonner: "Re-call with same ID" },
   {
     label: "Close button modes",
     popser: "always / hover / never",
@@ -120,11 +120,11 @@ const comparisonRows: {
 const migrationCode = `- import { toast } from "sonner";
 + import { toast } from "@vcui/popser";
 
-- toast.dismiss(id);
-+ toast.close(id);
+// toast.dismiss() still works (it's an alias for toast.close)
 
 - toast("msg", { duration: 3000 });
-+ toast("msg", { timeout: 3000 });`;
++ toast("msg", { timeout: 3000 });
+// duration also works as an alias`;
 
 function CheckIcon() {
   return (
@@ -242,7 +242,7 @@ export default function WhyPage() {
         </h2>
         <div className="mt-4 space-y-4 text-fd-muted-foreground leading-relaxed">
           <p>
-            In early 2026, the team behind Radix, Floating UI, and MUI shipped{" "}
+            In late 2025, the team behind Radix, Floating UI, and MUI shipped{" "}
             <code className="rounded bg-fd-secondary px-1.5 py-0.5 text-fd-foreground">
               @base-ui/react
             </code>{" "}
@@ -295,8 +295,8 @@ export default function WhyPage() {
       <section className="mt-12">
         <h2 className="font-bold text-2xl tracking-tight">The numbers</h2>
         <p className="mt-4 text-fd-muted-foreground leading-relaxed">
-          Less than half the size. And the CSS is a separate file — not injected
-          as a JavaScript side-effect.
+          Less than half the size. And the CSS is a separate opt-in file you
+          control.
         </p>
         <div className="mt-6 overflow-x-auto rounded-xl border border-fd-border">
           <table className="w-full text-sm">

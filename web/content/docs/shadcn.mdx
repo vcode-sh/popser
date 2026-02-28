@@ -6,10 +6,28 @@ description: One command. Done. Go home.
 One command:
 
 ```bash
-npx shadcn add @vcode-sh/popser
+npx shadcn add https://popser.vcui.dev/r/popser.json
 ```
 
 Installs `@vcui/popser`, adds a wrapper component, sorts the CSS imports. You're done.
+
+### Using a namespace
+
+If you'd rather type less every time, add the registry to your `components.json`:
+
+```json
+{
+  "registries": {
+    "@vcode-sh": "https://popser.vcui.dev/r/{name}.json"
+  }
+}
+```
+
+Then install with:
+
+```bash
+npx shadcn add @vcode-sh/popser
+```
 
 ## What you get
 
@@ -24,13 +42,13 @@ The registry component wraps `<Toaster>` with:
 
 ```tsx
 import { toast } from "@vcui/popser";
-import { Popser } from "@/components/ui/popser";
+import { Toaster } from "@/components/ui/popser";
 
 export default function Layout({ children }) {
   return (
     <>
       {children}
-      <Popser />
+      <Toaster />
     </>
   );
 }
@@ -44,7 +62,7 @@ toast.success("Saved");
 Forwards everything:
 
 ```tsx
-<Popser
+<Toaster
   position="top-center"
   limit={5}
   timeout={3000}
@@ -59,7 +77,7 @@ Reads `resolvedTheme` from `next-themes`. Dark mode works if you've got `next-th
 No `next-themes`? Pass it manually:
 
 ```tsx
-<Popser theme="dark" />
+<Toaster theme="dark" />
 ```
 
 ## Styling

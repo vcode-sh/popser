@@ -36,7 +36,7 @@ const highlights = [
   },
   {
     label: "Zero icon deps",
-    detail: "Five inline SVGs. One CSS spinner. 40 lines. No library tax.",
+    detail: "Five inline SVGs. One CSS spinner. No library tax.",
   },
 ];
 

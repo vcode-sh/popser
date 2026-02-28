@@ -103,7 +103,7 @@ src/
 ├── use-toaster.ts     # React hook wrapper
 ├── types.ts           # All TypeScript interfaces
 ├── constants.ts       # Default values
-└── styles/            # CSS tokens + styles (7 files)
+└── styles/            # CSS tokens + styles (6 files + popser.css bundle)
 
 docs/                  # Package documentation (markdown)
 web/                   # Documentation site (Next.js + fumadocs)

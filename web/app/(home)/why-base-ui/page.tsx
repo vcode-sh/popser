@@ -4,7 +4,7 @@ import Link from "next/link";
 export const metadata: Metadata = {
   title: "Why Base UI, Not Radix — Popser",
   description:
-    "The co-creator of Radix called their toast component a liability. Here's why Popser chose Base UI instead.",
+    "The co-creator of Radix moved to Base UI. Here's why Popser chose to follow.",
 };
 
 const comparisonRows = [
@@ -149,9 +149,8 @@ export default function WhyBaseUIPage() {
             component system on it.
           </p>
           <p>
-            Then Colm Tuite — co-creator of Radix — publicly called the Radix
-            Toast component &ldquo;a liability&rdquo; and joined the Base UI
-            team.
+            Then Colm Tuite — co-creator of Radix — left the project and joined
+            the Base UI team, bringing the lessons learned from Radix with him.
           </p>
           <p>
             That&apos;s not a market signal. That&apos;s the architect leaving

@@ -9,11 +9,11 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 1.1.0 | 2.x |
+| Version | 1.1.2 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | 13.4 KB raw / 4.8 KB gzip | 65.9 KB raw / ~13.5 KB gzip |
-| CSS | Opt-in file, OKLCH tokens, `styles/min` flat bundle | Bundled inline as JS side-effect, HSL gray scale |
+| CSS | Opt-in file, OKLCH tokens, `styles/min` flat bundle | Auto-imported with JS, HSL gray scale |
 | Dependencies | `@base-ui/react` (peer) | Zero runtime deps |
 | shadcn/ui | Registry (`npx shadcn add @vcode-sh/popser`) | Official integration |
 | Anchored toasts | Full Floating UI positioning with arrow | Not available |
@@ -36,7 +36,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `toast.promise()` | `toast.promise()` | `toast.promise()` |
 | `toast.close(id)` | `toast.close(id)` | `toast.dismiss(id)` |
 | `toast.close()` (all) | `toast.close()` | `toast.dismiss()` |
-| `toast.update(id, opts)` | `toast.update(id, opts)` | Not available |
+| `toast.update(id, opts)` | `toast.update(id, opts)` | Re-call `toast()` with same ID (full replace) |
 | `toast.dismiss(id)` | `toast.dismiss(id)` (alias for `close`) | `toast.dismiss(id)` |
 | `toast.getToasts()` | `toast.getToasts()` → `string[]` | Not available |
 | `toast.custom(jsx)` | `toast.custom((id) => jsx)` | `toast.custom(jsx)` |
@@ -111,7 +111,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `mobileBreakpoint` | `number` (default: 600) | Hardcoded 600px | Configurable |
 | `swipeDirection` | `string \| string[]` | `string[]` | Same |
 | `icons` | `PopserIcons` | `object` | Same concept |
-| `classNames` | `PopserClassNames` (12 slots) | 6 slots | More granular |
+| `classNames` | `PopserClassNames` (12 slots) | Element + type slots | More granular element targeting |
 | `style` | `CSSProperties` | Not available | Viewport inline styles |
 | `unstyled` | `boolean` | `boolean` | Same |
 | `toastOptions` | `Partial<PopserOptions>` | `object` | Global defaults for all toasts |
@@ -132,7 +132,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 
 ### 2. Proper `update()` API
 
-**Sonner:** No `update()` method. To change a toast, you re-call `toast()` with the same ID, replacing the entire toast. Loading state bleeds through (#401, 10 comments). Action buttons persist on future toasts (#692).
+**Sonner:** No dedicated `update()` method. To change a toast, you re-call `toast()` with the same ID, replacing the entire toast. Loading state bleeds through (#401, 10 comments). Action buttons persist on future toasts (#692).
 
 **Popser:** `toast.update(id, partialOptions)` -- partial updates via Base UI's `manager.update()`. Only changed fields are updated. Type, icon, action all reset cleanly.
 
@@ -144,7 +144,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 
 ### 4. Configurable Mobile Breakpoint
 
-**Sonner #376 (open 2+ years, 7 upvotes):** Mobile breakpoint is hardcoded to 600px in CSS `@media (max-width: 600px)`. No way to change it.
+**Sonner #376 (open since March 2024, 7 upvotes):** Mobile breakpoint is hardcoded to 600px in CSS `@media (max-width: 600px)`. No way to change it.
 
 **Popser:** `mobileBreakpoint` prop. Uses `window.matchMedia` to detect mobile and sets `data-mobile` attribute on viewport. CSS targets `[data-popser-viewport][data-mobile]` instead of a fixed media query. Fully configurable at runtime.
 
@@ -317,7 +317,7 @@ Toast.createToastManager() (Base UI singleton)
 
 ### Sonner
 
-- CSS bundled inline in the JS package
+- CSS auto-imported with the JS package
 - Uses `data-styled="true"` to gate default styles
 - HSL color values
 - `!important` required for overrides
@@ -358,7 +358,7 @@ Toast.createToastManager() (Base UI singleton)
 | `arrow` | `classNames.arrow` | Not available |
 | `default` | Per-type via `data-type` | `classNames.default` (buggy #744) |
 
-Popser: **12 slots**. Sonner: **6 slots** (and `default` is broken).
+Popser: **12 element slots**. Sonner has fewer element-targeting slots and mixes in per-type class overrides (and `default` is broken — #744).
 
 ---
 
@@ -475,7 +475,7 @@ Popser ships less than half the gzipped weight of Sonner, and the CSS is a separ
 Two CSS import paths:
 
 ```ts
-// Modular: 7 files linked via @import directives
+// Modular: 6 files linked via @import directives
 import "@vcui/popser/styles";
 
 // Flat: single inlined, minified file (no @imports)

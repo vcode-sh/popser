@@ -6,6 +6,27 @@ The format tries to be useful. No "chore: bump deps" padding. If it didn't chang
 
 ---
 
+## [1.1.2] - 2026-02-28
+
+The shadcn registry actually works now. Also fixed some docs that were lying about import names.
+
+### Added
+- shadcn registry served from docs site at `popser.vcui.dev/r/popser.json`. Direct URL install: `npx shadcn add https://popser.vcui.dev/r/popser.json`.
+- Namespace install instructions: configure `@vcode-sh` registry in `components.json`, then `npx shadcn add @vcode-sh/popser`.
+
+### Fixed
+- shadcn docs referenced `<Popser>` but the registry component exports `<Toaster>`. Fixed across all docs.
+- README CSS examples used HSL values. The actual token system is OKLCH. Examples now match reality.
+
+### Changed
+- Registry homepage updated from GitHub to `popser.vcui.dev`.
+
+### No code changes
+
+Zero changes to `src/`. Same build output as 1.1.0.
+
+---
+
 ## [1.1.1] - 2026-02-28
 
 The paperwork patch. No code changed. The docs got a promotion.
@@ -57,7 +78,7 @@ CSS bundle (via `@vcui/popser/styles/min`):
 Total: 7.4 KB gzipped. Sonner ships ~17 KB. We're less than half.
 
 ### Added
-- `@vcui/popser/styles/min` export: single inlined, minified CSS file. No more 7 HTTP requests for CDN users. Modular imports (`@vcui/popser/styles`) still available.
+- `@vcui/popser/styles/min` export: single inlined, minified CSS file. No more 6 HTTP requests for CDN users. Modular imports (`@vcui/popser/styles`) still available.
 
 ### Changed
 - JS minification enabled in tsup. The dist was shipping formatted, readable JavaScript. Lovely for education. Terrible for bandwidth.
