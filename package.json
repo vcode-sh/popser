@@ -1,6 +1,6 @@
 {
   "name": "@vcui/popser",
-  "version": "1.1.0",
+  "version": "1.1.1",
   "type": "module",
   "description": "Toast notifications for React. Built on Base UI. Sonner-compatible API.",
   "main": "./dist/index.cjs",
