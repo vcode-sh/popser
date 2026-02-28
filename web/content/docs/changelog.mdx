@@ -11,11 +11,14 @@ The shadcn registry actually works now. Also fixed some docs that were lying abo
 
 - shadcn registry served from the docs site. Direct install: `npx shadcn add https://popser.vcui.dev/r/popser.json`.
 - Namespace install: configure `@vcode-sh` in your `components.json`, then `npx shadcn add @vcode-sh/popser`.
+- `/llms.txt` — concise index of all docs pages with links and descriptions.
+- `/llms-full.txt` — full documentation concatenated into one plain text file. JSX demo components stripped out.
 
 ### Fixed
 
 - shadcn docs referenced `<Popser>` but the registry component exports `<Toaster>`. Fixed everywhere.
 - README CSS examples used HSL values. The token system is OKLCH. Now they match.
+- Factual accuracy sweep across all docs: corrected @import file count (6 not 7), Base UI release date (late 2025 not early 2026), Sonner classNames count, update() API comparison, CSS bundling description, migration example, and removed unverifiable quotes.
 
 ### Changed
 

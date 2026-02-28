@@ -13,10 +13,21 @@ The shadcn registry actually works now. Also fixed some docs that were lying abo
 ### Added
 - shadcn registry served from docs site at `popser.vcui.dev/r/popser.json`. Direct URL install: `npx shadcn add https://popser.vcui.dev/r/popser.json`.
 - Namespace install instructions: configure `@vcode-sh` registry in `components.json`, then `npx shadcn add @vcode-sh/popser`.
+- `/llms.txt` route: concise index of all docs pages with titles, URLs, and descriptions.
+- `/llms-full.txt` route: full documentation concatenated into one plain text file. JSX demo components stripped. Changelog excluded.
 
 ### Fixed
 - shadcn docs referenced `<Popser>` but the registry component exports `<Toaster>`. Fixed across all docs.
 - README CSS examples used HSL values. The actual token system is OKLCH. Examples now match reality.
+- "7 files via @import" → 6. The actual `popser.css` has 6 `@import` directives.
+- "5 inline SVGs + CSS spinner. 40 lines" → dropped the line count. `toast-icon.tsx` is 129 lines.
+- "In early 2026, shipped @base-ui/react v1.0" → late 2025. Base UI v1.0.0 shipped Dec 11, 2025.
+- "Sonner has 6 classNames slots" → Sonner has more properties (element + per-type). Removed specific count.
+- "update() API: Sonner = None" → Sonner re-calls `toast()` with same ID (full replace). Not nothing.
+- Sonner CSS described as "bundled inline as JS side-effect" → "auto-imported with JS". More accurate for v2.
+- Migration example showed `dismiss → close` rename as required. `toast.dismiss()` is already an alias in popser.
+- Colm Tuite "liability" quote removed — unverifiable. Replaced with factual statement about him joining Base UI.
+- Sonner #376 described as "open 2+ years" → "open since March 2024".
 
 ### Changed
 - Registry homepage updated from GitHub to `popser.vcui.dev`.
