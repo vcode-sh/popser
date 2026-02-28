@@ -1,46 +1,41 @@
 import Link from "next/link";
+import { CopyCommand } from "@/components/copy-command";
 import { ToastDemo } from "@/components/toast-demo";
 
-const features = [
+const highlights = [
   {
-    title: "Headless Base UI",
-    description:
-      "Built on Base UI Toast primitives. No opinionated markup. Your styles always win.",
+    label: "Anchored toasts",
+    detail:
+      "Pin to elements, clicks, or coordinates. Sonner can't. Popser can.",
+    badge: "Unique",
   },
   {
-    title: "Sonner-compatible API",
-    description:
-      "Drop-in replacement. toast.success(), toast.error(), toast.promise() — all the hits.",
+    label: "Headless Base UI",
+    detail: "No opinions. Your CSS wins every argument.",
   },
   {
-    title: "No memory leaks",
-    description:
-      "Singleton toast manager with proper cleanup. Deduplication map cleared on close.",
+    label: "Sonner-compatible",
+    detail: "Same API. Drop-in replacement. All the greatest hits.",
   },
   {
-    title: "Accessible",
-    description:
-      "ARIA live regions, priority system, F6 keyboard navigation. Screen readers included.",
+    label: "No !important",
+    detail: "Zero specificity wars. Override anything. Like civilised people.",
   },
   {
-    title: "Anchored toasts",
-    description:
-      "Pin to DOM elements, click events, or coordinates. Built on Floating UI.",
+    label: "No memory leaks",
+    detail: "Proper cleanup. Your app won't slowly eat itself alive.",
   },
   {
-    title: "E2E ready",
-    description:
-      "data-popser-id on every toast root. Stable selectors for Playwright and Cypress.",
+    label: "Accessible",
+    detail: "ARIA live regions, F6 navigation. Not an afterthought.",
   },
   {
-    title: "No !important",
-    description:
-      "Headless primitives mean zero specificity wars. Override anything with plain CSS.",
+    label: "E2E ready",
+    detail: "data-popser-id on every toast. Your tests won't be flaky (for once).",
   },
   {
-    title: "Zero icon deps",
-    description:
-      "Five inline SVGs + CSS spinner. Under 40 lines. No icon library required.",
+    label: "Zero icon deps",
+    detail: "Five inline SVGs. One CSS spinner. 40 lines. No library tax.",
   },
 ];
 
@@ -62,37 +57,39 @@ export default function HomePage() {
   return (
     <main className="flex flex-col items-center">
       {/* Hero */}
-      <section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-20 pb-16 text-center">
-        <h1 className="font-bold text-5xl tracking-tight sm:text-6xl">
-          Toast notifications
-          <br />
-          <span className="bg-gradient-to-r from-purple-500 to-pink-500 bg-clip-text text-transparent">
-            done properly
+      <section className="mx-auto flex max-w-3xl flex-col items-center px-4 pt-24 pb-20 text-center">
+        <h1 className="font-extrabold text-7xl tracking-tighter sm:text-8xl">
+          <span className="animate-gradient bg-[length:200%_auto] bg-gradient-to-r from-purple-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
+            Popser
           </span>
         </h1>
-        <p className="mt-6 max-w-xl text-fd-muted-foreground text-lg">
-          Built on Base UI. Sonner-compatible API. No{" "}
-          <code className="text-fd-foreground">!important</code>. No memory
-          leaks. Just toasts that work.
+        <p className="mt-4 font-medium text-fd-foreground text-xl tracking-tight sm:text-2xl">
+          Toasts that don&apos;t make you cry.
         </p>
-        <div className="mt-8 flex flex-col items-center gap-2">
-          <code className="rounded-lg border border-fd-border bg-fd-secondary px-4 py-2.5 font-mono text-sm">
-            npm i @vcui/popser
-          </code>
-          <span className="text-fd-muted-foreground text-xs">or</span>
-          <code className="rounded-lg border border-fd-border bg-fd-secondary px-4 py-2.5 font-mono text-sm">
-            npx shadcn add @vcode-sh/popser
-          </code>
+        <p className="mx-auto mt-4 max-w-lg text-fd-muted-foreground text-sm leading-relaxed sm:text-base">
+          Headless Base UI. Sonner-compatible API.
+          <br />
+          No <code className="text-fd-foreground">!important</code> hacks. No
+          memory leaks. No existential dread.
+        </p>
+
+        <div className="mt-10 flex flex-col items-center gap-2">
+          <CopyCommand command="npm i @vcui/popser" />
+          <span className="text-fd-muted-foreground text-xs">
+            or, if you&apos;re fancy
+          </span>
+          <CopyCommand command="npx shadcn add @vcode-sh/popser" />
         </div>
-        <div className="mt-6 flex gap-3">
+
+        <div className="mt-8 flex gap-3">
           <Link
-            className="rounded-lg bg-fd-primary px-5 py-2.5 font-medium text-fd-primary-foreground text-sm transition-colors hover:bg-fd-primary/90"
+            className="rounded-lg bg-fd-primary px-6 py-2.5 font-medium text-fd-primary-foreground text-sm transition-colors hover:bg-fd-primary/90"
             href="/docs"
           >
-            Get Started
+            Read the docs
           </Link>
           <a
-            className="rounded-lg border border-fd-border px-5 py-2.5 font-medium text-sm transition-colors hover:bg-fd-accent"
+            className="rounded-lg border border-fd-border px-6 py-2.5 font-medium text-sm transition-colors hover:bg-fd-accent"
             href="https://github.com/vcode-sh/popser"
             rel="noopener noreferrer"
             target="_blank"
@@ -103,32 +100,62 @@ export default function HomePage() {
       </section>
 
       {/* Features */}
-      <section className="mx-auto w-full max-w-5xl px-4 py-16">
-        <h2 className="mb-8 text-center font-bold text-2xl">What you get</h2>
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          {features.map((feature) => (
+      <section className="mx-auto w-full max-w-2xl px-4 py-16">
+        <div className="divide-y divide-fd-border rounded-xl border border-fd-border">
+          {highlights.map((item) => (
             <div
-              className="rounded-xl border border-fd-border bg-fd-card p-5"
-              key={feature.title}
+              className="flex items-start gap-3 px-5 py-4"
+              key={item.label}
             >
-              <h3 className="font-semibold text-sm">{feature.title}</h3>
-              <p className="mt-2 text-fd-muted-foreground text-sm">
-                {feature.description}
-              </p>
+              <span className="mt-0.5 text-fd-muted-foreground">
+                {"badge" in item ? (
+                  <span className="inline-block rounded-full bg-purple-500/10 px-2 py-0.5 font-medium text-purple-500 text-[10px] leading-tight">
+                    {item.badge}
+                  </span>
+                ) : (
+                  <svg
+                    className="size-4"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      d="M20 6 9 17l-5-5"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    />
+                  </svg>
+                )}
+              </span>
+              <div className="min-w-0">
+                <span className="font-medium text-sm">{item.label}</span>
+                <span className="ml-2 text-fd-muted-foreground text-sm">
+                  {item.detail}
+                </span>
+              </div>
             </div>
           ))}
         </div>
       </section>
 
       {/* Demo */}
-      <section className="mx-auto w-full max-w-3xl px-4 py-16">
-        <h2 className="mb-8 text-center font-bold text-2xl">Try it out</h2>
+      <section className="mx-auto w-full max-w-2xl px-4 py-16">
+        <h2 className="mb-2 text-center font-bold text-2xl">
+          Go on, break something
+        </h2>
+        <p className="mb-8 text-center text-fd-muted-foreground text-sm">
+          Try the click-anchored one. That&apos;s the one Sonner doesn&apos;t
+          have.
+        </p>
         <ToastDemo />
       </section>
 
       {/* Code Example */}
       <section className="mx-auto w-full max-w-3xl px-4 pb-20">
-        <h2 className="mb-8 text-center font-bold text-2xl">Quick start</h2>
+        <h2 className="mb-8 text-center font-bold text-2xl">
+          Five lines. That&apos;s it.
+        </h2>
         <pre className="overflow-x-auto rounded-xl border border-fd-border bg-fd-secondary p-6 font-mono text-sm">
           <code>{codeExample}</code>
         </pre>

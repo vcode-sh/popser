@@ -1,28 +1,26 @@
 ---
-title: shadcn Integration
-description: Add popser to your shadcn project with one command. Includes next-themes integration.
+title: shadcn
+description: One command. Done. Go home.
 ---
 
-Add popser to your shadcn project with one command:
+One command:
 
 ```bash
 npx shadcn add @vcode-sh/popser
 ```
 
-This installs `@vcui/popser`, adds a wrapper component, and configures CSS imports.
+Installs `@vcui/popser`, adds a wrapper component, sorts the CSS imports. You're done.
 
-## What You Get
+## What you get
 
 The registry component wraps `<Toaster>` with:
 
-- **next-themes integration** — reads `resolvedTheme` and passes it to popser
-- **CSS variable merging** — maps shadcn's CSS custom properties to popser's `--popser-*` tokens
-- **Sensible defaults** — `richColors` enabled, `"system"` theme
-- **Full prop passthrough** — accepts all `ToasterProps` via `Partial<ToasterProps>`
+- **next-themes** — reads `resolvedTheme`, passes it to popser
+- **CSS variable merging** — maps shadcn tokens to `--popser-*`
+- **Sensible defaults** — `richColors` on, `"system"` theme
+- **Full prop passthrough** — every `ToasterProps` works
 
 ## Usage
-
-After installing via the registry:
 
 ```tsx
 import { toast } from "@vcui/popser";
@@ -37,13 +35,13 @@ export default function Layout({ children }) {
   );
 }
 
-// Anywhere in your app
+// anywhere
 toast.success("Saved");
 ```
 
-## Customization
+## Customisation
 
-Pass any `ToasterProps` to the wrapper:
+Forwards everything:
 
 ```tsx
 <Popser
@@ -56,9 +54,9 @@ Pass any `ToasterProps` to the wrapper:
 
 ## Theme
 
-The wrapper reads `resolvedTheme` from `next-themes` and passes it to popser's `theme` prop. Dark mode works automatically if you have `next-themes` configured in your app.
+Reads `resolvedTheme` from `next-themes`. Dark mode works if you've got `next-themes` set up. Which you do. Because you're using shadcn.
 
-If you're not using `next-themes`, pass `theme` manually:
+No `next-themes`? Pass it manually:
 
 ```tsx
 <Popser theme="dark" />
@@ -66,7 +64,7 @@ If you're not using `next-themes`, pass `theme` manually:
 
 ## Styling
 
-The wrapper component merges shadcn's CSS variables with popser's defaults. Your shadcn theme colors apply automatically. If you want to override specific tokens, use CSS custom properties:
+Merges shadcn's CSS variables with popser's defaults. Your theme colours apply automatically. Override specific tokens if needed:
 
 ```css
 :root {
@@ -79,18 +77,18 @@ The wrapper component merges shadcn's CSS variables with popser's defaults. Your
 
 ## Dependencies
 
-The registry component requires:
+- `@vcui/popser` — installed automatically
+- `next-themes` — installed automatically
+- `@vcui/popser/styles` — imported in the component
 
-- `@vcui/popser` (installed automatically)
-- `next-themes` (installed automatically)
-- `@vcui/popser/styles` (imported in the component)
+You don't need to think about any of this.
 
-## Manual Setup
+## Manual setup
 
-If you prefer not to use the registry, install manually:
+Prefer the scenic route? Install manually:
 
 ```bash
 npm install @vcui/popser
 ```
 
-Then import the styles and use `<Toaster>` directly. No wrapper needed if you don't want `next-themes` integration.
+Import styles, use `<Toaster>` directly. No wrapper. No `next-themes`. Just raw popser.

@@ -1,48 +1,48 @@
 ---
 title: Styling
-description: CSS custom properties, classNames, Tailwind integration, unstyled mode, data attributes, and animations.
+description: CSS variables, classNames, Tailwind, unstyled mode. No !important. Ever.
 ---
 
-popser ships with default styles that work out of the box. Import them, override what you want, or throw them away entirely. No `!important` anywhere.
+Popser ships with default styles that work out of the box. Import them. Override what you want. Or bin the lot and start from scratch. Zero `!important` anywhere. Your specificity wins.
 
-## Default Styles
+## Default styles
 
 ```ts
 import "@vcui/popser/styles";
 ```
 
-This includes layout, animations, light/dark tokens, and the spinner. One import, done.
+Layout, animations, light/dark tokens, spinner. One import.
 
-If you only want the color tokens without layout:
+Just want the colour tokens without the layout opinions?
 
 ```ts
 import "@vcui/popser/tokens";
 ```
 
-## CSS Custom Properties
+## CSS custom properties
 
-All visual tokens use `--popser-*` custom properties. Override them anywhere — `:root`, a wrapper div, inline styles, whatever your system uses.
+Everything visual runs through `--popser-*` variables. Override them on `:root`, a wrapper div, inline styles — wherever your design system lives.
 
-### Core Tokens
+### Core tokens
 
 ```css
 :root {
-  --popser-bg: oklch(1 0 0);              /* Toast background */
-  --popser-fg: oklch(0.145 0 0);          /* Text color */
-  --popser-border: oklch(0.922 0 0);      /* Border color */
-  --popser-radius: 8px;                    /* Border radius */
-  --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.1);  /* Box shadow */
-  --popser-offset: 16px;                   /* Distance from viewport edge */
-  --popser-gap: 8px;                       /* Space between expanded toasts */
-  --popser-width: 356px;                   /* Toast width */
-  --popser-stack-peek: 14px;               /* Peek distance in collapsed stack */
-  --popser-hover-bg: oklch(0 0 0 / 0.05); /* Button hover background */
+  --popser-bg: oklch(1 0 0);
+  --popser-fg: oklch(0.145 0 0);
+  --popser-border: oklch(0.922 0 0);
+  --popser-radius: 8px;
+  --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.1);
+  --popser-offset: 16px;
+  --popser-gap: 8px;
+  --popser-width: 356px;
+  --popser-stack-peek: 14px;
+  --popser-hover-bg: oklch(0 0 0 / 0.05);
 }
 ```
 
-### Dark Mode Tokens
+### Dark mode
 
-Dark tokens activate automatically via `[data-theme="dark"]` or `.dark` on any ancestor:
+Activates via `[data-theme="dark"]` or `.dark` on any ancestor. No JavaScript. Just CSS doing CSS things.
 
 ```css
 [data-theme="dark"],
@@ -55,20 +55,19 @@ Dark tokens activate automatically via `[data-theme="dark"]` or `.dark` on any a
 }
 ```
 
-Or set the theme on the Toaster:
+Or just tell the Toaster:
 
 ```tsx
 <Toaster theme="dark" />
 ```
 
-### Rich Color Tokens
+### Rich colours
 
-When `richColors` is enabled, each toast type gets its own background, border, and text color:
+When `richColors` is on, each type gets its own background, border, and text.
 
 <RichColorsDemo />
 
 ```css
-/* Light mode */
 --popser-success-bg     --popser-success-border     --popser-success-fg
 --popser-error-bg       --popser-error-border       --popser-error-fg
 --popser-info-bg        --popser-info-border        --popser-info-fg
@@ -76,11 +75,11 @@ When `richColors` is enabled, each toast type gets its own background, border, a
 --popser-loading-bg     --popser-loading-border     --popser-loading-fg
 ```
 
-Override any of them to match your design system.
+Override any of them. Make success pink. Make errors chartreuse. No judgement.
 
 ## ClassNames
 
-Target every part of the toast. Works with Tailwind, CSS modules, or any class-based system.
+Target every slot. Works with Tailwind, CSS modules, or whatever class-based religion you follow.
 
 ### Global (Toaster level)
 
@@ -117,17 +116,15 @@ toast.success("Saved", {
 
 ### Merge order
 
-Class names merge across three levels. Nothing gets replaced:
+Three levels. Nothing replaced. Everything concatenated.
 
 1. Toaster `classNames`
 2. Toaster `toastOptions.classNames`
 3. Per-toast `classNames` / `className`
 
-Result: all three concatenated with spaces.
-
 ## Tailwind
 
-Tailwind works out of the box via `classNames`:
+Works out of the box. No special config. Just pass classes.
 
 ```tsx
 <Toaster
@@ -141,15 +138,15 @@ Tailwind works out of the box via `classNames`:
 />
 ```
 
-Per-toast Tailwind:
+Per-toast:
 
 ```ts
 toast.success("Saved", { className: "border-green-500" });
 ```
 
-## Unstyled Mode
+## Unstyled mode
 
-Strip all default styles and start from zero:
+Nuclear option. Strip everything. Start from zero.
 
 ```tsx
 <Toaster unstyled />
@@ -161,24 +158,24 @@ Or per-toast:
 toast("Raw", { unstyled: true });
 ```
 
-In unstyled mode, use `data-popser-*` attributes to target elements in your CSS:
+Target elements with `data-popser-*` attributes:
 
 ```css
-[data-popser-viewport] { /* viewport container */ }
-[data-popser-root] { /* individual toast */ }
-[data-popser-content] { /* content wrapper */ }
-[data-popser-header] { /* header row */ }
-[data-popser-title] { /* title text */ }
-[data-popser-description] { /* description text */ }
-[data-popser-icon] { /* icon wrapper */ }
-[data-popser-actions] { /* action bar */ }
-[data-popser-action] { /* action button */ }
-[data-popser-cancel] { /* cancel button */ }
-[data-popser-close] { /* close button */ }
-[data-popser-arrow] { /* anchor arrow */ }
+[data-popser-viewport] { }
+[data-popser-root] { }
+[data-popser-content] { }
+[data-popser-header] { }
+[data-popser-title] { }
+[data-popser-description] { }
+[data-popser-icon] { }
+[data-popser-actions] { }
+[data-popser-action] { }
+[data-popser-cancel] { }
+[data-popser-close] { }
+[data-popser-arrow] { }
 ```
 
-## Data Attributes for Conditional Styling
+## Data attributes
 
 ### Viewport
 
@@ -191,7 +188,7 @@ In unstyled mode, use `data-popser-*` attributes to target elements in your CSS:
 [data-popser-viewport][data-mobile] { }
 ```
 
-### Toast Root
+### Toast root
 
 ```css
 [data-popser-root] { }
@@ -204,7 +201,7 @@ In unstyled mode, use `data-popser-*` attributes to target elements in your CSS:
 [data-popser-root][data-popser-id="my-id"] { }
 ```
 
-### Close Button
+### Close button
 
 ```css
 [data-popser-close][data-close-button="hover"] { }
@@ -222,25 +219,23 @@ In unstyled mode, use `data-popser-*` attributes to target elements in your CSS:
 
 Default styles include enter/exit animations:
 
-- **Enter:** Fade in + scale from 0.95 + slide from edge
-- **Exit:** Fade out + slide toward edge
-- **Swipe:** Slide in swipe direction
-- **Reduced motion:** Animations disabled via `prefers-reduced-motion: reduce`
+- **Enter:** fade in + scale from 0.95 + slide from edge
+- **Exit:** fade out + slide toward edge
+- **Swipe:** slide in swipe direction
+- **Reduced motion:** disabled via `prefers-reduced-motion: reduce`
 
-Entry/exit direction depends on position:
-- Bottom positions: slide up on enter, slide down on exit
-- Top positions: slide down on enter, slide up on exit
+Direction depends on position — bottom slides up, top slides down. We thought about it.
 
-Uses `data-starting-style` and `data-ending-style` attributes from Base UI for CSS-only transitions.
+Uses `data-starting-style` and `data-ending-style` from Base UI for CSS-only transitions.
 
-## CSS Variables Set at Runtime
+## Runtime CSS variables
 
-These are computed by popser and available for your CSS:
+Computed by popser. Available for your CSS to do clever things with:
 
 ```css
 --toast-index              /* 0 = newest, 1 = next, etc. */
---toast-offset-y           /* Cumulative height offset (px) */
---toast-height             /* Measured height of this toast (px) */
---toast-frontmost-height   /* Height of the front toast (px) */
---popser-visible-count     /* Number of visible toasts */
+--toast-offset-y           /* cumulative height offset (px) */
+--toast-height             /* measured height of this toast (px) */
+--toast-frontmost-height   /* height of the front toast (px) */
+--popser-visible-count     /* number of visible toasts */
 ```

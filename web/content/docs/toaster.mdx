@@ -1,9 +1,9 @@
 ---
-title: Toaster Component
-description: Configure the Toaster component — layout, theme, mobile, stack behavior, and close button modes.
+title: Toaster
+description: One component. Drop it once. Forget about it.
 ---
 
-The `<Toaster>` component renders the toast viewport. Drop it once in your app. Anywhere in the tree is fine — it portals to `document.body`.
+`<Toaster>` renders the viewport. Drop it once, anywhere in the tree. It portals to `document.body` so your carefully crafted layout remains unbothered.
 
 ```tsx
 import { Toaster } from "@vcui/popser";
@@ -18,7 +18,7 @@ function App() {
 }
 ```
 
-No Provider wrapper needed. The Toaster handles Provider, Portal, and Viewport internally.
+No Provider. No context. Toaster handles all that internally because you've got better things to do.
 
 ## Props
 
@@ -26,28 +26,28 @@ No Provider wrapper needed. The Toaster handles Provider, Portal, and Viewport i
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `position` | `PopserPosition` | `"bottom-right"` | Where toasts appear |
-| `limit` | `number` | `3` | Max visible toasts at once |
-| `offset` | `number \| string` | `16` | Distance from viewport edge (px or CSS value) |
+| `position` | `PopserPosition` | `"bottom-right"` | Where toasts show up |
+| `limit` | `number` | `3` | Max visible toasts |
+| `offset` | `number \| string` | `16` | Distance from viewport edge |
 | `mobileOffset` | `number \| string` | Falls back to `offset` | Distance from edge on mobile |
-| `gap` | `number` | `8` | Space between toasts when expanded (px) |
-| `mobileBreakpoint` | `number` | `600` | Width in px that triggers mobile layout |
-| `expand` | `boolean` | `false` | Always show toasts in expanded column |
+| `gap` | `number` | `8` | Space between expanded toasts |
+| `mobileBreakpoint` | `number` | `600` | Width that triggers mobile layout |
+| `expand` | `boolean` | `false` | Always show toasts expanded |
 
-### Behavior
+### Behaviour
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `timeout` | `number` | `4000` | Global auto-dismiss in ms |
-| `closeButton` | `"always" \| "hover" \| "never"` | `"hover"` | Close button visibility mode |
+| `closeButton` | `"always" \| "hover" \| "never"` | `"hover"` | Close button visibility |
 | `swipeDirection` | `SwipeDirection \| SwipeDirection[]` | `["down", "right"]` | Swipe-to-dismiss direction(s) |
 
 ### Appearance
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `theme` | `"light" \| "dark" \| "system"` | `"system"` | Color scheme |
-| `richColors` | `boolean` | `false` | Colored backgrounds per toast type |
+| `theme` | `"light" \| "dark" \| "system"` | `"system"` | Colour scheme |
+| `richColors` | `boolean` | `false` | Coloured backgrounds per type |
 | `unstyled` | `boolean` | `false` | Strip all default styles |
 | `icons` | `PopserIcons` | Built-in SVGs | Override icons per type |
 | `classNames` | `PopserClassNames` | — | Class names for every slot |
@@ -57,12 +57,12 @@ No Provider wrapper needed. The Toaster handles Provider, Portal, and Viewport i
 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
-| `toastOptions` | `Partial<PopserOptions>` | — | Default options applied to every toast |
+| `toastOptions` | `Partial<PopserOptions>` | — | Defaults applied to every toast |
 | `ariaLabel` | `string` | — | Custom ARIA label for the viewport |
 
 ## Positions
 
-Six positions. Pick one.
+Six spots. Pick your favourite corner. Or centre, if you enjoy blocking content.
 
 ```
 top-left       top-center       top-right
@@ -76,50 +76,52 @@ bottom-left    bottom-center    bottom-right
 
 ## Theme
 
-`"system"` (default) detects via `prefers-color-scheme` media query. Or lock it:
+`"system"` reads `prefers-color-scheme`. Or just tell it what you want:
 
 ```tsx
 <Toaster theme="dark" />
 ```
 
-Theme is applied as `data-theme="light"` or `data-theme="dark"` on the viewport element. If you're using `next-themes` or any system that sets `.dark` on an ancestor, popser picks that up automatically via CSS.
+Sets `data-theme` on the viewport. Using `next-themes` or anything that slaps `.dark` on an ancestor? Popser picks it up via CSS. No config. It just works.
 
-## Mobile Layout
+## Mobile
 
-Below the `mobileBreakpoint` (default 600px), toasts switch to:
+Below `mobileBreakpoint` (default 600px), toasts switch to:
 
 - Full viewport width
-- Close button always visible
-- Offset from `mobileOffset` (falls back to `offset`)
+- Close button always visible (thumbs are imprecise)
+- `mobileOffset` for spacing
 - `data-mobile` attribute on the viewport
 
-No hardcoded media queries in your code. Just a prop.
+No hardcoded media queries. Just a prop.
 
 ```tsx
 <Toaster mobileBreakpoint={768} mobileOffset="24px" />
 ```
 
-## Stack Behavior
+## Stack
 
-By default, toasts collapse into a stack with a peek effect. Hover to expand. Set `expand` to always show the full list:
+Toasts collapse into a stack by default. Hover to expand. Hate the stack? Spread everything out:
 
 ```tsx
 <Toaster expand />
 ```
 
-Stack state is exposed via `data-expanded` on the viewport. The collapse has a 100ms debounce on mouse leave to prevent flicker.
+Stack state lives on `data-expanded`. Mouse leave has a 100ms debounce because without it, every accidental pixel causes a seizure.
 
-## Close Button Modes
+## Close button
+
+Three modes. Choose based on how much you trust your users.
 
 ```tsx
-<Toaster closeButton="always" />   {/* Always visible */}
-<Toaster closeButton="hover" />    {/* Shown on toast hover (default) */}
-<Toaster closeButton="never" />    {/* No close button */}
+<Toaster closeButton="always" />   {/* trust no one */}
+<Toaster closeButton="hover" />    {/* default — civilised */}
+<Toaster closeButton="never" />    {/* no escape */}
 ```
 
-## Custom Icons
+## Custom icons
 
-Override any or all icons globally:
+Don't like the built-in SVGs? Swap any or all:
 
 ```tsx
 <Toaster
@@ -134,11 +136,11 @@ Override any or all icons globally:
 />
 ```
 
-Built-in icons are inline SVGs with `currentColor` — they inherit your text color automatically.
+Built-in icons use `currentColor` so they inherit your text colour. Quite civilised.
 
-## Default Toast Options
+## Default toast options
 
-Apply options to every toast via `toastOptions`:
+Apply options to every toast globally. Per-toast options still override, because specificity matters.
 
 ```tsx
 <Toaster
@@ -153,11 +155,9 @@ Apply options to every toast via `toastOptions`:
 />
 ```
 
-Per-toast options override `toastOptions`. Per-toast overrides Toaster. Always.
-
 ## ClassNames
 
-Target every slot globally:
+Target every slot:
 
 ```tsx
 <Toaster
@@ -178,24 +178,23 @@ Target every slot globally:
 />
 ```
 
-Class names are merged across three levels:
+Merges across three levels. Nothing replaced, everything concatenated:
+
 1. Toaster `classNames`
 2. `toastOptions.classNames`
 3. Per-toast `classNames`
 
-All three concatenate. Nothing gets replaced.
+## Swipe direction
 
-## Swipe Direction
-
-Control which directions dismiss a toast:
+Control which way dismisses:
 
 ```tsx
 <Toaster swipeDirection="right" />
 <Toaster swipeDirection={["down", "left"]} />
 ```
 
-Options: `"up"`, `"down"`, `"left"`, `"right"`. Accepts a single direction or an array.
+Options: `"up"`, `"down"`, `"left"`, `"right"`. Single value or array.
 
-## Error Boundary
+## Error boundary
 
-The Toaster includes a built-in error boundary. If one toast throws during render, the rest keep working. Errors are logged to console. Your app doesn't crash because someone passed a bad icon.
+Built in. One toast throws? The rest keep going. Errors hit the console. Your app doesn't crash because someone passed a malformed icon. You're welcome.

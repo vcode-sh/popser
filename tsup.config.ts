@@ -8,6 +8,7 @@ export default defineConfig({
   dts: true,
   clean: true,
   sourcemap: false,
+  minify: true,
   external: ["react", "react-dom", "@base-ui/react"],
   onSuccess: "mkdir -p dist/styles && cp src/styles/*.css dist/styles/",
 });

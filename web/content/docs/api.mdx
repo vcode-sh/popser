@@ -1,93 +1,58 @@
 ---
 title: Toast API
-description: Imperative API for creating and managing toasts. Methods, options, deduplication, and TypeScript types.
+description: Call it anywhere. No hooks. No providers. Just rectangles appearing on screen.
 ---
 
-Imperative API for creating and managing toasts. Import `toast` from `@vcui/popser` and call it anywhere — inside components, event handlers, server actions, wherever. No hooks required.
+Import `toast`. Call it anywhere — components, event handlers, server actions, inside a `setTimeout` at 3am. No hooks. No context. Just function calls that summon rectangles.
 
-Every method returns the toast ID as a `string`. Use it for updates, close, and tracking.
+Every method spits back a toast ID. Keep it if you care. Bin it if you don't.
 
 ```ts
 import { toast } from "@vcui/popser";
 ```
 
-## Methods
+## Types
 
-### `toast(title, options?)`
-
-Create a default toast.
-
-```ts
-toast("Hello world");
-toast("With description", { description: "More detail here" });
-```
-
-<DescriptionDemo />
-
-### `toast.success(title, options?)`
-
-```ts
-toast.success("Saved");
-```
+Six flavours. Each one gets its own icon and colours.
 
 <TypesDemo />
 
-### `toast.error(title, options?)`
-
 ```ts
-toast.error("Something broke");
+toast("Hello world");           // default — no icon, no drama
+toast.success("Saved");         // green check
+toast.error("Something broke"); // red x
+toast.info("Heads up");         // blue info circle
+toast.warning("Careful");       // yellow triangle
+toast.loading("Uploading...");  // spinner, no auto-dismiss
 ```
 
-### `toast.info(title, options?)`
+`toast.message()` is an alias for `toast()`. Exists because Sonner has it. Compatibility is a hell of a drug.
+
+### Description
+
+Secondary text. Below the title. Pass it in options.
+
+<DescriptionDemo />
 
 ```ts
-toast.info("Heads up");
+toast("With description", { description: "More detail here" });
 ```
 
-### `toast.warning(title, options?)`
+### Loading
 
-```ts
-toast.warning("Careful");
-```
-
-### `toast.loading(title, options?)`
-
-Creates a persistent toast (no auto-dismiss). Stays until you close or update it.
+Stays on screen until you explicitly deal with it. Like a todo you keep ignoring. Close it or update it. Those are your options.
 
 ```ts
 const id = toast.loading("Uploading...");
-// later
+// later, when you can be bothered
 toast.close(id);
 ```
 
-### `toast.message(title, options?)`
+## Update
 
-Explicit "default" type. Same as `toast()`. Exists for Sonner compatibility.
+Mutate a living toast. Title, type, description, timeout — change whatever you want. The toast doesn't care about your indecisiveness.
 
-### `toast.custom(jsx, options?)`
-
-Render arbitrary JSX. Bypasses the default toast structure entirely.
-
-```ts
-toast.custom((id) => (
-  <div className="my-toast">
-    <p>Custom content</p>
-    <button onClick={() => toast.close(id)}>Close</button>
-  </div>
-));
-```
-
-The render function receives the toast `id` as its only argument. You're responsible for layout and close behavior.
-
-Custom toasts render with `data-type="custom"` on the root. See [Custom Toasts](/docs/custom) for details.
-
-### `toast.promise(promiseOrFn, options)`
-
-See [Promise Toasts](/docs/promise) for the full guide.
-
-### `toast.update(id, options)`
-
-Update an existing toast in-place. Any option can be changed.
+<UpdateDemo />
 
 ```ts
 const id = toast.loading("Uploading...");
@@ -99,34 +64,94 @@ toast.update(id, {
 });
 ```
 
-<UpdateDemo />
+## Close
 
-### `toast.close(id?)`
-
-Close a specific toast or all toasts.
-
-```ts
-toast.close("my-id");  // close one
-toast.close();         // close all
-```
+Pass an ID to kill one. Pass nothing to kill them all.
 
 <CloseDemo />
 
-### `toast.dismiss(id?)`
+```ts
+toast.close("my-id");  // surgical
+toast.close();         // scorched earth
+```
 
-Alias for `toast.close()`. Sonner compatibility.
+`toast.dismiss()` does the same thing. Sonner compatibility. Different name, same body count.
 
-### `toast.getToasts()`
+## Actions
 
-Returns an array of active toast IDs.
+Toasts can have buttons. Pass a `PopserAction` object if you want clicks, or raw `ReactNode` if you just want it to sit there looking pretty.
+
+<ActionsDemo />
+
+```ts
+toast.success("File uploaded", {
+  action: {
+    label: "View",
+    onClick: () => router.push("/files"),
+  },
+  cancel: {
+    label: "Undo",
+    onClick: () => undoUpload(),
+  },
+});
+
+// ReactNode — decorative, no click handler
+toast.info("Tip", { action: <span>Learn more →</span> });
+```
+
+`PopserAction` shape:
+
+```ts
+{
+  label: ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
+}
+```
+
+## Custom
+
+Full anarchy. Bypass the default layout. Render whatever JSX you want.
+
+```ts
+toast.custom((id) => (
+  <div className="my-toast">
+    <p>Custom content</p>
+    <button onClick={() => toast.close(id)}>Close</button>
+  </div>
+));
+```
+
+You get the toast `id`. You're responsible for everything else. More carnage in [Custom Toasts](/docs/custom).
+
+## Promise
+
+The state machine you were too busy to build. Whole page dedicated to it: [Promise Toasts](/docs/promise).
+
+## Deduplication
+
+`deduplicate: true` tracks active toasts by title. Same title already showing? You get the existing ID back. One toast on screen. No spam.
+
+<DedupDemo />
+
+```ts
+const id1 = toast.error("Connection lost", { deduplicate: true });
+const id2 = toast.error("Connection lost", { deduplicate: true });
+// id1 === id2 — one toast, not two
+```
+
+Dismiss the original and the slot opens up. Only works with string titles — ReactNode titles are too chaotic to compare.
+
+## Get active toasts
+
+For when you need to know how much damage you've done.
 
 ```ts
 const ids = toast.getToasts(); // ["abc", "def"]
 ```
 
-## Options
+## Options reference
 
-All toast creation methods accept these options as a second argument.
+Every toast method takes these as a second argument. Mix and match.
 
 ```ts
 toast.success("Saved", {
@@ -144,54 +169,24 @@ toast.success("Saved", {
 | `icon` | `ReactNode \| false` | Auto per type | Custom icon, or `false` to hide |
 | `type` | `PopserType` | Method-dependent | `"success"` \| `"error"` \| `"info"` \| `"warning"` \| `"loading"` |
 
-### Behavior
+### Behaviour
 
 | Option | Type | Default | Description |
 |--------|------|---------|-------------|
 | `id` | `string` | Auto-generated | Custom toast ID for updates and targeting |
-| `timeout` | `number` | `4000` | Auto-dismiss in ms. `0` = persistent |
-| `duration` | `number` | — | Alias for `timeout` (Sonner compatibility) |
-| `deduplicate` | `boolean` | `false` | Block duplicate toasts with same string title |
+| `timeout` | `number` | `4000` | Auto-dismiss in ms. `0` = it lives forever |
+| `duration` | `number` | — | Alias for `timeout` (Sonner compat) |
+| `deduplicate` | `boolean` | `false` | Block duplicates with same string title |
 | `dismissible` | `boolean` | `true` | Allow swipe/close button dismissal |
 | `priority` | `"low" \| "high"` | — | ARIA live region priority |
-| `data` | `Record<string, unknown>` | — | Custom data attached to the toast |
+| `data` | `Record<string, unknown>` | — | Your custom data, along for the ride |
 
 ### Actions
 
 | Option | Type | Description |
 |--------|------|-------------|
 | `action` | `PopserAction \| ReactNode` | Primary action button |
-| `cancel` | `PopserAction \| ReactNode` | Secondary cancel button (renders as close trigger) |
-
-`PopserAction` shape:
-
-```ts
-{
-  label: ReactNode;
-  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
-}
-```
-
-Both `action` and `cancel` accept either a `PopserAction` object or raw `ReactNode` for static display.
-
-```ts
-// Object form (clickable)
-toast.success("File uploaded", {
-  action: {
-    label: "View",
-    onClick: () => router.push("/files"),
-  },
-  cancel: {
-    label: "Undo",
-    onClick: () => undoUpload(),
-  },
-});
-
-// ReactNode form (display only)
-toast.info("Tip", { action: <span>Learn more →</span> });
-```
-
-<ActionsDemo />
+| `cancel` | `PopserAction \| ReactNode` | Cancel button (also closes the toast) |
 
 ### Anchoring
 
@@ -201,36 +196,36 @@ toast.info("Tip", { action: <span>Learn more →</span> });
 | `anchorSide` | `"top" \| "bottom" \| "left" \| "right" \| "inline-end" \| "inline-start"` | `"bottom"` | Which side of the anchor |
 | `anchorAlign` | `"start" \| "center" \| "end"` | `"center"` | Alignment along the anchor side |
 | `anchorOffset` | `number` | `8` | Distance from anchor in px |
-| `anchorAlignOffset` | `number` | `0` | Alignment offset in px |
+| `anchorAlignOffset` | `number` | `0` | Offset along alignment axis in px |
 | `anchorPositionMethod` | `"absolute" \| "fixed"` | `"absolute"` | CSS positioning method |
-| `anchorSticky` | `boolean` | `false` | Stay visible when anchor scrolls |
+| `anchorSticky` | `boolean` | `false` | Stay visible when anchor scrolls off |
 | `anchorCollisionBoundary` | `"clipping-ancestors" \| Element \| Element[]` | `"clipping-ancestors"` | Collision boundary |
 | `anchorCollisionPadding` | `number` | `5` | Collision padding in px |
 | `arrow` | `boolean` | `false` | Show arrow pointing at anchor |
 | `arrowPadding` | `number` | `5` | Arrow edge padding in px |
 
-See [Anchored Toasts](/docs/anchored) for the full guide.
+More than you'll ever need. Full guide: [Anchored Toasts](/docs/anchored).
 
 ### Styling (per-toast)
 
 | Option | Type | Description |
 |--------|------|-------------|
-| `className` | `string` | Class name on the toast root |
+| `className` | `string` | Class on the toast root |
 | `classNames` | `Partial<PopserClassNames>` | Per-slot class names |
 | `style` | `CSSProperties` | Inline styles on the toast root |
-| `richColors` | `boolean` | Colored background for this toast |
+| `richColors` | `boolean` | Coloured background for this toast |
 | `unstyled` | `boolean` | Strip default styles for this toast |
 
 ### Callbacks
 
-All callbacks receive the toast `id` as their argument.
+All callbacks get the toast `id`. Except `onRemove` — by that point the toast is dead and gone.
 
 | Callback | When it fires |
 |----------|---------------|
 | `onClose(id)` | Toast starts closing (always fires) |
-| `onAutoClose(id)` | Toast was auto-dismissed by timeout |
-| `onDismiss(id)` | Toast was manually dismissed (swipe, close button, `toast.close(id)`) |
-| `onRemove()` | Toast removed from DOM after exit animation |
+| `onAutoClose(id)` | Auto-dismissed by timeout |
+| `onDismiss(id)` | Manually dismissed (swipe, close button, `toast.close(id)`) |
+| `onRemove()` | Removed from DOM after exit animation |
 
 **Firing order:**
 
@@ -238,25 +233,9 @@ Manual dismiss: `onDismiss` → `onClose` → *(animation)* → `onRemove`
 
 Auto dismiss: `onAutoClose` → `onClose` → *(animation)* → `onRemove`
 
-## Deduplication
-
-When `deduplicate: true`, popser tracks active toasts by their string title. If a toast with the same title is already visible, the duplicate call returns the existing toast's ID instead of creating a new one.
-
-```ts
-const id1 = toast.error("Connection lost", { deduplicate: true });
-const id2 = toast.error("Connection lost", { deduplicate: true });
-// id1 === id2, only one toast on screen
-```
-
-Once the original toast is dismissed, the title is released and a new toast can be created.
-
-Only works with string titles. ReactNode titles are never deduplicated.
-
-<DedupDemo />
-
 ## TypeScript
 
-All types are exported from `@vcui/popser`:
+Everything's exported. Go wild.
 
 ```ts
 import type {

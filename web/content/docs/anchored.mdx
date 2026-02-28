@@ -1,139 +1,136 @@
 ---
 title: Anchored Toasts
-description: Pin toasts to DOM elements, mouse events, or coordinates. Built on Floating UI positioning.
+description: Pin toasts to elements, clicks, or coordinates. The thing Sonner still hasn't shipped.
 ---
 
-Pin a toast to a DOM element, mouse event, or arbitrary coordinates. Built on Floating UI positioning via Base UI. Think tooltips but for notifications.
+Pin a toast to a DOM element, a mouse click, or arbitrary coordinates. Built on Floating UI via Base UI. Tooltips with commitment issues.
 
-Only one anchored toast is visible at a time. Creating a new anchored toast closes the previous one.
+One rule: only one anchored toast at a time. New one boots the previous one.
 
-## Basic Usage
+## Usage
 
 ```ts
 import { toast } from "@vcui/popser";
 
-// Anchor to an element
+// anchor to an element
 toast.success("Copied!", {
   anchor: buttonRef.current,
   timeout: 2000,
 });
 
-// Anchor to a click event
+// anchor to a click
 function handleClick(event: React.MouseEvent) {
   toast.info("Context menu", { anchor: event.nativeEvent });
 }
 
-// Anchor to coordinates
+// anchor to coordinates
 toast.warning("Here", { anchor: { x: 200, y: 300 } });
 ```
 
 <AnchoredDemo />
 
-## Anchor Types
+## Anchor types
 
-The `anchor` prop accepts:
-
-| Type | Description |
+| Type | What it does |
 |------|-------------|
-| `Element` | DOM element (ref, querySelector, etc.) |
-| `MouseEvent` | Position at click coordinates |
+| `Element` | DOM element — ref, querySelector, whatever |
+| `MouseEvent` | Appears exactly where you clicked |
 | `{ x: number, y: number }` | Arbitrary screen coordinates |
-| `null` | No anchoring (regular viewport toast) |
+| `null` | Regular viewport toast, nothing special |
 
-For `MouseEvent` and `{x, y}`, popser creates a temporary fixed-position element at those coordinates and cleans it up when the toast closes.
+For `MouseEvent` and `{x, y}`, popser creates a temporary fixed-position element at those coordinates and cleans it up when the toast closes. No orphaned divs. We're civilised.
 
 ## Positioning
 
-Control where the toast appears relative to the anchor:
+Control where the toast sits relative to the anchor:
 
 ```ts
 toast.success("Saved", {
   anchor: element,
-  anchorSide: "top",        // which side of the anchor
-  anchorAlign: "center",    // alignment along that side
-  anchorOffset: 12,         // distance from anchor (px)
+  anchorSide: "top",
+  anchorAlign: "center",
+  anchorOffset: 12,
 });
 ```
 
 ### Side
 
-| Value | Description |
-|-------|-------------|
-| `"top"` | Above the anchor |
-| `"bottom"` | Below the anchor (default) |
-| `"left"` | Left of the anchor |
-| `"right"` | Right of the anchor |
+| Value | Where |
+|-------|-------|
+| `"top"` | Above |
+| `"bottom"` | Below (default) |
+| `"left"` | Left |
+| `"right"` | Right |
 | `"inline-start"` | Logical inline start |
 | `"inline-end"` | Logical inline end |
 
 ### Alignment
 
-| Value | Description |
-|-------|-------------|
-| `"start"` | Align to start edge |
-| `"center"` | Center aligned (default) |
-| `"end"` | Align to end edge |
+| Value | Where |
+|-------|-------|
+| `"start"` | Start edge |
+| `"center"` | Centre (default) |
+| `"end"` | End edge |
 
 ### Offset
 
 ```ts
 {
-  anchorOffset: 8,         // Distance from anchor (default: 8px)
-  anchorAlignOffset: 0,    // Offset along alignment axis (default: 0)
+  anchorOffset: 8,       // distance from anchor (default: 8px)
+  anchorAlignOffset: 0,  // offset along alignment axis (default: 0)
 }
 ```
 
 ## Arrow
 
-Show an arrow pointing at the anchor:
+Show an arrow pointing at the anchor. For when you need to be explicit about where a notification came from.
 
 ```ts
 toast.success("Copied!", {
   anchor: buttonRef.current,
   anchorSide: "top",
   arrow: true,
-  arrowPadding: 5,  // padding from arrow to edge (default: 5)
+  arrowPadding: 5,
 });
 ```
 
-The arrow inherits toast colors and renders with `data-popser-arrow` and `data-side` attributes for styling.
+Inherits toast colours. Styled via `data-popser-arrow` and `data-side`.
 
-## Collision Handling
+## Collision handling
 
-Toasts automatically flip or shift to stay within the viewport:
+Toasts flip and shift to stay in the viewport. No clipping off the edge like it's 2008.
 
 ```ts
 {
   anchorCollisionBoundary: "clipping-ancestors",  // default
-  anchorCollisionPadding: 5,                       // padding from boundary (default: 5px)
+  anchorCollisionPadding: 5,
 }
 ```
 
-You can pass a specific element or array of elements as the collision boundary.
+Pass a specific element or array if the default boundary isn't enough.
 
-## Position Method
+## Position method
 
 ```ts
 {
   anchorPositionMethod: "absolute",  // default
-  // or
-  anchorPositionMethod: "fixed",
+  anchorPositionMethod: "fixed",     // for scrollable containers
 }
 ```
 
-`"absolute"` positions relative to the nearest positioned ancestor. `"fixed"` positions relative to the viewport. Use `"fixed"` if the anchor is inside a scrollable container and you want the toast to stay in place.
+`"absolute"` positions relative to nearest positioned ancestor. `"fixed"` pins to the viewport. Use `"fixed"` when your anchor sits inside a scrollable container and you want the toast to stay put.
 
 ## Sticky
 
-Keep the toast visible even when the anchor scrolls out of view:
+Keep the toast visible when the anchor scrolls away. The toast stays. The anchor runs.
 
 ```ts
 {
-  anchorSticky: true,  // default: false
+  anchorSticky: true,
 }
 ```
 
-## Full Example
+## Full example
 
 ```tsx
 function CopyButton() {
@@ -160,9 +157,9 @@ function CopyButton() {
 }
 ```
 
-## Data Attributes
+## Data attributes
 
-Anchored toasts get `data-anchored` on the root element:
+Anchored toasts get `data-anchored` on the root:
 
 ```css
 [data-popser-root][data-anchored] {
@@ -174,6 +171,6 @@ Anchored toasts get `data-anchored` on the root element:
 }
 
 [data-popser-arrow][data-side="top"] {
-  /* arrow when toast is above anchor */
+  /* arrow when toast is above */
 }
 ```

@@ -1,9 +1,9 @@
 ---
 title: Custom Toasts
-description: Render arbitrary JSX inside toasts with toast.custom(). Full control over layout and content.
+description: Render whatever you want. We give you the wrapper. You bring the chaos.
 ---
 
-`toast.custom()` lets you render arbitrary JSX inside a toast, bypassing the default layout (icon, title, description, actions). You get the toast root wrapper with enter/exit animations. Everything inside is yours.
+`toast.custom()` lets you render arbitrary JSX inside a toast. No default layout. No icon. No title slot. Just a wrapper with animations and whatever you shove inside it.
 
 ## Usage
 
@@ -22,37 +22,37 @@ toast.custom((id) => (
 ));
 ```
 
-The render function receives the toast `id` as its argument. Use it to close the toast from inside your custom layout.
+You get the toast `id`. Use it to close things. Or don't. Let it time out. Your funeral.
 
 <CustomDemo />
 
-## What You Get
+## What you get
 
-Custom toasts still get:
+Even in full custom mode, you're not completely abandoned:
 
-- The toast root wrapper (`data-popser-root`)
+- Toast root wrapper (`data-popser-root`)
 - Enter/exit animations
 - Swipe-to-dismiss (unless `dismissible: false`)
-- Proper stacking in the toast viewport
+- Proper stacking in the viewport
 - `data-popser-id` for testing
 - Anchor positioning (if `anchor` is set)
 - Arrow (if `arrow: true` and `anchor` is set)
 
-## What You Don't Get
+## What you don't get
 
-Custom toasts skip the entire default layout. No:
+The entire default layout is skipped:
 
-- Icon
-- Title/description slots
-- Action/cancel buttons
-- Close button
-- Content wrapper
+- No icon
+- No title/description slots
+- No action/cancel buttons
+- No close button
+- No content wrapper
 
-You render all of that yourself if you want it.
+You want any of that? Build it. That's the deal.
 
 ## Options
 
-`toast.custom()` accepts the same options as other toast methods, minus the content-related ones:
+Same options as other methods, minus the content ones. Everything else works.
 
 ```ts
 toast.custom(
@@ -62,14 +62,11 @@ toast.custom(
     timeout: 5000,
     dismissible: true,
     deduplicate: true,
-    // anchor options work too
     anchor: element,
     anchorSide: "top",
     arrow: true,
-    // callbacks
     onClose: (id) => console.log("closed", id),
-    onRemove: () => console.log("removed from DOM"),
-    // data
+    onRemove: () => console.log("gone"),
     data: { source: "chat" },
   }
 );
@@ -77,17 +74,17 @@ toast.custom(
 
 ## Styling
 
-Custom toasts render with `data-type="custom"` on the root:
+Custom toasts get `data-type="custom"` on the root:
 
 ```css
 [data-popser-root][data-type="custom"] {
-  /* your custom toast styles */
+  /* your styles */
 }
 ```
 
-The root still gets all standard data attributes (`data-popser-id`, `data-rich-colors`, `data-anchored`, etc.) so your CSS selectors work the same way.
+All standard data attributes still apply (`data-popser-id`, `data-rich-colors`, `data-anchored`, etc.).
 
-## Example: Notification Card
+## Example: notification card
 
 ```tsx
 toast.custom((id) => (

@@ -1,9 +1,9 @@
 ---
 title: Promise Toasts
-description: Automatic loading → success → error transitions with dynamic messages, JSX results, and extended options.
+description: Loading → success → error. The state machine you were too busy to write.
 ---
 
-`toast.promise()` transitions through loading → success → error automatically. You provide the promise and the messages. popser handles the state machine.
+`toast.promise()` handles the loading → success → error dance. Hand it a promise and three messages. Popser does the rest.
 
 ```ts
 import { toast } from "@vcui/popser";
@@ -26,7 +26,7 @@ toast.promise<T>(
 ): Promise<T> & { id: string }
 ```
 
-Returns the original promise with an `id` property attached. Use it for tracking.
+Returns the original promise with an `id` tacked on. For tracking, if you're into that.
 
 ## Options
 
@@ -41,9 +41,9 @@ Returns the original promise with an `id` property attached. Use it for tracking
 }
 ```
 
-## Dynamic Messages
+## Dynamic messages
 
-Pass a function to `success` or `error` to compute the message from the result:
+Pass a function to `success` or `error` and compute from the actual result. Groundbreaking, truly.
 
 ```ts
 toast.promise(saveUser(data), {
@@ -53,9 +53,9 @@ toast.promise(saveUser(data), {
 });
 ```
 
-## JSX Results
+## JSX results
 
-Handlers accept `ReactNode`, not just strings:
+Handlers take `ReactNode`. Strings, JSX, whatever. Go mental.
 
 ```ts
 toast.promise(saveUser(data), {
@@ -65,9 +65,9 @@ toast.promise(saveUser(data), {
 });
 ```
 
-## Extended Results
+## Extended results
 
-Return an object with `title` plus additional options to fully control the resulting toast:
+Return an object with `title` to take full control. Description, timeout, icon, actions — the whole menu.
 
 ```ts
 toast.promise(uploadFile(file), {
@@ -85,16 +85,16 @@ toast.promise(uploadFile(file), {
   error: (err) => ({
     title: "Upload failed",
     description: err.message,
-    timeout: 0, // persistent until dismissed
+    timeout: 0, // stays until dismissed
   }),
 });
 ```
 
-Extended results are detected by the presence of a `title` property (and not being a React element). You can include `description`, `timeout`, `icon`, `action`, `cancel`, and any other `PopserOptions` field.
+Detected by the presence of `title` (and not being a React element). Any `PopserOptions` field works here.
 
-## Conditional Skip
+## Conditional skip
 
-Return `undefined` from a handler to dismiss the toast silently instead of showing a success or error state:
+Return `undefined` to silently dismiss instead of showing a result. For background operations nobody asked to see.
 
 ```ts
 toast.promise(fetchData(), {
@@ -104,11 +104,11 @@ toast.promise(fetchData(), {
 });
 ```
 
-Useful for background operations where the user doesn't need confirmation, or for suppressing expected abort errors.
+Suppressing abort errors? Chef's kiss.
 
-## Per-State Descriptions
+## Per-state descriptions
 
-The `description` field can be a function that receives the resolved data or error:
+`description` can be a function. Gets the resolved data or the error, depending on how things went.
 
 ```ts
 toast.promise(fetchItems(), {
@@ -119,7 +119,7 @@ toast.promise(fetchItems(), {
 });
 ```
 
-For error state, the function receives the error:
+For errors:
 
 ```ts
 toast.promise(save(), {
@@ -130,9 +130,9 @@ toast.promise(save(), {
 });
 ```
 
-## Finally Handler
+## Finally
 
-Runs after the promise settles, regardless of success or error:
+Runs after the promise settles. Success, error, doesn't matter. Cleanup is cleanup.
 
 ```ts
 toast.promise(uploadFile(file), {
@@ -145,13 +145,13 @@ toast.promise(uploadFile(file), {
 });
 ```
 
-## Lazy Promises
+## Lazy promises
 
-Pass a function instead of a promise to delay execution:
+Pass a function instead of a promise. Doesn't fire until the toast is created.
 
 ```ts
 toast.promise(
-  () => fetchData(), // not called until toast is created
+  () => fetchData(),
   {
     loading: "Loading...",
     success: "Done",
@@ -160,9 +160,11 @@ toast.promise(
 );
 ```
 
+Handy when you want the loading toast to appear *before* the request fires. Timing matters.
+
 ## Custom ID
 
-Provide a custom ID for tracking:
+Pin a specific ID:
 
 ```ts
 const result = toast.promise(save(), {

@@ -1,13 +1,13 @@
 ---
 title: Testing
-description: Stable data-popser-id selectors for Playwright, Cypress, and unit testing with Vitest.
+description: Stable selectors. data-popser-id on everything. Zero excuses for flaky tests.
 ---
 
-Every toast renders a `data-popser-id` attribute on its root element. Use it for stable selectors in Playwright, Cypress, or any testing framework that touches the DOM.
+Every toast renders `data-popser-id` on its root. Stable selectors for Playwright, Cypress, or whatever testing framework you've reluctantly adopted.
 
-## Data Attributes
+## Data attributes
 
-### Toast Root
+### Toast root
 
 ```html
 <div
@@ -21,16 +21,16 @@ Every toast renders a `data-popser-id` attribute on its root element. Use it for
 
 Every toast root has:
 
-| Attribute | Value | Always present |
-|-----------|-------|----------------|
+| Attribute | Value | Always there |
+|-----------|-------|--------------|
 | `data-popser-root` | — | Yes |
 | `data-popser-id` | Toast ID | Yes |
 | `data-type` | `success` \| `error` \| `info` \| `warning` \| `loading` \| `custom` | Yes |
-| `data-rich-colors` | — | When richColors enabled |
-| `data-unstyled` | — | When unstyled enabled |
-| `data-anchored` | — | When anchored to element |
+| `data-rich-colors` | — | When richColors is on |
+| `data-unstyled` | — | When unstyled is on |
+| `data-anchored` | — | When anchored |
 
-### Inner Elements
+### Inner elements
 
 | Attribute | Element |
 |-----------|---------|
@@ -49,54 +49,54 @@ Every toast root has:
 ## Playwright
 
 ```ts
-// Wait for a specific toast
+// wait for a toast
 await page.locator('[data-popser-id="my-toast"]').waitFor();
 
-// Assert toast text
+// check the text
 await expect(
   page.locator('[data-popser-root][data-type="success"] [data-popser-title]')
 ).toHaveText("Saved");
 
-// Click action button inside a specific toast
+// click the action button
 await page
   .locator('[data-popser-id="upload-toast"] [data-popser-action]')
   .click();
 
-// Close a toast
+// close it
 await page
   .locator('[data-popser-id="my-toast"] [data-popser-close]')
   .click();
 
-// Count visible toasts
+// count them
 const count = await page.locator('[data-popser-root]').count();
 
-// Wait for toast to disappear
+// wait for it to vanish
 await page.locator('[data-popser-id="my-toast"]').waitFor({ state: "detached" });
 ```
 
 ## Cypress
 
 ```ts
-// Assert toast exists
+// exists?
 cy.get('[data-popser-id="my-toast"]').should("exist");
 
-// Assert toast type
+// right type?
 cy.get('[data-popser-root][data-type="error"]').should("be.visible");
 
-// Get toast title text
+// right text?
 cy.get('[data-popser-id="my-toast"] [data-popser-title]')
   .should("have.text", "Something broke");
 
-// Click action
+// click the action
 cy.get('[data-popser-id="my-toast"] [data-popser-action]').click();
 
-// Wait for dismissal
+// gone?
 cy.get('[data-popser-id="my-toast"]').should("not.exist");
 ```
 
-## Custom Toast IDs
+## Custom IDs
 
-Pass a custom `id` when creating toasts for predictable selectors:
+Pass a custom `id` for predictable selectors. Auto-generated IDs are fine for humans, rubbish for tests.
 
 ```ts
 toast.success("Saved", { id: "save-toast" });
@@ -104,11 +104,11 @@ toast.error("Failed", { id: "error-toast" });
 toast.loading("Uploading...", { id: "upload-toast" });
 ```
 
-Then select with `[data-popser-id="save-toast"]` instead of relying on auto-generated IDs.
+Then target with `[data-popser-id="save-toast"]` instead of guessing.
 
-## useToaster Hook
+## useToaster hook
 
-For component-level test assertions, use the `useToaster()` hook to access the toast list:
+For component-level assertions. Gives you the toast list:
 
 ```tsx
 import { useToaster } from "@vcui/popser";
@@ -123,11 +123,11 @@ function ToastDebugPanel() {
 }
 ```
 
-Must be rendered inside `<Toaster>` (which provides the Base UI `Toast.Provider` context).
+Must be inside `<Toaster>` — that's where the Base UI context lives.
 
 ## toast.getToasts()
 
-Get active toast IDs programmatically in your test setup:
+Active toast IDs. No DOM required.
 
 ```ts
 import { toast } from "@vcui/popser";
@@ -136,9 +136,9 @@ const ids = toast.getToasts();
 // ["abc-123", "def-456"]
 ```
 
-## Unit Testing with Vitest
+## Vitest
 
-popser uses Vitest with `happy-dom`. If you're testing components that call `toast()`, mock the module or use the actual API with a rendered `<Toaster>`:
+Popser uses Vitest with `happy-dom` internally. Testing components that call `toast()`? Either mock the module or render an actual `<Toaster>`:
 
 ```tsx
 import { render, screen } from "@testing-library/react";

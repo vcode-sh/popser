@@ -1,33 +1,33 @@
 ---
 title: Getting Started
-description: Install popser and show your first toast in under a minute.
+description: Install popser. Show a toast. Go home early.
 ---
 
-## Installation
+## Install the thing
 
 ```bash
 npm install @vcui/popser
 ```
 
-popser requires React 18+ and Base UI as peer dependencies:
+Base UI is a peer dependency. You need it. Don't argue.
 
 ```bash
 npm install @base-ui/react
 ```
 
-### shadcn
+### Already using shadcn?
 
-Using shadcn? One command gets you a pre-configured wrapper with next-themes integration:
+One command. Themes, CSS variables, the lot. Skip the rest of this page, honestly.
 
 ```bash
 npx shadcn add @vcode-sh/popser
 ```
 
-See the [shadcn Integration](/docs/shadcn) page for details.
+More on the [shadcn page](/docs/shadcn) if you're curious. You probably aren't.
 
-## Setup
+## Wire it up
 
-Add the `<Toaster>` component once, anywhere in your app. It portals to `document.body`.
+Stick `<Toaster>` somewhere in your app. It portals to `document.body` because it doesn't trust your layout skills.
 
 ```tsx
 import { Toaster } from "@vcui/popser";
@@ -43,9 +43,11 @@ function App() {
 }
 ```
 
-## Show a toast
+No Provider. No context wrapper. No five-layer-deep component tree. Just one component.
 
-Import `toast` and call it anywhere — components, event handlers, server actions. No hooks required.
+## Pop a toast
+
+Import `toast`. Call it. Event handlers, server actions, `useEffect`, the toilet — wherever. No hooks. No ceremony.
 
 ```ts
 import { toast } from "@vcui/popser";
@@ -57,12 +59,12 @@ toast.info("Heads up");
 toast.warning("Careful");
 ```
 
-Every method returns the toast ID as a `string`. Use it for updates, close, and tracking.
+Every method spits back the toast ID. Keep it if you want to update or close things later.
 
 ```ts
 const id = toast.loading("Uploading...");
 
-// later
+// ...whenever your API stops napping
 toast.update(id, {
   title: "Upload complete",
   type: "success",
@@ -70,9 +72,12 @@ toast.update(id, {
 });
 ```
 
-## Next steps
+## Now what
 
-- [Toast API](/docs/api) — all methods and options
-- [Toaster Component](/docs/toaster) — layout, theme, and behavior props
-- [Styling](/docs/styling) — CSS custom properties, classNames, Tailwind
-- [Promise Toasts](/docs/promise) — loading → success → error transitions
+You've got toasts. Congrats. Here's where it gets interesting:
+
+- [Toast API](/docs/api) — every method, every option, the full arsenal
+- [Toaster](/docs/toaster) — position, theme, limits, all the knobs
+- [Styling](/docs/styling) — CSS variables, classNames, Tailwind, the works
+- [Anchored Toasts](/docs/anchored) — pin to elements, clicks, coordinates. The thing Sonner still hasn't shipped.
+- [Promise Toasts](/docs/promise) — loading → success → error, automatically
