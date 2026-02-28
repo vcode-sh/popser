@@ -26,6 +26,30 @@ You get the toast `id`. Use it to close things. Or don't. Let it time out. Your 
 
 <CustomDemo />
 
+## Examples
+
+Different shapes for different moods. All custom, all yours.
+
+<CustomNotificationDemo />
+
+### Anchored custom
+
+Custom toasts work with anchoring too. Pin your own JSX to an element.
+
+<CustomAnchoredDemo />
+
+```ts
+toast.custom(
+  (id) => <MyTooltip id={id} />,
+  {
+    anchor: buttonRef.current,
+    anchorSide: "top",
+    arrow: true,
+    timeout: 2000,
+  }
+);
+```
+
 ## What you get
 
 Even in full custom mode, you're not completely abandoned:
@@ -74,36 +98,39 @@ toast.custom(
 
 ## Styling
 
-Custom toasts get `data-type="custom"` on the root:
+Custom toasts are **transparent by design**. No background, no border, no shadow, no padding. Your JSX renders clean without fighting default chrome.
+
+Want the standard toast look back? Pass `style` with popser's CSS variables:
+
+```ts
+toast.custom(
+  (id) => <MyComponent id={id} />,
+  {
+    style: {
+      background: "var(--popser-bg)",
+      border: "1px solid var(--popser-border)",
+      borderRadius: "var(--popser-radius, 8px)",
+      boxShadow: "var(--popser-shadow)",
+      padding: 12,
+      color: "var(--popser-fg)",
+    },
+  }
+);
+```
+
+Works in light and dark mode. The tokens resolve automatically.
+
+Or target custom toasts globally in CSS — they get `data-type="custom"` on the root:
 
 ```css
 [data-popser-root][data-type="custom"] {
-  /* your styles */
+  background: var(--popser-bg);
+  border: 1px solid var(--popser-border);
+  border-radius: var(--popser-radius, 8px);
+  box-shadow: var(--popser-shadow);
+  padding: 12px;
+  color: var(--popser-fg);
 }
 ```
 
 All standard data attributes still apply (`data-popser-id`, `data-rich-colors`, `data-anchored`, etc.).
-
-## Example: notification card
-
-```tsx
-toast.custom((id) => (
-  <div className="flex items-center gap-3 p-4">
-    <div className="h-10 w-10 rounded-full bg-blue-100 flex items-center justify-center">
-      <BellIcon className="h-5 w-5 text-blue-600" />
-    </div>
-    <div className="flex-1 min-w-0">
-      <p className="font-medium text-sm">Deployment complete</p>
-      <p className="text-xs text-muted-foreground truncate">
-        Production build deployed to vercel.app
-      </p>
-    </div>
-    <button
-      onClick={() => toast.close(id)}
-      className="text-muted-foreground hover:text-foreground"
-    >
-      <XIcon className="h-4 w-4" />
-    </button>
-  </div>
-), { timeout: 8000 });
-```

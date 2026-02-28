@@ -5,6 +5,8 @@ description: CSS variables, classNames, Tailwind, unstyled mode. No !important. 
 
 Popser ships with default styles that work out of the box. Import them. Override what you want. Or bin the lot and start from scratch. Zero `!important` anywhere. Your specificity wins.
 
+<TypesDemo />
+
 ## Default styles
 
 ```ts
@@ -76,6 +78,23 @@ When `richColors` is on, each type gets its own background, border, and text.
 ```
 
 Override any of them. Make success pink. Make errors chartreuse. No judgement.
+
+## Per-toast styles
+
+Inline styles, custom borders, monospace — override anything on a single toast.
+
+<StyleDemo />
+
+```ts
+toast.success("Saved", {
+  style: { borderLeft: "4px solid #22c55e" },
+});
+
+toast("Minimal", {
+  icon: false,
+  style: { fontFamily: "monospace", fontSize: 13 },
+});
+```
 
 ## ClassNames
 

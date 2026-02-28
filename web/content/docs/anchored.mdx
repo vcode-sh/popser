@@ -40,9 +40,27 @@ toast.warning("Here", { anchor: { x: 200, y: 300 } });
 
 For `MouseEvent` and `{x, y}`, popser creates a temporary fixed-position element at those coordinates and cleans it up when the toast closes. No orphaned divs. We're civilised.
 
+### Click-anchored
+
+Toast appears right where the click happened. Pass the native event.
+
+<AnchorClickDemo />
+
+```ts
+function handleClick(event: React.MouseEvent) {
+  toast.success("Right here", {
+    anchor: event.nativeEvent,
+    anchorOffset: 16,
+    arrow: true,
+  });
+}
+```
+
 ## Positioning
 
-Control where the toast sits relative to the anchor:
+Control where the toast sits relative to the anchor. Try all four sides:
+
+<AnchorSidesDemo />
 
 ```ts
 toast.success("Saved", {
@@ -83,7 +101,9 @@ toast.success("Saved", {
 
 ## Arrow
 
-Show an arrow pointing at the anchor. For when you need to be explicit about where a notification came from.
+Show an arrow pointing at the anchor. Compare with and without:
+
+<AnchorArrowDemo />
 
 ```ts
 toast.success("Copied!", {
