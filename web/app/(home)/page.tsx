@@ -31,7 +31,8 @@ const highlights = [
   },
   {
     label: "E2E ready",
-    detail: "data-popser-id on every toast. Your tests won't be flaky (for once).",
+    detail:
+      "data-popser-id on every toast. Your tests won't be flaky (for once).",
   },
   {
     label: "Zero icon deps",
@@ -103,17 +104,15 @@ export default function HomePage() {
       <section className="mx-auto w-full max-w-2xl px-4 py-16">
         <div className="divide-y divide-fd-border rounded-xl border border-fd-border">
           {highlights.map((item) => (
-            <div
-              className="flex items-start gap-3 px-5 py-4"
-              key={item.label}
-            >
+            <div className="flex items-start gap-3 px-5 py-4" key={item.label}>
               <span className="mt-0.5 text-fd-muted-foreground">
                 {"badge" in item ? (
-                  <span className="inline-block rounded-full bg-purple-500/10 px-2 py-0.5 font-medium text-purple-500 text-[10px] leading-tight">
+                  <span className="inline-block rounded-full bg-purple-500/10 px-2 py-0.5 font-medium text-[10px] text-purple-500 leading-tight">
                     {item.badge}
                   </span>
                 ) : (
                   <svg
+                    aria-hidden="true"
                     className="size-4"
                     fill="none"
                     stroke="currentColor"

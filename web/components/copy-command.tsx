@@ -5,6 +5,7 @@ import { useCallback, useState } from "react";
 function CopyIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="size-3.5"
       fill="none"
       stroke="currentColor"
@@ -22,6 +23,7 @@ function CopyIcon() {
 function CheckIcon() {
   return (
     <svg
+      aria-hidden="true"
       className="size-3.5"
       fill="none"
       stroke="currentColor"

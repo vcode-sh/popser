@@ -72,15 +72,13 @@ const icons: Record<string, ReactNode> = {
   ),
 };
 
+const SPINNER_BARS = Array.from({ length: 12 }, (_, i) => (
+  // biome-ignore lint/suspicious/noArrayIndexKey: static spinner bars never reorder
+  <div data-popser-spinner-bar key={i} />
+));
+
 function Spinner() {
-  return (
-    <div data-popser-spinner>
-      {Array.from({ length: 12 }, (_, i) => (
-        // biome-ignore lint/suspicious/noArrayIndexKey: static spinner bars never reorder
-        <div data-popser-spinner-bar key={i} />
-      ))}
-    </div>
-  );
+  return <div data-popser-spinner>{SPINNER_BARS}</div>;
 }
 
 export interface ToastIconProps {

@@ -111,6 +111,69 @@ function isReactElement(value: unknown): boolean {
   return typeof value === "object" && value !== null && "$$typeof" in value;
 }
 
+/**
+ * Builds a promise state handler (success or error) for `toast.promise`.
+ * Eliminates duplication between success/error branches.
+ */
+function buildPromiseHandler<TType extends "success" | "error", TInput>(
+  type: TType,
+  handler:
+    | ReactNode
+    | ((input: TInput) => ReactNode | PopserPromiseExtendedResult | undefined),
+  toastId: { current: string },
+  descriptionOption: PopserPromiseOptions<never>["description"]
+) {
+  if (typeof handler !== "function") {
+    return {
+      title: handler,
+      type,
+      ...(typeof descriptionOption !== "function" &&
+        descriptionOption !== undefined && {
+          description: descriptionOption,
+        }),
+    };
+  }
+
+  return (input: TInput) => {
+    const result = (
+      handler as (
+        input: TInput
+      ) => ReactNode | PopserPromiseExtendedResult | undefined
+    )(input);
+    if (result === undefined) {
+      queueMicrotask(() => getManager().close(toastId.current));
+      return { title: "" as ReactNode, type, timeout: 1 };
+    }
+    if (isExtendedResult(result)) {
+      const { title, timeout, icon, action, cancel, description, ...rest } =
+        result;
+      return {
+        title,
+        type,
+        ...(timeout !== undefined && { timeout }),
+        ...(description !== undefined && { description }),
+        data: {
+          __popser: {
+            ...(icon !== undefined && { icon }),
+            ...(action !== undefined && { action }),
+            ...(cancel !== undefined && { cancel }),
+            ...rest,
+          },
+        },
+      };
+    }
+    const desc =
+      typeof descriptionOption === "function"
+        ? (descriptionOption as (data: TInput) => ReactNode)(input)
+        : undefined;
+    return {
+      title: result,
+      type,
+      ...(desc !== undefined && { description: desc }),
+    };
+  };
+}
+
 // ---------------------------------------------------------------------------
 // Public API
 // ---------------------------------------------------------------------------
@@ -220,113 +283,18 @@ toast.promise = <T>(
 
   const toastId = { current: "" };
 
-  const successHandler =
-    typeof success === "function"
-      ? (result: T) => {
-          const handlerResult = success(result);
-          if (handlerResult === undefined) {
-            // Close the loading toast instead of showing a ghost (B1 fix)
-            queueMicrotask(() => getManager().close(toastId.current));
-            return { title: "", type: "success" as const, timeout: 1 };
-          }
-          if (isExtendedResult(handlerResult)) {
-            const {
-              title,
-              timeout,
-              icon,
-              action,
-              cancel,
-              description,
-              ...rest
-            } = handlerResult;
-            return {
-              title,
-              type: "success" as const,
-              ...(timeout !== undefined && { timeout }),
-              ...(description !== undefined && { description }),
-              data: {
-                __popser: {
-                  ...(icon !== undefined && { icon }),
-                  ...(action !== undefined && { action }),
-                  ...(cancel !== undefined && { cancel }),
-                  ...rest,
-                },
-              },
-            };
-          }
-          // Per-state description support
-          const desc =
-            typeof options.description === "function"
-              ? (options.description as (data: T) => ReactNode)(result)
-              : undefined;
-          return {
-            title: handlerResult,
-            type: "success" as const,
-            ...(desc !== undefined && { description: desc }),
-          };
-        }
-      : {
-          title: success,
-          type: "success" as const,
-          ...(typeof options.description !== "function" &&
-            options.description !== undefined && {
-              description: options.description,
-            }),
-        };
-
-  const errorHandler =
-    typeof error === "function"
-      ? (err: unknown) => {
-          const handlerResult = error(err);
-          if (handlerResult === undefined) {
-            // Close the loading toast instead of showing a ghost (B1 fix)
-            queueMicrotask(() => getManager().close(toastId.current));
-            return { title: "", type: "error" as const, timeout: 1 };
-          }
-          if (isExtendedResult(handlerResult)) {
-            const {
-              title,
-              timeout,
-              icon,
-              action,
-              cancel,
-              description,
-              ...rest
-            } = handlerResult;
-            return {
-              title,
-              type: "error" as const,
-              ...(timeout !== undefined && { timeout }),
-              ...(description !== undefined && { description }),
-              data: {
-                __popser: {
-                  ...(icon !== undefined && { icon }),
-                  ...(action !== undefined && { action }),
-                  ...(cancel !== undefined && { cancel }),
-                  ...rest,
-                },
-              },
-            };
-          }
-          // Per-state description support
-          const desc =
-            typeof options.description === "function"
-              ? (options.description as (error: unknown) => ReactNode)(err)
-              : undefined;
-          return {
-            title: handlerResult,
-            type: "error" as const,
-            ...(desc !== undefined && { description: desc }),
-          };
-        }
-      : {
-          title: error,
-          type: "error" as const,
-          ...(typeof options.description !== "function" &&
-            options.description !== undefined && {
-              description: options.description,
-            }),
-        };
+  const successHandler = buildPromiseHandler<"success", T>(
+    "success",
+    success,
+    toastId,
+    options.description
+  );
+  const errorHandler = buildPromiseHandler<"error", unknown>(
+    "error",
+    error,
+    toastId,
+    options.description
+  );
 
   const result = getManager().promise(promise, {
     ...(options.id !== undefined && { id: options.id }),

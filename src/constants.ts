@@ -8,9 +8,6 @@ export const DEFAULT_SWIPE_DIRECTION: PopserSwipeDirection[] = [
   "right",
 ];
 export const DEFAULT_CLOSE_BUTTON = "hover" as const;
-export const DEFAULT_EXPAND = false;
-export const DEFAULT_RICH_COLORS = false;
-export const DEFAULT_THEME = "system" as const;
 export const DEFAULT_OFFSET = 16;
 export const DEFAULT_GAP = 8;
 export const DEFAULT_MOBILE_BREAKPOINT = 600;

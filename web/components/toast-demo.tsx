@@ -56,14 +56,11 @@ export function ToastDemo() {
         <button
           className={btn}
           onClick={() => {
-            toast.promise(
-              new Promise((resolve) => setTimeout(resolve, 2000)),
-              {
-                loading: "Uploading...",
-                success: "Upload complete!",
-                error: "Upload failed",
-              }
-            );
+            toast.promise(new Promise((resolve) => setTimeout(resolve, 2000)), {
+              loading: "Uploading...",
+              success: "Upload complete!",
+              error: "Upload failed",
+            });
           }}
           type="button"
         >
@@ -99,9 +96,7 @@ export function ToastDemo() {
         </button>
         <button
           className={btn}
-          onClick={() =>
-            toast.error("Connection lost", { deduplicate: true })
-          }
+          onClick={() => toast.error("Connection lost", { deduplicate: true })}
           type="button"
         >
           Spam this one
@@ -111,9 +106,7 @@ export function ToastDemo() {
       {/* Anchor target */}
       <div className="flex justify-center">
         <button
-          className="rounded-lg border border-dashed border-purple-500/50 bg-purple-500/5 px-4 py-2 text-purple-500 text-sm"
-          ref={anchorRef}
-          type="button"
+          className="rounded-lg border border-purple-500/50 border-dashed bg-purple-500/5 px-4 py-2 text-purple-500 text-sm"
           onClick={() => {
             toast.info("I'm the anchor target", {
               anchor: anchorRef.current,
@@ -122,6 +115,8 @@ export function ToastDemo() {
               timeout: 2000,
             });
           }}
+          ref={anchorRef}
+          type="button"
         >
           anchor target
         </button>
