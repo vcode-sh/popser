@@ -43,6 +43,28 @@
   bottom: var(--popser-offset, 16px);
 }
 
+/* ─── RTL support ──────────────────────────────────────────────────── */
+
+[data-popser-viewport][data-dir="rtl"][data-position="top-left"] {
+  right: auto;
+  left: var(--popser-offset, 16px);
+}
+
+[data-popser-viewport][data-dir="rtl"][data-position="top-right"] {
+  right: var(--popser-offset, 16px);
+  left: auto;
+}
+
+[data-popser-viewport][data-dir="rtl"][data-position="bottom-left"] {
+  right: auto;
+  left: var(--popser-offset, 16px);
+}
+
+[data-popser-viewport][data-dir="rtl"][data-position="bottom-right"] {
+  right: var(--popser-offset, 16px);
+  left: auto;
+}
+
 /* ─── Mobile responsive (driven by data-mobile attribute) ─────────── */
 
 [data-popser-viewport][data-mobile] {

@@ -25,6 +25,15 @@
   opacity: 1;
 }
 
+/* Corner position: absolute top-right of toast root */
+[data-popser-close][data-close-position="corner"] {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 1;
+  margin: 0;
+}
+
 /* Hover mode: hidden by default, shown on toast hover */
 [data-popser-close][data-close-button="hover"] {
   opacity: 0;
@@ -93,4 +102,16 @@
 
 [data-popser-cancel]:hover {
   background: var(--popser-hover-bg);
+}
+
+/* ─── RTL support ──────────────────────────────────────────────────── */
+
+[data-dir="rtl"] [data-popser-close] {
+  margin: -2px 0 -2px -4px;
+}
+
+[data-dir="rtl"] [data-popser-close][data-close-position="corner"] {
+  right: auto;
+  left: 8px;
+  margin: 0;
 }

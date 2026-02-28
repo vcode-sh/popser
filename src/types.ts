@@ -61,6 +61,8 @@ export interface PopserOptions {
   cancel?: PopserAction | ReactNode;
   className?: string;
   classNames?: Partial<PopserClassNames>;
+  /** Where to render the close button for this toast. Overrides Toaster-level `closeButtonPosition`. */
+  closeButtonPosition?: "header" | "corner";
   data?: Record<string, unknown>;
   deduplicate?: boolean;
   description?: ReactNode;
@@ -68,6 +70,8 @@ export interface PopserOptions {
   dismissible?: boolean;
   /** Alias for `timeout`. If both are set, `timeout` takes precedence. Provided for Sonner compatibility. */
   duration?: number;
+  /** Override entry/exit direction for this toast. @default position-based */
+  enterFrom?: "top" | "bottom" | "left" | "right";
   icon?: ReactNode | false;
   id?: string;
   /** Callback fired when the toast is auto-dismissed after its timeout expires. */
@@ -99,6 +103,12 @@ export interface PopserPromiseExtendedResult extends Partial<PopserOptions> {
 }
 
 export interface PopserPromiseOptions<T = unknown> {
+  /** Content to show when the signal is aborted. Accepts ReactNode, function, extended result, or `undefined` (dismiss). */
+  aborted?:
+    | ReactNode
+    | ((
+        reason: unknown
+      ) => ReactNode | PopserPromiseExtendedResult | undefined);
   description?:
     | ReactNode
     | ((data: T) => ReactNode)
@@ -109,6 +119,10 @@ export interface PopserPromiseOptions<T = unknown> {
   finally?: () => void | Promise<void>;
   id?: string;
   loading: ReactNode;
+  /** Callback fired when the signal is aborted. Fires before the toast updates. */
+  onAbort?: (reason: unknown) => void;
+  /** AbortSignal to cancel the promise toast. When aborted, shows `aborted` content or dismisses. */
+  signal?: AbortSignal;
   success:
     | ReactNode
     | ((result: T) => ReactNode | PopserPromiseExtendedResult | undefined);
@@ -116,6 +130,15 @@ export interface PopserPromiseOptions<T = unknown> {
 
 export interface PopserUpdateOptions extends Partial<PopserOptions> {
   title?: ReactNode;
+}
+
+export interface ToastHistoryEntry {
+  closedAt?: number;
+  closedBy?: "auto" | "manual" | "limit";
+  createdAt: number;
+  id: string;
+  title: unknown;
+  type?: string;
 }
 
 export interface PopserIcons {
@@ -147,7 +170,9 @@ export interface PopserInternalData {
   cancel?: PopserAction | ReactNode;
   className?: string;
   classNames?: Partial<PopserClassNames>;
+  closeButtonPosition?: "header" | "corner";
   dismissible?: boolean;
+  enterFrom?: "top" | "bottom" | "left" | "right";
   icon?: ReactNode | false;
   jsx?: (id: string) => ReactNode;
   richColors?: boolean;
@@ -165,8 +190,16 @@ export interface ToasterProps {
   ariaLabel?: string;
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";
+  /** Where to render the close button. "header" = inline in header (default). "corner" = absolute top-right of toast. */
+  closeButtonPosition?: "header" | "corner";
+  /** Text direction. "auto" reads from `document.documentElement.dir`. Flips positions and swipe in RTL. */
+  dir?: "ltr" | "rtl" | "auto";
   expand?: boolean;
+  /** Maximum number of toasts visible when the stack is expanded (hovered). Falls back to `limit`. */
+  expandedLimit?: number;
   gap?: number;
+  /** Maximum number of entries in the toast history ring buffer. 0 or unset disables history. */
+  historyLength?: number;
   icons?: PopserIcons;
   limit?: number;
   mobileBreakpoint?: number;

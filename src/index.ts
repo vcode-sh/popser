@@ -15,5 +15,6 @@ export type {
   PopserType,
   PopserUpdateOptions,
   ToasterProps,
+  ToastHistoryEntry,
 } from "./types.js";
 export { useToaster } from "./use-toaster.js";

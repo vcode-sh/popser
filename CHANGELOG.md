@@ -6,6 +6,27 @@ The format tries to be useful. No "chore: bump deps" padding. If it didn't chang
 
 ---
 
+## [1.2.0] - 2026-02-28
+
+The "Sonner issues tab as a roadmap" release. Eight features, every one of them pulled from a real GitHub issue where someone asked Sonner for it and got silence. 39 new tests.
+
+### Added
+- **Animation duration customization.** `--popser-transition-duration` and `--popser-anchored-transition-duration` CSS custom properties. Want 50ms toasts? 2 second toasts? Your CSS, your call. Pure CSS, zero JS. (Sonner [#690](https://github.com/emilkowalski/sonner/issues/690))
+- **Popover API support.** Toast viewport uses `popover="manual"` + `showPopover()`. Toasts now render in the top layer, above dialogs, modals, and whatever else is fighting for z-index supremacy. Progressive enhancement — falls back gracefully in older browsers. (Sonner [#655](https://github.com/emilkowalski/sonner/issues/655), [#667](https://github.com/emilkowalski/sonner/issues/667))
+- **Expanded limit.** `expandedLimit` prop on `<Toaster>`. Collapsed stack shows `limit` toasts, hover expands to `expandedLimit`. Because showing 3 toasts then revealing 10 on hover is genuinely useful. (Sonner [#637](https://github.com/emilkowalski/sonner/issues/637))
+- **Close button position.** `closeButtonPosition` prop: `"header"` (default, inline with content) or `"corner"` (absolute top-right). Per-toast override supported. Pick the one that doesn't overlap your content. (Sonner [#747](https://github.com/emilkowalski/sonner/issues/747))
+- **AbortSignal for promise toasts.** `signal`, `aborted`, and `onAbort` options on `toast.promise()`. Cancel in-flight requests and show a cancellation toast. `aborted` accepts `ReactNode`, functions, extended results, or `undefined` (dismiss silently). Default aborted type: `"warning"`. (Sonner [#681](https://github.com/emilkowalski/sonner/issues/681))
+- **Entry direction.** `enterFrom` option: `"top"` | `"bottom"` | `"left"` | `"right"`. Override the default slide direction per toast. Uses `data-enter-from` attribute + CSS. Exit animation matches entry direction. (Sonner [#671](https://github.com/emilkowalski/sonner/issues/671))
+- **RTL support.** `dir` prop on `<Toaster>`: `"ltr"` | `"rtl"` | `"auto"`. Flips positions, swipe directions, and animations. `"auto"` reads `document.documentElement.dir`. Right-to-left languages finally get toasts that go the right way.
+- **Toast history.** `toast.getHistory()` and `toast.clearHistory()`. Opt-in ring buffer enabled via `historyLength` prop on `<Toaster>`. Records creation and closure with timestamps and `closedBy` reason. `ToastHistoryEntry` type exported. Disabled by default because not everyone needs a toast audit trail.
+
+### Changed
+- 7 CSS files updated for new features (transitions, viewport, toast, controls).
+- `types.ts` expanded with new option interfaces for all 8 features.
+- `index.ts` barrel export updated with new type exports (`ToastHistoryEntry`).
+
+---
+
 ## [1.1.2] - 2026-02-28
 
 The shadcn registry actually works now. Also fixed some docs that were lying about import names.

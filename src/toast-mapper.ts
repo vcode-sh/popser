@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { resolveAnchor } from "./anchor-resolver.js";
 import {
   isManuallyClosedToast,
+  recordToastClosure,
   removeManualCloseFlag,
 } from "./toast-tracker.js";
 import type {
@@ -83,12 +84,14 @@ export function toManagerOptions(
     icon,
     action,
     cancel,
+    closeButtonPosition,
     onClose,
     onAutoClose,
     onDismiss,
     onRemove,
     className,
     classNames,
+    enterFrom,
     style,
     dismissible,
     richColors,
@@ -112,6 +115,8 @@ export function toManagerOptions(
     dismissible,
     richColors,
     unstyled,
+    ...(closeButtonPosition !== undefined && { closeButtonPosition }),
+    ...(enterFrom !== undefined && { enterFrom }),
     ...(jsx !== undefined && { jsx }),
     ...(arrow !== undefined && { arrow }),
   };
@@ -131,6 +136,7 @@ export function toManagerOptions(
         removeManualCloseFlag(toastId);
         onDismiss?.(toastId);
       } else {
+        recordToastClosure(toastId, "auto");
         onAutoClose?.(toastId);
       }
       onCloseInternal();
@@ -160,8 +166,10 @@ function buildUpdateInternalData(
     icon,
     action,
     cancel,
+    closeButtonPosition,
     className,
     classNames,
+    enterFrom,
     style,
     dismissible,
     richColors,
@@ -173,8 +181,10 @@ function buildUpdateInternalData(
     ...(icon !== undefined && { icon }),
     ...(action !== undefined && { action }),
     ...(cancel !== undefined && { cancel }),
+    ...(closeButtonPosition !== undefined && { closeButtonPosition }),
     ...(className !== undefined && { className }),
     ...(classNames !== undefined && { classNames }),
+    ...(enterFrom !== undefined && { enterFrom }),
     ...(style !== undefined && { style }),
     ...(dismissible !== undefined && { dismissible }),
     ...(richColors !== undefined && { richColors }),

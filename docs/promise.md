@@ -33,6 +33,9 @@ Returns the original promise with an `id` property attached. Use it for tracking
   description?: ReactNode | ((data: T) => ReactNode) | ((error: unknown) => ReactNode);
   finally?: () => void | Promise<void>;
   id?: string;
+  signal?: AbortSignal;
+  aborted?: ReactNode | ((reason: unknown) => ReactNode | PopserPromiseExtendedResult | undefined);
+  onAbort?: (reason: unknown) => void;
 }
 ```
 
@@ -154,6 +157,79 @@ toast.promise(
   },
 );
 ```
+
+## AbortSignal
+
+Cancel a promise toast with an `AbortSignal`. When the signal fires, the loading toast is replaced with the `aborted` content (or dismissed if no `aborted` is provided).
+
+```ts
+const controller = new AbortController();
+
+toast.promise(fetchData(), {
+  loading: "Fetching...",
+  success: "Done",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: "Request cancelled",
+});
+
+// Later
+controller.abort();
+```
+
+### Dynamic aborted content
+
+`aborted` accepts a function that receives the abort reason:
+
+```ts
+toast.promise(fetchData(), {
+  loading: "Fetching...",
+  success: "Done",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: (reason) => `Cancelled: ${reason}`,
+});
+
+controller.abort("User navigated away");
+```
+
+### Extended aborted result
+
+Return an object for full control over the aborted toast:
+
+```ts
+toast.promise(fetchData(), {
+  loading: "Fetching...",
+  success: "Done",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: (reason) => ({
+    title: "Cancelled",
+    description: String(reason),
+    timeout: 5000,
+  }),
+});
+```
+
+### onAbort callback
+
+Run side effects when the signal fires:
+
+```ts
+toast.promise(fetchData(), {
+  loading: "Uploading...",
+  success: "Done",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: "Upload cancelled",
+  onAbort: (reason) => {
+    cleanup();
+    analytics.track("upload_cancelled", { reason });
+  },
+});
+```
+
+The aborted toast defaults to type `"warning"`. Return `undefined` from the `aborted` handler to dismiss silently.
 
 ## Custom ID
 

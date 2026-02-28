@@ -3,6 +3,29 @@ title: Changelog
 description: What changed, when, and why you should care.
 ---
 
+## 1.2.0
+
+The "Sonner issues tab as a roadmap" release. Eight features, every one of them pulled from a real GitHub issue where someone asked Sonner for it and got silence. 39 new tests.
+
+### Added
+
+- **Animation duration customization.** `--popser-transition-duration` and `--popser-anchored-transition-duration` CSS custom properties. Pure CSS, zero JS. ([Sonner #690](https://github.com/emilkowalski/sonner/issues/690))
+- **Popover API support.** Toast viewport uses `popover="manual"` + `showPopover()`. Toasts render in the top layer, above dialogs and modals. Progressive enhancement. ([Sonner #655](https://github.com/emilkowalski/sonner/issues/655), [#667](https://github.com/emilkowalski/sonner/issues/667))
+- **Expanded limit.** `expandedLimit` prop on `<Toaster>`. Collapsed shows `limit`, hover expands to `expandedLimit`. ([Sonner #637](https://github.com/emilkowalski/sonner/issues/637))
+- **Close button position.** `closeButtonPosition`: `"header"` (default) or `"corner"` (absolute top-right). Per-toast override supported. ([Sonner #747](https://github.com/emilkowalski/sonner/issues/747))
+- **AbortSignal for promise toasts.** `signal`, `aborted`, and `onAbort` on `toast.promise()`. Cancel in-flight requests. Default aborted type: `"warning"`. ([Sonner #681](https://github.com/emilkowalski/sonner/issues/681))
+- **Entry direction.** `enterFrom`: `"top"` | `"bottom"` | `"left"` | `"right"`. Per-toast animation direction override. ([Sonner #671](https://github.com/emilkowalski/sonner/issues/671))
+- **RTL support.** `dir` prop on `<Toaster>`: `"ltr"` | `"rtl"` | `"auto"`. Flips positions, swipe directions, and animations.
+- **Toast history.** `toast.getHistory()` and `toast.clearHistory()`. Opt-in ring buffer via `historyLength` prop. `ToastHistoryEntry` type exported.
+
+### Changed
+
+- 7 CSS files updated for new features.
+- `types.ts` expanded with new option interfaces.
+- `index.ts` barrel export updated with `ToastHistoryEntry`.
+
+---
+
 ## 1.1.2
 
 The shadcn registry actually works now. Also fixed some docs that were lying about import names.

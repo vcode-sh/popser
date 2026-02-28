@@ -60,6 +60,7 @@ function mergeClassNames(
 export interface ToastRootProps {
   classNames?: PopserClassNames;
   closeButton?: "always" | "hover" | "never";
+  closeButtonPosition?: "header" | "corner";
   icons?: PopserIcons;
   richColors?: boolean;
   swipeDirection?:
@@ -73,6 +74,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
   toast: toastData,
   swipeDirection,
   closeButton = "hover",
+  closeButtonPosition: toasterCloseButtonPosition = "header",
   icons,
   classNames,
   richColors: toasterRichColors,
@@ -91,6 +93,13 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
 
   // Per-toast unstyled
   const isUnstyled = popser.unstyled;
+
+  // Close button position: per-toast > Toaster > default "header"
+  const effectiveCloseButtonPosition =
+    popser.closeButtonPosition ?? toasterCloseButtonPosition;
+
+  // Entry direction override
+  const enterFrom = popser.enterFrom;
 
   // Detect anchored toast
   const isAnchored = !!toastData.positionerProps?.anchor;
@@ -129,6 +138,15 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
     );
   }
 
+  const closeButtonElement = (
+    <ToastCloseButton
+      className={mergedClassNames?.closeButton}
+      icon={icons?.close}
+      mode={effectiveCloseButton}
+      position={effectiveCloseButtonPosition}
+    />
+  );
+
   const toastContent = (
     <Toast.Content className={mergedClassNames?.content} data-popser-content>
       <div className={mergedClassNames?.header} data-popser-header>
@@ -153,11 +171,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
             </Toast.Description>
           )}
         </div>
-        <ToastCloseButton
-          className={mergedClassNames?.closeButton}
-          icon={icons?.close}
-          mode={effectiveCloseButton}
-        />
+        {effectiveCloseButtonPosition === "header" && closeButtonElement}
       </div>
       <ToastActions
         action={popser.action}
@@ -175,6 +189,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
     <Toast.Root
       className={rootClassName}
       data-anchored={isAnchored || undefined}
+      data-enter-from={enterFrom || undefined}
       data-popser-id={toastData.id}
       data-popser-root
       data-rich-colors={effectiveRichColors || undefined}
@@ -184,6 +199,7 @@ export const PopserToastRoot = React.memo(function PopserToastRoot({
       swipeDirection={effectiveSwipeDirection}
       toast={toastData}
     >
+      {effectiveCloseButtonPosition === "corner" && closeButtonElement}
       {isAnchored && popser.arrow && (
         <Toast.Arrow className={mergedClassNames?.arrow} data-popser-arrow />
       )}

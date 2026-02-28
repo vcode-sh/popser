@@ -20,10 +20,10 @@ Six flavours. Each one gets its own icon and colours.
 ```ts
 toast("Hello world");           // default — no icon, no drama
 toast.success("Saved");         // green check
-toast.error("Something broke"); // red x
+toast.error("Something broke"); // red circle
 toast.info("Heads up");         // blue info circle
 toast.warning("Careful");       // yellow triangle
-toast.loading("Uploading...");  // spinner, no auto-dismiss
+toast.loading("Uploading...");  // spinner, same timeout as others
 ```
 
 `toast.message()` is an alias for `toast()`. Exists because Sonner has it. Compatibility is a hell of a drug.
@@ -40,10 +40,10 @@ toast("With description", { description: "More detail here" });
 
 ### Loading
 
-Stays on screen until you explicitly deal with it. Like a todo you keep ignoring. Close it or update it. Those are your options.
+Uses the same default timeout as every other toast. If you want it to stick around until you deal with it, set `timeout: 0`. Then close it or update it. Those are your options.
 
 ```ts
-const id = toast.loading("Uploading...");
+const id = toast.loading("Uploading...", { timeout: 0 });
 // later, when you can be bothered
 toast.close(id);
 ```
@@ -149,6 +149,19 @@ For when you need to know how much damage you've done.
 const ids = toast.getToasts(); // ["abc", "def"]
 ```
 
+## Toast history
+
+Opt-in audit trail. Enable with `historyLength` on `<Toaster>`, then query whenever you fancy.
+
+```ts
+const history = toast.getHistory();
+// [{ id, title, type, createdAt, closedAt, closedBy }, ...]
+
+toast.clearHistory(); // wipe the lot
+```
+
+Each entry tracks `closedBy`: `"auto"` (timeout), `"manual"` (user/code), or `"limit"` (evicted by stack limit). Disabled by default — set `historyLength` to enable. See [Toaster](/docs/toaster) for setup.
+
 ## Options reference
 
 Every toast method takes these as a second argument. Mix and match.
@@ -178,6 +191,8 @@ toast.success("Saved", {
 | `duration` | `number` | — | Alias for `timeout` (Sonner compat) |
 | `deduplicate` | `boolean` | `false` | Block duplicates with same string title |
 | `dismissible` | `boolean` | `true` | Allow swipe/close button dismissal |
+| `enterFrom` | `"top" \| "bottom" \| "left" \| "right"` | Position-based | Override entry/exit animation direction |
+| `closeButtonPosition` | `"header" \| "corner"` | `"header"` | Where to render the close button for this toast |
 | `priority` | `"low" \| "high"` | — | ARIA live region priority |
 | `data` | `Record<string, unknown>` | — | Your custom data, along for the ride |
 
@@ -250,5 +265,6 @@ import type {
   PopserPromiseOptions,
   PopserPromiseExtendedResult,
   ToasterProps,
+  ToastHistoryEntry,
 } from "@vcui/popser";
 ```

@@ -213,6 +213,28 @@ In unstyled mode, use `data-popser-*` attributes to target elements in your CSS:
 [data-popser-arrow][data-side="bottom"] { }
 ```
 
+## Animation Duration
+
+Control transition speed via CSS custom properties:
+
+```css
+:root {
+  --popser-transition-duration: 400ms;           /* Standard toast enter/exit (default) */
+  --popser-anchored-transition-duration: 200ms;  /* Anchored toast enter/exit (default) */
+}
+```
+
+Faster transitions:
+
+```css
+:root {
+  --popser-transition-duration: 200ms;
+  --popser-anchored-transition-duration: 100ms;
+}
+```
+
+These apply to all enter/exit animations — fade, scale, and slide. Swipe animations use the same duration.
+
 ## Animations
 
 Default styles include enter/exit animations:
@@ -225,6 +247,13 @@ Default styles include enter/exit animations:
 Entry/exit direction depends on position:
 - Bottom positions: slide up on enter, slide down on exit
 - Top positions: slide down on enter, slide up on exit
+
+Per-toast direction override via `enterFrom`:
+
+```ts
+toast.success("Saved", { enterFrom: "left" });
+toast.error("Failed", { enterFrom: "right" });
+```
 
 Uses `data-starting-style` and `data-ending-style` attributes from Base UI for CSS-only transitions.
 

@@ -5,7 +5,7 @@ import type { ReactNode } from "react";
 export const metadata: Metadata = {
   title: "Why I Built This — Popser",
   description:
-    "Sonner works. But memory leaks, !important hacks, and 44 open issues convinced me to build something different.",
+    "Sonner works. But memory leaks, !important hacks, and dozens of open issues convinced me to build something different.",
 };
 
 const SONNER_ISSUES = "https://github.com/emilkowalski/sonner/issues";
@@ -107,9 +107,13 @@ const comparisonRows: {
     popser: "Never",
     sonner: "For any override",
   },
-  { label: "Open issues", popser: "Few", sonner: "44" },
+  { label: "Open issues", popser: "Few", sonner: "60+" },
   { label: "Anchored toasts", popser: "Full Floating UI", sonner: "None" },
-  { label: "update() API", popser: "Partial updates", sonner: "Re-call with same ID" },
+  {
+    label: "update() API",
+    popser: "Partial updates",
+    sonner: "Re-call with same ID",
+  },
   {
     label: "Close button modes",
     popser: "always / hover / never",
@@ -188,7 +192,7 @@ export default function WhyPage() {
             from the internal array. The DOM nodes leak too.
           </p>
           <p>
-            Emil&apos;s busy. PRs sit. Issues pile up. 44 open at last count.
+            Emil&apos;s busy. PRs sit. Issues pile up. 60+ open at last count.
             The codebase relies on a singleton Observer class with{" "}
             <code className="rounded bg-fd-secondary px-1.5 py-0.5 text-fd-foreground">
               setTimeout + flushSync

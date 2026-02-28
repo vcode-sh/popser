@@ -164,9 +164,8 @@ export default function WhyBaseUIPage() {
         <h2 className="font-bold text-2xl tracking-tight">What happened</h2>
         <div className="mt-4 space-y-4 text-fd-muted-foreground leading-relaxed">
           <p>
-            The team that created Radix UI (Colm Tuite, Pedro Duarte) joined
-            forces with the Floating UI team (Atomiks) and the MUI team.
-            Together they built{" "}
+            Colm Tuite, co-creator of Radix UI, joined forces with the Floating
+            UI team (Atomiks) and the MUI team. Together they built{" "}
             <code className="rounded bg-fd-secondary px-1.5 py-0.5 text-fd-foreground">
               @base-ui/react
             </code>{" "}

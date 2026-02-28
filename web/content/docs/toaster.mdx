@@ -29,7 +29,8 @@ No Provider. No context. Toaster handles all that internally because you've got 
 | Prop | Type | Default | Description |
 |------|------|---------|-------------|
 | `position` | `PopserPosition` | `"bottom-right"` | Where toasts show up |
-| `limit` | `number` | `3` | Max visible toasts |
+| `limit` | `number` | `3` | Max visible toasts (collapsed) |
+| `expandedLimit` | `number` | Falls back to `limit` | Max visible toasts when expanded (hovered) |
 | `offset` | `number \| string` | `16` | Distance from viewport edge |
 | `mobileOffset` | `number \| string` | Falls back to `offset` | Distance from edge on mobile |
 | `gap` | `number` | `8` | Space between expanded toasts |
@@ -44,6 +45,7 @@ No Provider. No context. Toaster handles all that internally because you've got 
 |------|------|---------|-------------|
 | `timeout` | `number` | `4000` | Global auto-dismiss in ms |
 | `closeButton` | `"always" \| "hover" \| "never"` | `"hover"` | Close button visibility |
+| `closeButtonPosition` | `"header" \| "corner"` | `"header"` | Where to render close buttons |
 | `swipeDirection` | `SwipeDirection \| SwipeDirection[]` | `["down", "right"]` | Swipe-to-dismiss direction(s) |
 
 ### Appearance
@@ -63,6 +65,8 @@ No Provider. No context. Toaster handles all that internally because you've got 
 |------|------|---------|-------------|
 | `toastOptions` | `Partial<PopserOptions>` | — | Defaults applied to every toast |
 | `ariaLabel` | `string` | — | Custom ARIA label for the viewport |
+| `dir` | `"ltr" \| "rtl" \| "auto"` | — | Text direction. `"auto"` reads from `document.documentElement.dir` |
+| `historyLength` | `number` | — | Max entries in the toast history ring buffer. 0 or unset disables |
 
 ## Positions
 
@@ -111,6 +115,16 @@ Toasts collapse into a stack by default. Hover to expand. Hate the stack? Spread
 
 Stack state lives on `data-expanded`. Mouse leave has a 100ms debounce because without it, every accidental pixel causes a seizure.
 
+### Expanded limit
+
+Show more toasts when hovering than when collapsed. `limit` controls the collapsed count, `expandedLimit` controls the expanded count.
+
+```tsx
+<Toaster limit={3} expandedLimit={8} />
+```
+
+Collapsed: 3 toasts visible. Hover: up to 8. The provider keeps enough toasts alive internally to support the higher count.
+
 ## Rich colours
 
 Coloured backgrounds per type. One prop.
@@ -123,6 +137,8 @@ Coloured backgrounds per type. One prop.
 
 ## Close button
 
+### Visibility
+
 Three modes. Choose based on how much you trust your users.
 
 <CloseButtonDemo />
@@ -132,6 +148,59 @@ Three modes. Choose based on how much you trust your users.
 <Toaster closeButton="hover" />    {/* default — civilised */}
 <Toaster closeButton="never" />    {/* no escape */}
 ```
+
+### Position
+
+Where the close button lives. `"header"` puts it inline in the toast header. `"corner"` positions it absolute in the top-right corner.
+
+```tsx
+<Toaster closeButtonPosition="corner" />
+```
+
+Per-toast override:
+
+```ts
+toast("Important", { closeButtonPosition: "corner" });
+```
+
+Resolution: per-toast > Toaster > default `"header"`.
+
+## RTL support
+
+Right-to-left layout. Set `dir` to `"rtl"` or `"auto"` to read from `document.documentElement.dir`.
+
+```tsx
+<Toaster dir="rtl" />
+```
+
+When RTL is active:
+- Positions flip: `"top-right"` → `"top-left"`, `"bottom-right"` → `"bottom-left"` (center positions unchanged)
+- Swipe directions flip: left ↔ right
+- Entry/exit animations mirror horizontally
+- `data-dir="rtl"` set on the viewport for CSS targeting
+
+```tsx
+<Toaster dir="auto" />  {/* reads document.documentElement.dir */}
+```
+
+## Toast history
+
+Opt-in ring buffer of recent toast events. Enable with `historyLength`.
+
+```tsx
+<Toaster historyLength={50} />
+```
+
+Then query from anywhere:
+
+```ts
+const history = toast.getHistory();
+// [{ id, title, type, createdAt, closedAt, closedBy }, ...]
+
+toast.clearHistory();
+```
+
+Disabled by default (0 or unset). The buffer evicts oldest entries when over capacity. Each entry tracks `closedBy`: `"auto"`, `"manual"`, or `"limit"`.
 
 ## Custom icons
 

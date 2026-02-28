@@ -298,7 +298,7 @@ Base UI provides `data-expanded` attribute but relies on CSS `:hover` or manual 
 Popser implements JS-driven expansion in `<ToasterContent>`:
 - `isHovering` React state with `handleMouseEnter`/`handleMouseLeave` callbacks
 - 100ms debounce timeout on `mouseLeave` to prevent flicker when moving between toasts
-- Mouse handlers attached to individual `<Toast.Root>` elements
+- Mouse handlers attached to `<Toast.Viewport>` (moved from per-toast in v0.4.0)
 - `isExpanded = expand || isHovering` drives `data-expanded` on viewport
 
 ### 11. Collapsed Stacking CSS

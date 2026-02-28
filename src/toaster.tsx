@@ -18,6 +18,7 @@ import {
 } from "./constants.js";
 import { getManager } from "./manager.js";
 import { PopserToastRoot } from "./toast-root.js";
+import { setHistoryLimit } from "./toast-tracker.js";
 import type { ToasterProps } from "./types.js";
 
 interface ErrorBoundaryState {
@@ -46,11 +47,43 @@ class ToastErrorBoundary extends React.Component<
   }
 }
 
+/** Flip left/right in a position string for RTL. Center positions unchanged. */
+function flipPosition(pos: string): string {
+  if (pos.endsWith("-left")) {
+    return pos.replace("-left", "-right");
+  }
+  if (pos.endsWith("-right")) {
+    return pos.replace("-right", "-left");
+  }
+  return pos;
+}
+
+/** Flip left<->right in swipe directions for RTL. */
+function flipSwipeDirection(
+  dir: ("up" | "down" | "left" | "right") | ("up" | "down" | "left" | "right")[]
+): ("up" | "down" | "left" | "right") | ("up" | "down" | "left" | "right")[] {
+  const flip = (d: "up" | "down" | "left" | "right") => {
+    if (d === "left") {
+      return "right" as const;
+    }
+    if (d === "right") {
+      return "left" as const;
+    }
+    return d;
+  };
+  if (Array.isArray(dir)) {
+    return dir.map(flip);
+  }
+  return flip(dir);
+}
+
 function ToasterContent({
   ariaLabel,
   position = DEFAULT_POSITION,
   swipeDirection = DEFAULT_SWIPE_DIRECTION,
   closeButton = DEFAULT_CLOSE_BUTTON,
+  closeButtonPosition,
+  dir,
   icons,
   classNames,
   offset = DEFAULT_OFFSET,
@@ -60,6 +93,7 @@ function ToasterContent({
   richColors = false,
   theme = "system",
   expand = false,
+  expandedLimit,
   style,
   unstyled = false,
   visibleCount = DEFAULT_LIMIT,
@@ -73,8 +107,25 @@ function ToasterContent({
   );
   const hoverTimeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  // Resolve text direction
+  let resolvedDir = dir;
+  if (dir === "auto") {
+    const isDocRtl =
+      typeof document !== "undefined" && document.documentElement.dir === "rtl";
+    resolvedDir = isDocRtl ? "rtl" : "ltr";
+  }
+  const isRtl = resolvedDir === "rtl";
+
   const isExpanded = expand || isHovering;
-  const effectivePosition = isMobile ? "bottom-center" : position;
+  const basePosition = isRtl ? flipPosition(position) : position;
+  const effectivePosition = isMobile ? "bottom-center" : basePosition;
+  const effectiveSwipeDirection = isRtl
+    ? flipSwipeDirection(swipeDirection)
+    : swipeDirection;
+  const effectiveVisibleCount =
+    isExpanded && expandedLimit
+      ? Math.max(visibleCount, expandedLimit)
+      : visibleCount;
 
   const viewportStyle = useMemo(
     () =>
@@ -83,7 +134,7 @@ function ToasterContent({
           "--popser-offset":
             typeof offset === "number" ? `${offset}px` : offset,
           "--popser-gap": `${gap}px`,
-          "--popser-visible-count": `${visibleCount}`,
+          "--popser-visible-count": `${effectiveVisibleCount}`,
           ...(mobileOffset !== undefined && {
             "--popser-mobile-offset":
               typeof mobileOffset === "number"
@@ -93,7 +144,7 @@ function ToasterContent({
         }),
         ...style,
       }) as React.CSSProperties,
-    [unstyled, offset, mobileOffset, gap, visibleCount, style]
+    [unstyled, offset, mobileOffset, gap, effectiveVisibleCount, style]
   );
 
   const handleMouseEnter = useCallback(() => {
@@ -140,19 +191,33 @@ function ToasterContent({
     return () => mql.removeEventListener("change", handler);
   }, [mobileBreakpoint]);
 
+  const viewportRef = useCallback((node: HTMLElement | null) => {
+    if (node && "showPopover" in node) {
+      try {
+        node.showPopover();
+      } catch {
+        /* already showing or unsupported */
+      }
+    }
+  }, []);
+
   return (
     <Toast.Portal>
       <Toast.Viewport
         aria-label={ariaLabel}
         className={classNames?.viewport}
+        data-dir={isRtl ? "rtl" : undefined}
         data-expanded={isExpanded || undefined}
         data-mobile={isMobile || undefined}
         data-popser-viewport
         data-position={effectivePosition}
         data-rich-colors={richColors || undefined}
         data-theme={resolvedTheme}
+        dir={resolvedDir}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        popover="manual"
+        ref={viewportRef}
         style={viewportStyle}
       >
         {toasts.map((toast) => {
@@ -162,9 +227,10 @@ function ToasterContent({
               <PopserToastRoot
                 classNames={classNames}
                 closeButton={closeButton}
+                closeButtonPosition={closeButtonPosition}
                 icons={icons}
                 richColors={richColors}
-                swipeDirection={swipeDirection}
+                swipeDirection={effectiveSwipeDirection}
                 toast={toast}
                 toastOptions={toastOptions}
               />
@@ -188,12 +254,30 @@ function ToasterContent({
 
 export function Toaster({
   limit = DEFAULT_LIMIT,
+  expandedLimit,
+  historyLength,
   timeout = DEFAULT_TIMEOUT,
   ...rest
 }: ToasterProps) {
+  // When expandedLimit is set, Provider needs to keep enough toasts alive for expanded view
+  const providerLimit = expandedLimit ? Math.max(limit, expandedLimit) : limit;
+
+  // Configure history ring buffer
+  useEffect(() => {
+    setHistoryLimit(historyLength ?? 0);
+  }, [historyLength]);
+
   return (
-    <Toast.Provider limit={limit} timeout={timeout} toastManager={getManager()}>
-      <ToasterContent visibleCount={limit} {...rest} />
+    <Toast.Provider
+      limit={providerLimit}
+      timeout={timeout}
+      toastManager={getManager()}
+    >
+      <ToasterContent
+        expandedLimit={expandedLimit}
+        visibleCount={limit}
+        {...rest}
+      />
     </Toast.Provider>
   );
 }

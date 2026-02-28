@@ -1,3 +1,5 @@
+import type { ToastHistoryEntry } from "./types.js";
+
 /**
  * Tracks active toast IDs so `toast.close()` (no args) can close all.
  */
@@ -113,4 +115,80 @@ export function untrackToast(id: string): void {
  */
 export function getActiveToastIds(): Iterable<string> {
   return activeToasts;
+}
+
+// ---------------------------------------------------------------------------
+// Toast History (opt-in ring buffer)
+// ---------------------------------------------------------------------------
+
+let historyLimit = 0;
+const historyBuffer: ToastHistoryEntry[] = [];
+
+/** Set the maximum number of history entries. 0 disables history. */
+export function setHistoryLimit(limit: number): void {
+  historyLimit = Math.max(0, limit);
+  // Trim if needed
+  while (historyBuffer.length > historyLimit) {
+    historyBuffer.shift();
+  }
+}
+
+/** @internal -- exposed for testing only */
+export function getHistoryLimit(): number {
+  return historyLimit;
+}
+
+/** Record a toast creation in history. No-op if history is disabled. */
+export function recordToastCreation(
+  id: string,
+  title: unknown,
+  type?: string
+): void {
+  if (historyLimit <= 0) {
+    return;
+  }
+
+  const entry: ToastHistoryEntry = {
+    id,
+    title,
+    type,
+    createdAt: Date.now(),
+  };
+
+  historyBuffer.push(entry);
+
+  // Evict oldest when over capacity
+  while (historyBuffer.length > historyLimit) {
+    historyBuffer.shift();
+  }
+}
+
+/** Update a history entry when a toast is closed. */
+export function recordToastClosure(
+  id: string,
+  closedBy: "auto" | "manual" | "limit"
+): void {
+  if (historyLimit <= 0) {
+    return;
+  }
+
+  // Find the most recent entry with this ID (search from end)
+  for (let i = historyBuffer.length - 1; i >= 0; i--) {
+    const entry = historyBuffer[i];
+    if (entry && entry.id === id && entry.closedAt === undefined) {
+      entry.closedAt = Date.now();
+      entry.closedBy = closedBy;
+      break;
+    }
+  }
+}
+
+/** Get an immutable snapshot of the toast history. */
+export function getHistory(): readonly ToastHistoryEntry[] {
+  return historyBuffer.map((entry) => ({ ...entry }));
+}
+
+/** Clear all history entries. */
+export function clearHistory(): void {
+  historyBuffer.length = 0;
 }

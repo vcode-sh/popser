@@ -30,6 +30,8 @@ No Provider wrapper needed. The Toaster handles Provider, Portal, and Viewport i
 | `gap` | `number` | `8` | Space between toasts when expanded (px) |
 | `mobileBreakpoint` | `number` | `600` | Width in px that triggers mobile layout |
 | `expand` | `boolean` | `false` | Always show toasts in expanded column |
+| `expandedLimit` | `number` | — | Max visible toasts when hovered/expanded. Collapsed still uses `limit` |
+| `dir` | `"ltr" \| "rtl" \| "auto"` | — | Text direction. `"auto"` reads `document.documentElement.dir` |
 
 ### Behavior
 
@@ -37,7 +39,9 @@ No Provider wrapper needed. The Toaster handles Provider, Portal, and Viewport i
 |------|------|---------|-------------|
 | `timeout` | `number` | `4000` | Global auto-dismiss in ms |
 | `closeButton` | `"always" \| "hover" \| "never"` | `"hover"` | Close button visibility mode |
+| `closeButtonPosition` | `"header" \| "corner"` | `"header"` | Close button placement (header row or top-right corner) |
 | `swipeDirection` | `SwipeDirection \| SwipeDirection[]` | `["down", "right"]` | Swipe-to-dismiss direction(s) |
+| `historyLength` | `number` | `0` (disabled) | Max history entries. Enables `toast.getHistory()` |
 
 ### Appearance
 
@@ -192,6 +196,66 @@ Control which directions dismiss a toast:
 ```
 
 Options: `"up"`, `"down"`, `"left"`, `"right"`. Accepts a single direction or an array.
+
+## Expanded Limit
+
+By default, hovering over a collapsed stack shows all toasts up to `limit`. Use `expandedLimit` to show more toasts when expanded/hovered:
+
+```tsx
+<Toaster limit={3} expandedLimit={8} />
+```
+
+Collapsed: 3 visible. Hover: up to 8. Useful when you want a clean default view but let users see more on demand.
+
+## Close Button Position
+
+Control where the close button renders:
+
+```tsx
+<Toaster closeButtonPosition="corner" />  {/* Top-right corner of the toast */}
+<Toaster closeButtonPosition="header" />  {/* In the header row (default) */}
+```
+
+Per-toast override:
+
+```ts
+toast.success("Saved", { closeButtonPosition: "corner" });
+```
+
+Resolution order: per-toast > Toaster > default (`"header"`).
+
+## RTL Support
+
+```tsx
+<Toaster dir="rtl" />
+<Toaster dir="auto" />  {/* Reads document.documentElement.dir */}
+```
+
+When `dir` is `"rtl"`:
+- Positions flip: `left` becomes `right` and vice versa
+- Swipe directions adjust accordingly
+- Enter/exit animations mirror
+
+`"auto"` detects the direction from `document.documentElement.dir` at mount time.
+
+## Toast History
+
+Enable history tracking by setting `historyLength`:
+
+```tsx
+<Toaster historyLength={50} />
+```
+
+Then use the imperative API:
+
+```ts
+const history = toast.getHistory();
+// [{ id, title, type, createdAt, closedAt, closedBy }]
+
+toast.clearHistory();
+```
+
+Set to `0` or omit to disable. History entries are capped at `historyLength` — oldest entries are evicted first.
 
 ## Error Boundary
 

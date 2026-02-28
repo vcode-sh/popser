@@ -23,12 +23,14 @@ export interface ToastCloseButtonProps {
   className?: string;
   icon?: ReactNode;
   mode?: "always" | "hover" | "never";
+  position?: "header" | "corner";
 }
 
 export function ToastCloseButton({
   mode = "hover",
   icon,
   className,
+  position = "header",
 }: ToastCloseButtonProps) {
   if (mode === "never") {
     return null;
@@ -39,6 +41,7 @@ export function ToastCloseButton({
       aria-label="Close notification"
       className={className}
       data-close-button={mode}
+      data-close-position={position}
       data-popser-close
     >
       {icon || <CloseIcon />}

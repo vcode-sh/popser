@@ -36,7 +36,7 @@ Everything visual runs through `--popser-*` variables. Override them on `:root`,
   --popser-shadow: 0 4px 12px oklch(0 0 0 / 0.1);
   --popser-offset: 16px;
   --popser-gap: 8px;
-  --popser-width: 356px;
+  --popser-width: 356px; /* not shipped in tokens — CSS fallback default */
   --popser-stack-peek: 14px;
   --popser-hover-bg: oklch(0 0 0 / 0.05);
 }
@@ -205,6 +205,7 @@ Target elements with `data-popser-*` attributes:
 [data-popser-viewport][data-rich-colors] { }
 [data-popser-viewport][data-expanded] { }
 [data-popser-viewport][data-mobile] { }
+[data-popser-viewport][data-dir="rtl"] { }
 ```
 
 ### Toast root
@@ -217,6 +218,7 @@ Target elements with `data-popser-*` attributes:
 [data-popser-root][data-rich-colors] { }
 [data-popser-root][data-unstyled] { }
 [data-popser-root][data-anchored] { }
+[data-popser-root][data-enter-from="left"] { }
 [data-popser-root][data-popser-id="my-id"] { }
 ```
 
@@ -225,6 +227,8 @@ Target elements with `data-popser-*` attributes:
 ```css
 [data-popser-close][data-close-button="hover"] { }
 [data-popser-close][data-close-button="always"] { }
+[data-popser-close][data-close-position="header"] { }
+[data-popser-close][data-close-position="corner"] { }
 ```
 
 ### Arrow
@@ -233,6 +237,38 @@ Target elements with `data-popser-*` attributes:
 [data-popser-arrow][data-side="top"] { }
 [data-popser-arrow][data-side="bottom"] { }
 ```
+
+## Animation duration
+
+Override the default transition timing with CSS custom properties. No JS changes needed.
+
+```css
+:root {
+  --popser-transition-duration: 400ms;            /* default for all toasts */
+  --popser-anchored-transition-duration: 200ms;   /* default for anchored toasts */
+}
+```
+
+Want snappier transitions? Slower exits? Just change the variable.
+
+```css
+[data-popser-viewport] {
+  --popser-transition-duration: 250ms;
+}
+```
+
+Works on any ancestor — `:root`, viewport, or a wrapper div.
+
+## Entry direction
+
+Override the default entry/exit animation direction per toast with `enterFrom`. Defaults to position-based (bottom toasts slide up, top toasts slide down).
+
+```ts
+toast("Sliding in from the left", { enterFrom: "left" });
+toast("Coming from above", { enterFrom: "top" });
+```
+
+Sets `data-enter-from` on the toast root. CSS handles the rest. Options: `"top"`, `"bottom"`, `"left"`, `"right"`.
 
 ## Animations
 

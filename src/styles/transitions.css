@@ -46,6 +46,69 @@
   transform: translateY(calc(-1 * var(--toast-height, 0px) - 8px)) scale(0.95);
 }
 
+/* ─── RTL: flip horizontal slide animations ──────────────────────── */
+
+[data-dir="rtl"]
+  [data-popser-root][data-enter-from="left"][data-starting-style] {
+  transform: translateX(100%) scale(0.95);
+}
+
+[data-dir="rtl"] [data-popser-root][data-enter-from="left"][data-ending-style] {
+  transform: translateX(100%) scale(0.95);
+}
+
+[data-dir="rtl"]
+  [data-popser-root][data-enter-from="right"][data-starting-style] {
+  transform: translateX(-100%) scale(0.95);
+}
+
+[data-dir="rtl"]
+  [data-popser-root][data-enter-from="right"][data-ending-style] {
+  transform: translateX(-100%) scale(0.95);
+}
+
+/* ─── Per-toast entry direction overrides (data-enter-from) ────────── */
+
+[data-popser-root][data-enter-from="left"][data-starting-style] {
+  opacity: 0;
+  transform: translateX(-100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="left"][data-ending-style] {
+  opacity: 0;
+  transform: translateX(-100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="right"][data-starting-style] {
+  opacity: 0;
+  transform: translateX(100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="right"][data-ending-style] {
+  opacity: 0;
+  transform: translateX(100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="top"][data-starting-style] {
+  opacity: 0;
+  transform: translateY(-100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="top"][data-ending-style] {
+  opacity: 0;
+  transform: translateY(-100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="bottom"][data-starting-style] {
+  opacity: 0;
+  transform: translateY(100%) scale(0.95);
+}
+
+[data-popser-root][data-enter-from="bottom"][data-ending-style] {
+  opacity: 0;
+  transform: translateY(100%) scale(0.95);
+}
+
 /* ─── Rich colors (opt-in via data-rich-colors on viewport or per-toast) ─── */
 
 [data-rich-colors] [data-popser-root][data-type="success"],

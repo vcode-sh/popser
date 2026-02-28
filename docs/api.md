@@ -76,7 +76,7 @@ Custom toasts render with `data-type="custom"` on the root. See [custom.md](cust
 
 ### `toast.promise(promiseOrFn, options)`
 
-See [promise.md](promise.md) for the full guide.
+Supports `signal`, `aborted`, and `onAbort` for AbortSignal integration. See [promise.md](promise.md) for the full guide.
 
 ### `toast.update(id, options)`
 
@@ -113,6 +113,36 @@ Returns an array of active toast IDs.
 const ids = toast.getToasts(); // ["abc", "def"]
 ```
 
+### `toast.getHistory()`
+
+Returns a readonly array of all toast history entries. Requires `historyLength` on `<Toaster>` to be set (disabled by default).
+
+```ts
+const history = toast.getHistory();
+// [{ id: "abc", title: "Saved", type: "success", createdAt: 1709..., closedAt: 1709..., closedBy: "auto" }]
+```
+
+Each entry is a `ToastHistoryEntry`:
+
+```ts
+{
+  id: string;
+  title: string;
+  type?: PopserType;
+  createdAt: number;
+  closedAt?: number;
+  closedBy?: "auto" | "manual" | "limit";
+}
+```
+
+### `toast.clearHistory()`
+
+Clears all toast history entries.
+
+```ts
+toast.clearHistory();
+```
+
 ## Options
 
 All toast creation methods accept these options as a second argument.
@@ -143,6 +173,8 @@ toast.success("Saved", {
 | `deduplicate` | `boolean` | `false` | Block duplicate toasts with same string title |
 | `dismissible` | `boolean` | `true` | Allow swipe/close button dismissal |
 | `priority` | `"low" \| "high"` | — | ARIA live region priority |
+| `enterFrom` | `"top" \| "bottom" \| "left" \| "right"` | Position-dependent | Override entry/exit animation direction |
+| `closeButtonPosition` | `"header" \| "corner"` | Inherits from Toaster | Close button placement for this toast |
 | `data` | `Record<string, unknown>` | — | Custom data attached to the toast |
 
 ### Actions
@@ -256,5 +288,6 @@ import type {
   PopserPromiseOptions,
   PopserPromiseExtendedResult,
   ToasterProps,
+  ToastHistoryEntry,
 } from "@vcui/popser";
 ```

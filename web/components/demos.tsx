@@ -1,7 +1,7 @@
 "use client";
 
-import type { MouseEvent as ReactMouseEvent } from "react";
 import { toast } from "@vcui/popser";
+import type { MouseEvent as ReactMouseEvent } from "react";
 import { type ReactNode, useRef } from "react";
 
 function DemoBox({ children }: { children: ReactNode }) {
@@ -642,30 +642,35 @@ export function CloseButtonDemo() {
 export function PositionDemo() {
   return (
     <DemoBox>
-      <div className="grid w-full max-w-sm grid-cols-3 grid-rows-2 gap-2 rounded-lg border border-dashed border-fd-border p-4"
+      <div
+        className="grid w-full max-w-sm grid-cols-3 grid-rows-2 gap-2 rounded-lg border border-fd-border border-dashed p-4"
         style={{ height: 140 }}
       >
-        {([
-          "top-left",
-          "top-center",
-          "top-right",
-          "bottom-left",
-          "bottom-center",
-          "bottom-right",
-        ] as const).map((pos) => (
+        {(
+          [
+            "top-left",
+            "top-center",
+            "top-right",
+            "bottom-left",
+            "bottom-center",
+            "bottom-right",
+          ] as const
+        ).map((pos) => (
           <div
-            key={pos}
-            className={`flex items-center rounded-md px-2 py-1 text-xs font-mono ${
+            className={`flex items-center rounded-md px-2 py-1 font-mono text-xs ${
               pos === "bottom-right"
-                ? "border border-purple-500/50 bg-purple-500/10 text-purple-500 font-semibold"
+                ? "border border-purple-500/50 bg-purple-500/10 font-semibold text-purple-500"
                 : "text-fd-muted-foreground"
-            } ${
-              pos.includes("left")
-                ? "justify-start"
-                : pos.includes("center")
-                  ? "justify-center"
-                  : "justify-end"
-            }`}
+            } ${(() => {
+              if (pos.includes("left")) {
+                return "justify-start";
+              }
+              if (pos.includes("center")) {
+                return "justify-center";
+              }
+              return "justify-end";
+            })()}`}
+            key={pos}
           >
             {pos}
           </div>

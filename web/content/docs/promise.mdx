@@ -38,6 +38,9 @@ Returns the original promise with an `id` tacked on. For tracking, if you're int
   description?: ReactNode | ((data: T) => ReactNode) | ((error: unknown) => ReactNode);
   finally?: () => void | Promise<void>;
   id?: string;
+  signal?: AbortSignal;
+  aborted?: ReactNode | ((reason: unknown) => ReactNode | PopserPromiseExtendedResult | undefined);
+  onAbort?: (reason: unknown) => void;
 }
 ```
 
@@ -161,6 +164,72 @@ toast.promise(
 ```
 
 Handy when you want the loading toast to appear *before* the request fires. Timing matters.
+
+## AbortSignal
+
+Cancel in-flight promise toasts. Pass a `signal` and optionally `aborted` content.
+
+```ts
+const controller = new AbortController();
+
+toast.promise(fetchData(), {
+  loading: "Fetching...",
+  success: "Done",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: "Cancelled",
+});
+
+// later
+controller.abort();
+// toast updates to "Cancelled" with type "warning"
+```
+
+### Abort content options
+
+`aborted` follows the same pattern as `success`/`error`:
+
+```ts
+// Static message
+aborted: "Cancelled"
+
+// Dynamic from abort reason
+aborted: (reason) => `Cancelled: ${reason}`
+
+// Extended result with full control
+aborted: (reason) => ({
+  title: "Aborted",
+  description: String(reason),
+  timeout: 5000,
+  icon: <StopIcon />,
+})
+
+// Return undefined to silently dismiss
+aborted: (reason) => reason === "user" ? "Cancelled" : undefined
+
+// Omit entirely to auto-dismiss on abort
+```
+
+Default type for aborted state: `"warning"`.
+
+### onAbort callback
+
+Fires before the toast updates. Use for cleanup.
+
+```ts
+toast.promise(uploadFile(file), {
+  loading: "Uploading...",
+  success: "Uploaded",
+  error: "Failed",
+  signal: controller.signal,
+  aborted: "Upload cancelled",
+  onAbort: (reason) => {
+    cleanupPartialUpload();
+  },
+});
+```
+
+If the promise resolves or rejects before the signal fires, the abort is a no-op. If the signal is already aborted when `toast.promise()` is called, abort handling runs immediately.
 
 ## Custom ID
 

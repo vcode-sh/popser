@@ -3,9 +3,13 @@ import { getManager } from "./manager.js";
 import { toManagerOptions, toManagerUpdateOptions } from "./toast-mapper.js";
 import {
   clearActiveToasts,
+  clearHistory,
   findDuplicate,
   getActiveToastIds,
+  getHistory,
   markManuallyClosedToast,
+  recordToastClosure,
+  recordToastCreation,
   trackToast,
   untrackToast,
 } from "./toast-tracker.js";
@@ -78,6 +82,7 @@ function createToast(title: ReactNode, options: PopserOptions = {}): string {
   const id = getManager().add(managerOptions);
   resolvedId.current = id;
   trackToast(id, title, options.deduplicate);
+  recordToastCreation(id, title, options.type);
 
   if (isAnchored) {
     activeAnchoredToastId = id;
@@ -172,6 +177,62 @@ function buildPromiseHandler<TType extends "success" | "error", TInput>(
       ...(desc !== undefined && { description: desc }),
     };
   };
+}
+
+/**
+ * Resolves and applies abort content to an existing toast.
+ * Closes the toast if content is undefined or no handler is provided.
+ */
+function applyAbortContent(
+  toastIdValue: string,
+  aborted:
+    | ReactNode
+    | ((reason: unknown) => ReactNode | PopserPromiseExtendedResult | undefined)
+    | undefined,
+  reason: unknown
+): void {
+  if (aborted === undefined) {
+    getManager().close(toastIdValue);
+    return;
+  }
+
+  const abortedContent =
+    typeof aborted === "function"
+      ? (
+          aborted as (
+            reason: unknown
+          ) => ReactNode | PopserPromiseExtendedResult | undefined
+        )(reason)
+      : aborted;
+
+  if (abortedContent === undefined) {
+    getManager().close(toastIdValue);
+    return;
+  }
+
+  if (isExtendedResult(abortedContent)) {
+    const { title, timeout, icon, action, cancel, description, ...rest } =
+      abortedContent;
+    getManager().update(toastIdValue, {
+      title,
+      type: "warning",
+      ...(timeout !== undefined && { timeout }),
+      ...(description !== undefined && { description }),
+      data: {
+        __popser: {
+          ...(icon !== undefined && { icon }),
+          ...(action !== undefined && { action }),
+          ...(cancel !== undefined && { cancel }),
+          ...rest,
+        },
+      },
+    });
+  } else {
+    getManager().update(toastIdValue, {
+      title: abortedContent as ReactNode,
+      type: "warning",
+    });
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -275,7 +336,7 @@ toast.promise = <T>(
   promiseOrFn: Promise<T> | (() => Promise<T>),
   options: PopserPromiseOptions<T>
 ): Promise<T> & { id: string } => {
-  const { success, error } = options;
+  const { success, error, signal, aborted, onAbort } = options;
 
   // Support lazy promises
   const promise =
@@ -296,6 +357,82 @@ toast.promise = <T>(
     options.description
   );
 
+  // When an AbortSignal is provided, manage the loading toast manually
+  // so we have direct access to the toast ID for abort handling.
+  if (signal) {
+    const loadingId = getManager().add({
+      ...(options.id !== undefined && { id: options.id }),
+      title: options.loading,
+      type: "loading" as const,
+      timeout: 0,
+    });
+    toastId.current = loadingId;
+
+    let settled = false;
+
+    const result = promise.then(
+      (value) => {
+        if (settled) {
+          return value;
+        }
+        settled = true;
+        const handler =
+          typeof successHandler === "function"
+            ? successHandler(value)
+            : successHandler;
+        getManager().update(loadingId, handler);
+        return value;
+      },
+      (err) => {
+        if (!settled) {
+          settled = true;
+          const handler =
+            typeof errorHandler === "function"
+              ? errorHandler(err)
+              : errorHandler;
+          getManager().update(loadingId, handler);
+        }
+        throw err;
+      }
+    ) as Promise<T> & { id: string };
+
+    if (options.finally) {
+      const finallyFn = options.finally;
+      result.then(
+        () => finallyFn(),
+        () => finallyFn()
+      );
+    }
+
+    const handleAbort = () => {
+      if (settled) {
+        return;
+      }
+      settled = true;
+      onAbort?.(signal.reason);
+      applyAbortContent(loadingId, aborted, signal.reason);
+    };
+
+    if (signal.aborted) {
+      handleAbort();
+    } else {
+      signal.addEventListener("abort", handleAbort, { once: true });
+      promise.then(
+        () => signal.removeEventListener("abort", handleAbort),
+        () => signal.removeEventListener("abort", handleAbort)
+      );
+    }
+
+    Object.defineProperty(result, "id", {
+      get: () => loadingId,
+      enumerable: false,
+      configurable: true,
+    });
+
+    return result;
+  }
+
+  // No signal — delegate to Base UI's manager.promise()
   const result = getManager().promise(promise, {
     ...(options.id !== undefined && { id: options.id }),
     loading: { title: options.loading, type: "loading" as const },
@@ -303,8 +440,6 @@ toast.promise = <T>(
     error: errorHandler,
   }) as Promise<T> & { id: string };
 
-  // Capture the toast ID from the manager (it's the return value of promise())
-  // We need to handle the finally clause
   if (options.finally) {
     const finallyFn = options.finally;
     result.then(
@@ -313,8 +448,6 @@ toast.promise = <T>(
     );
   }
 
-  // Add non-enumerable `id` property for accessing the toast ID
-  // Note: The actual ID is set by Base UI internally; we track it via the promise chain
   Object.defineProperty(result, "id", {
     get: () => toastId.current,
     enumerable: false,
@@ -336,6 +469,7 @@ toast.promise = <T>(
 toast.close = (id?: string): void => {
   if (id !== undefined) {
     markManuallyClosedToast(id);
+    recordToastClosure(id, "manual");
     getManager().close(id);
     untrackToast(id);
     if (activeAnchoredToastId === id) {
@@ -344,6 +478,7 @@ toast.close = (id?: string): void => {
   } else {
     for (const toastId of getActiveToastIds()) {
       markManuallyClosedToast(toastId);
+      recordToastClosure(toastId, "manual");
       getManager().close(toastId);
     }
     clearActiveToasts();
@@ -376,5 +511,16 @@ toast.dismiss = toast.close;
 toast.getToasts = (): string[] => {
   return Array.from(getActiveToastIds());
 };
+
+/**
+ * Get an immutable snapshot of the toast history.
+ * Returns an empty array when history is disabled (no `historyLength` on Toaster).
+ */
+toast.getHistory = getHistory;
+
+/**
+ * Clear all toast history entries.
+ */
+toast.clearHistory = clearHistory;
 
 export { toast };

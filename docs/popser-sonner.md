@@ -9,7 +9,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | | **Popser** | **Sonner** |
 |---|---|---|
 | Foundation | Base UI Toast primitives | Custom implementation (singleton Observer) |
-| Version | 1.1.2 | 2.x |
+| Version | 1.2.0 | 2.x |
 | React | 18 + 19 | 18+ |
 | TypeScript | Strict, `verbatimModuleSyntax` | TypeScript (loose) |
 | Bundle (ESM) | 13.4 KB raw / 4.8 KB gzip | 65.9 KB raw / ~13.5 KB gzip |
@@ -39,6 +39,8 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `toast.update(id, opts)` | `toast.update(id, opts)` | Re-call `toast()` with same ID (full replace) |
 | `toast.dismiss(id)` | `toast.dismiss(id)` (alias for `close`) | `toast.dismiss(id)` |
 | `toast.getToasts()` | `toast.getToasts()` → `string[]` | Not available |
+| `toast.getHistory()` | `toast.getHistory()` → `ToastHistoryEntry[]` | Not available |
+| `toast.clearHistory()` | `toast.clearHistory()` | Not available |
 | `toast.custom(jsx)` | `toast.custom((id) => jsx)` | `toast.custom(jsx)` |
 | `toast.message()` | `toast.message("msg")` | `toast.message("msg")` |
 | Returns | `string` (toast ID) | `string \| number` |
@@ -88,6 +90,8 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `data` | `Record<string, unknown>` | Not available | Custom data bag |
 | `anchor` | `Element \| MouseEvent \| {x,y}` | Not available | Pin toast to element or coordinates |
 | `arrow` | `boolean` | Not available | Arrow pointing at anchor |
+| `enterFrom` | `"top" \| "bottom" \| "left" \| "right"` | Not available | Per-toast animation direction |
+| `closeButtonPosition` | `"header" \| "corner"` | Not available | Per-toast close button placement |
 | `invert` | Not needed | `boolean` | Popser uses `theme` prop |
 | `testId` | `data-popser-root` always | `testId` prop | Stable selectors by default |
 | `position` | On `<Toaster>` only | Per-toast override | Architectural choice |
@@ -103,6 +107,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `timeout` | `number` (default: 4000) | `toastOptions.duration` (default: 4000) | Top-level prop |
 | `closeButton` | `"always" \| "hover" \| "never"` | `boolean` | 3 modes vs on/off |
 | `expand` | `boolean` | `boolean` | Same |
+| `expandedLimit` | `number` | Not available | Show more toasts when expanded |
 | `richColors` | `boolean` | `boolean` | Same |
 | `theme` | `"light" \| "dark" \| "system"` | `"light" \| "dark" \| "system"` | Same |
 | `offset` | `number \| string` | `string \| number \| object` | Simpler |
@@ -115,7 +120,9 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 | `style` | `CSSProperties` | Not available | Viewport inline styles |
 | `unstyled` | `boolean` | `boolean` | Same |
 | `toastOptions` | `Partial<PopserOptions>` | `object` | Global defaults for all toasts |
-| `dir` | Not needed | `"ltr" \| "rtl"` | Base UI handles this |
+| `closeButtonPosition` | `"header" \| "corner"` | Not available | Global close button placement |
+| `dir` | `"ltr" \| "rtl" \| "auto"` | `"ltr" \| "rtl"` | Also supports `"auto"` (reads from DOM) |
+| `historyLength` | `number` | Not available | Enable toast history tracking |
 | `hotkey` | F6 (Base UI built-in) | `Alt+T` | F6 is ARIA standard |
 | `invert` | Not needed | `boolean` | Use `theme` instead |
 | `toasterId` | Not needed | `string` | Single manager pattern |
@@ -176,7 +183,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 
 **Sonner #667 (5 upvotes), shadcn/ui #2401:** Toast appears above Radix UI dialogs but swipe doesn't work. Or appears below dialog backdrop.
 
-**Popser:** `Toast.Portal` renders through proper React portal. Z-index managed via `data-popser-viewport` selector. Works with any dialog library.
+**Popser:** `Toast.Portal` renders through proper React portal. In v1.2, the Viewport uses `popover="manual"` (Popover API) to render in the top layer — toasts always appear above dialogs, modals, and other stacking contexts. No z-index hacks needed.
 
 ### 10. Toast Queued Before Mount
 
@@ -217,7 +224,7 @@ Drop-in replacement for Sonner. Same API, fewer bugs, no `!important`.
 
 **Sonner:** Collapsed stacking via JS height measurement (`getBoundingClientRect`) + manual offset calculation. Layout thrashing on every toast add/remove.
 
-**Popser:** Collapsed stacking via Base UI CSS variables (`--toast-index`, `--toast-frontmost-height`). Toasts are `position: absolute`, layered with `z-index: calc(100 - var(--toast-index))`, scaled down with `scale(1 - index * 0.05)`, and faded with progressive opacity. Content behind the front toast is hidden with `overflow: hidden` + `opacity: 0`. The `--popser-visible-count` CSS variable (from `limit` prop) cuts off toasts beyond the visible count. Expand on hover switches the viewport to `display: flex` with `overflow-y: auto` for scrollable toast lists -- fully CSS-driven layout shift, no JS measurement.
+**Popser:** Collapsed stacking via Base UI CSS variables (`--toast-index`, `--toast-frontmost-height`). Toasts are `position: absolute`, layered with `z-index: calc(100 - var(--toast-index))`, scaled down with `scale(1 - index * 0.05)`, and faded with progressive opacity. Content behind the front toast is hidden with `overflow: hidden` + `opacity: 0`. The `--popser-visible-count` CSS variable (from `limit` prop) cuts off toasts beyond the visible count. Expanded state fans toasts out using `translateY()` with cumulative `--toast-offset-y` offsets — toasts stay `position: absolute` in both states, animating smoothly between collapsed peek and expanded fan-out. No JS measurement.
 
 ### 16. Anchored Toasts
 
@@ -242,7 +249,6 @@ Configurable side, alignment, offset, collision boundary, position method, and s
 
 | Feature | Status | Notes |
 |---|---|---|
-| `toast.getHistory()` | Not planned | Sonner never cleans up, so it can return all past toasts |
 | `invert` prop | Not planned | Use `theme` instead |
 | `hotkey` customization | Base UI default (F6) | F6 is the ARIA standard |
 | `toasterId` (multiple Toasters) | Not planned | Single manager pattern |
@@ -300,10 +306,10 @@ Toast.createToastManager() (Base UI singleton)
   └── <Toast.Portal> (proper React portal)
     └── <Toast.Viewport data-expanded data-mobile data-position data-theme>
     │     └── CSS vars: --popser-offset, --popser-gap, --popser-visible-count
-    └── <Toast.Root> per toast (onMouseEnter/Leave forwarded)
+    └── <Toast.Root> per toast
     │     └── CSS vars: --toast-index, --toast-height, --toast-frontmost-height
     │     └── Collapsed: position:absolute, stacking via transforms + z-index
-    │     └── Expanded: position:relative, flex flow, scrollable overflow
+    │     └── Expanded: position:absolute, translateY fan-out via --toast-offset-y
     │     └── data-starting-style / data-ending-style for enter/exit
     │     └── Native swipe handling (accessible, Base UI)
     └── <Toast.Positioner> for anchored toasts
@@ -362,7 +368,7 @@ Popser: **12 element slots**. Sonner has fewer element-targeting slots and mixes
 
 ---
 
-## Sonner Open Issues We Address
+## Sonner Issues We Address
 
 ### Bugs (Fixed by Architecture)
 
@@ -404,17 +410,23 @@ Popser: **12 element slots**. Sonner has fewer element-targeting slots and mixes
 | # | Issue | Popser Implementation |
 |---|---|---|
 | #376 | Custom mobile breakpoint | `mobileBreakpoint` prop |
-| #654 | `closeButtonPosition` | `closeButton: "always" \| "hover" \| "never"` |
+| #654 | `closeButtonPosition` | `closeButton: "always" \| "hover" \| "never"` + `closeButtonPosition: "header" \| "corner"` |
 | #705 | Restore hover-to-show close | Default mode in popser |
 | #714 | `data-toast-id` stable attribute | `data-popser-root` + `data-type` |
 | #741 | Stable attribute on toaster | `data-popser-viewport` |
 | #713 | SVG accessibility (aria-hidden) | `role="img"` + `aria-label` on all icons |
 | #732 | Fix SVG accessibility | Same as above |
 | #666 | Update toast and change ID | `toast.update(id, opts)` |
-| #734 | `clearHistory` method | `toast.close()` closes all |
+| #734 | `clearHistory` method | `toast.getHistory()` + `toast.clearHistory()` with `historyLength` prop |
 | #464 | Per-state config in `toast.promise()` | Extended results with `{ title, description, timeout, icon, action }` |
+| — | Animation duration customization | `--popser-transition-duration` and `--popser-anchored-transition-duration` CSS properties |
+| — | Popover API for dialog layering | `popover="manual"` on Viewport, toasts render above dialogs |
+| — | Expanded limit | `expandedLimit` prop — show more toasts on hover |
+| — | AbortSignal for promise toasts | `signal`, `aborted`, `onAbort` on `toast.promise()` |
+| — | Per-toast entry direction | `enterFrom: "top" \| "bottom" \| "left" \| "right"` |
+| — | RTL support | `dir: "ltr" \| "rtl" \| "auto"` on Toaster |
 
-### Additional Sonner Issues We Address (by Architecture)
+### Additional Sonner Issues We Address (by Architecture, some now closed)
 
 | # | Issue | Why Popser is Unaffected |
 |---|---|---|
@@ -448,6 +460,11 @@ Popser: **12 element slots**. Sonner has fewer element-targeting slots and mixes
 14. **shadcn registry** -- `npx shadcn add @vcode-sh/popser`
 15. **Anchored toasts** -- pin to elements, mouse events, or coordinates with arrow support
 16. **Clean architecture** -- Base UI primitives, thin wrapper, no state hacks
+17. **RTL support** -- `dir="rtl"` or `"auto"`, flips positions/swipe/animations
+18. **Toast history** -- `toast.getHistory()` + `toast.clearHistory()` with configurable retention
+19. **AbortSignal for promises** -- cancel loading toasts cleanly with `signal` + `aborted` content
+20. **Animation duration control** -- `--popser-transition-duration` CSS custom property
+21. **Popover API** -- toasts render above dialogs via `popover="manual"`
 
 ## Popser Cons
 

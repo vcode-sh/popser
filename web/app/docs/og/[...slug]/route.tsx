@@ -10,7 +10,7 @@ export function generateStaticParams() {
 
 export async function GET(
   _request: Request,
-  props: { params: Promise<{ slug: string[] }> },
+  props: { params: Promise<{ slug: string[] }> }
 ) {
   const params = await props.params;
   const page = source.getPage(params.slug);
