@@ -9,8 +9,8 @@ WORKDIR /app
 
 COPY web/package.json web/package-lock.json web/source.config.ts web/next.config.mjs ./
 
-# Replace file:.. with npm registry version for Docker builds
-RUN sed -i 's|"file:.."|"^1.2.0"|' package.json && npm install
+# Replace local file:.. dependency with npm registry version for Docker builds
+RUN sed -i 's|"file:.."|"^1.2.0"|' package.json && rm package-lock.json && npm install
 
 # Build the web app
 FROM base AS builder
