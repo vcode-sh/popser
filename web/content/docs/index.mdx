@@ -1,0 +1,78 @@
+---
+title: Getting Started
+description: Install popser and show your first toast in under a minute.
+---
+
+## Installation
+
+```bash
+npm install @vcui/popser
+```
+
+popser requires React 18+ and Base UI as peer dependencies:
+
+```bash
+npm install @base-ui/react
+```
+
+### shadcn
+
+Using shadcn? One command gets you a pre-configured wrapper with next-themes integration:
+
+```bash
+npx shadcn add @vcode-sh/popser
+```
+
+See the [shadcn Integration](/docs/shadcn) page for details.
+
+## Setup
+
+Add the `<Toaster>` component once, anywhere in your app. It portals to `document.body`.
+
+```tsx
+import { Toaster } from "@vcui/popser";
+import "@vcui/popser/styles";
+
+function App() {
+  return (
+    <>
+      <YourApp />
+      <Toaster />
+    </>
+  );
+}
+```
+
+## Show a toast
+
+Import `toast` and call it anywhere — components, event handlers, server actions. No hooks required.
+
+```ts
+import { toast } from "@vcui/popser";
+
+toast("Hello world");
+toast.success("Saved");
+toast.error("Something broke");
+toast.info("Heads up");
+toast.warning("Careful");
+```
+
+Every method returns the toast ID as a `string`. Use it for updates, close, and tracking.
+
+```ts
+const id = toast.loading("Uploading...");
+
+// later
+toast.update(id, {
+  title: "Upload complete",
+  type: "success",
+  timeout: 3000,
+});
+```
+
+## Next steps
+
+- [Toast API](/docs/api) — all methods and options
+- [Toaster Component](/docs/toaster) — layout, theme, and behavior props
+- [Styling](/docs/styling) — CSS custom properties, classNames, Tailwind
+- [Promise Toasts](/docs/promise) — loading → success → error transitions

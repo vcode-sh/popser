@@ -1,0 +1,18 @@
+{
+  "title": "Documentation",
+  "pages": [
+    "index",
+    "---Core---",
+    "api",
+    "toaster",
+    "---Features---",
+    "promise",
+    "anchored",
+    "custom",
+    "---Customization---",
+    "styling",
+    "---Integration---",
+    "shadcn",
+    "testing"
+  ]
+}

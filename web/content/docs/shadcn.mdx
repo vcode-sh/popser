@@ -1,0 +1,96 @@
+---
+title: shadcn Integration
+description: Add popser to your shadcn project with one command. Includes next-themes integration.
+---
+
+Add popser to your shadcn project with one command:
+
+```bash
+npx shadcn add @vcode-sh/popser
+```
+
+This installs `@vcui/popser`, adds a wrapper component, and configures CSS imports.
+
+## What You Get
+
+The registry component wraps `<Toaster>` with:
+
+- **next-themes integration** — reads `resolvedTheme` and passes it to popser
+- **CSS variable merging** — maps shadcn's CSS custom properties to popser's `--popser-*` tokens
+- **Sensible defaults** — `richColors` enabled, `"system"` theme
+- **Full prop passthrough** — accepts all `ToasterProps` via `Partial<ToasterProps>`
+
+## Usage
+
+After installing via the registry:
+
+```tsx
+import { toast } from "@vcui/popser";
+import { Popser } from "@/components/ui/popser";
+
+export default function Layout({ children }) {
+  return (
+    <>
+      {children}
+      <Popser />
+    </>
+  );
+}
+
+// Anywhere in your app
+toast.success("Saved");
+```
+
+## Customization
+
+Pass any `ToasterProps` to the wrapper:
+
+```tsx
+<Popser
+  position="top-center"
+  limit={5}
+  timeout={3000}
+  closeButton="always"
+/>
+```
+
+## Theme
+
+The wrapper reads `resolvedTheme` from `next-themes` and passes it to popser's `theme` prop. Dark mode works automatically if you have `next-themes` configured in your app.
+
+If you're not using `next-themes`, pass `theme` manually:
+
+```tsx
+<Popser theme="dark" />
+```
+
+## Styling
+
+The wrapper component merges shadcn's CSS variables with popser's defaults. Your shadcn theme colors apply automatically. If you want to override specific tokens, use CSS custom properties:
+
+```css
+:root {
+  --popser-radius: var(--radius);
+  --popser-bg: hsl(var(--card));
+  --popser-fg: hsl(var(--card-foreground));
+  --popser-border: hsl(var(--border));
+}
+```
+
+## Dependencies
+
+The registry component requires:
+
+- `@vcui/popser` (installed automatically)
+- `next-themes` (installed automatically)
+- `@vcui/popser/styles` (imported in the component)
+
+## Manual Setup
+
+If you prefer not to use the registry, install manually:
+
+```bash
+npm install @vcui/popser
+```
+
+Then import the styles and use `<Toaster>` directly. No wrapper needed if you don't want `next-themes` integration.

@@ -1,0 +1,154 @@
+---
+title: Testing
+description: Stable data-popser-id selectors for Playwright, Cypress, and unit testing with Vitest.
+---
+
+Every toast renders a `data-popser-id` attribute on its root element. Use it for stable selectors in Playwright, Cypress, or any testing framework that touches the DOM.
+
+## Data Attributes
+
+### Toast Root
+
+```html
+<div
+  data-popser-root
+  data-popser-id="my-toast-id"
+  data-type="success"
+>
+  ...
+</div>
+```
+
+Every toast root has:
+
+| Attribute | Value | Always present |
+|-----------|-------|----------------|
+| `data-popser-root` | — | Yes |
+| `data-popser-id` | Toast ID | Yes |
+| `data-type` | `success` \| `error` \| `info` \| `warning` \| `loading` \| `custom` | Yes |
+| `data-rich-colors` | — | When richColors enabled |
+| `data-unstyled` | — | When unstyled enabled |
+| `data-anchored` | — | When anchored to element |
+
+### Inner Elements
+
+| Attribute | Element |
+|-----------|---------|
+| `data-popser-viewport` | Viewport container |
+| `data-popser-content` | Content wrapper |
+| `data-popser-header` | Header row |
+| `data-popser-title` | Title text |
+| `data-popser-description` | Description text |
+| `data-popser-icon` | Icon wrapper |
+| `data-popser-actions` | Action button container |
+| `data-popser-action` | Action button |
+| `data-popser-cancel` | Cancel button |
+| `data-popser-close` | Close button |
+| `data-popser-arrow` | Anchor arrow |
+
+## Playwright
+
+```ts
+// Wait for a specific toast
+await page.locator('[data-popser-id="my-toast"]').waitFor();
+
+// Assert toast text
+await expect(
+  page.locator('[data-popser-root][data-type="success"] [data-popser-title]')
+).toHaveText("Saved");
+
+// Click action button inside a specific toast
+await page
+  .locator('[data-popser-id="upload-toast"] [data-popser-action]')
+  .click();
+
+// Close a toast
+await page
+  .locator('[data-popser-id="my-toast"] [data-popser-close]')
+  .click();
+
+// Count visible toasts
+const count = await page.locator('[data-popser-root]').count();
+
+// Wait for toast to disappear
+await page.locator('[data-popser-id="my-toast"]').waitFor({ state: "detached" });
+```
+
+## Cypress
+
+```ts
+// Assert toast exists
+cy.get('[data-popser-id="my-toast"]').should("exist");
+
+// Assert toast type
+cy.get('[data-popser-root][data-type="error"]').should("be.visible");
+
+// Get toast title text
+cy.get('[data-popser-id="my-toast"] [data-popser-title]')
+  .should("have.text", "Something broke");
+
+// Click action
+cy.get('[data-popser-id="my-toast"] [data-popser-action]').click();
+
+// Wait for dismissal
+cy.get('[data-popser-id="my-toast"]').should("not.exist");
+```
+
+## Custom Toast IDs
+
+Pass a custom `id` when creating toasts for predictable selectors:
+
+```ts
+toast.success("Saved", { id: "save-toast" });
+toast.error("Failed", { id: "error-toast" });
+toast.loading("Uploading...", { id: "upload-toast" });
+```
+
+Then select with `[data-popser-id="save-toast"]` instead of relying on auto-generated IDs.
+
+## useToaster Hook
+
+For component-level test assertions, use the `useToaster()` hook to access the toast list:
+
+```tsx
+import { useToaster } from "@vcui/popser";
+
+function ToastDebugPanel() {
+  const { toasts } = useToaster();
+  return (
+    <div data-testid="toast-debug">
+      <span>{toasts.length} active toasts</span>
+    </div>
+  );
+}
+```
+
+Must be rendered inside `<Toaster>` (which provides the Base UI `Toast.Provider` context).
+
+## toast.getToasts()
+
+Get active toast IDs programmatically in your test setup:
+
+```ts
+import { toast } from "@vcui/popser";
+
+const ids = toast.getToasts();
+// ["abc-123", "def-456"]
+```
+
+## Unit Testing with Vitest
+
+popser uses Vitest with `happy-dom`. If you're testing components that call `toast()`, mock the module or use the actual API with a rendered `<Toaster>`:
+
+```tsx
+import { render, screen } from "@testing-library/react";
+import { toast, Toaster } from "@vcui/popser";
+
+test("shows success toast", async () => {
+  render(<Toaster />);
+  toast.success("It works", { id: "test-toast" });
+
+  const toastEl = await screen.findByText("It works");
+  expect(toastEl).toBeInTheDocument();
+});
+```
