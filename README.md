@@ -135,9 +135,9 @@ Everything is CSS custom properties. Override them, don't fight them:
 
 ```css
 :root {
-  --popser-bg: #fff;
-  --popser-fg: hsl(0 0% 9%);
-  --popser-border: hsl(0 0% 90%);
+  --popser-bg: oklch(1 0 0);
+  --popser-fg: oklch(0.145 0 0);
+  --popser-border: oklch(0.922 0 0);
   --popser-radius: 8px;
 }
 ```
