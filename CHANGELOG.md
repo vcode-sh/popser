@@ -6,6 +6,32 @@ The format tries to be useful. No "chore: bump deps" padding. If it didn't chang
 
 ---
 
+## [1.1.1] - 2026-02-28
+
+The paperwork patch. No code changed. The docs got a promotion.
+
+### Added
+- Documentation site: [popser.vcui.dev](https://popser.vcui.dev) — full docs, interactive demos, changelog.
+- [Why I built this](https://popser.vcui.dev/why) — the honest version of the README's "Why" section.
+- [Why Base UI, not Radix](https://popser.vcui.dev/why-base-ui) — the technical argument for headless primitives in 2026.
+- [Collaborate](https://popser.vcui.dev/collaborate) — contribution guide with actual context, not just a checklist.
+- Interactive toast demos in docs pages (types, anchored, custom, styling).
+- Open Graph images and sitemap for the documentation site.
+
+### Changed
+- `README.md` rewritten: bundle size table, docs site links, Base UI positioning, contributing section.
+- `CONTRIBUTING.md` rewritten: architecture reference, human tone, actual guidance on what needs help.
+- `package.json` homepage now points to [popser.vcui.dev](https://popser.vcui.dev) instead of GitHub.
+- GitHub repo description and homepage updated.
+- `docs/popser-sonner.md` updated with v1.1.0 bundle sizes and `styles/min` export.
+- `docs/popser-toast.md` updated with `styles/min` import path.
+
+### No code changes
+
+Zero changes to `src/`. Same build output as 1.1.0. If you're already on 1.1.0, this is just metadata.
+
+---
+
 ## [1.1.0] - 2026-02-28
 
 The diet patch. Same features, half the calories.
